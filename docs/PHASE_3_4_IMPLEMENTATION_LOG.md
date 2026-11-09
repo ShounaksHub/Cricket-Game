@@ -382,6 +382,37 @@
   - `pnpm test`: 14 tasks successful, 137 passing tests across monorepo.
   - `pnpm typecheck`: 15 tasks successful, 0 errors.
 
+### Feature P4.9: Stadium Integration & Tactical AI Captaincy
+* **Status:** PASS
+* **Description:** Implemented real-world stadium specifications, altitude ball flight physics, and situational AI captaincy:
+  - `VERIFIED_STADIUMS`: Specifications for Melbourne Cricket Ground (`stadium-mcg`), Wankhede Stadium (`stadium-wankhede`), M. Chinnaswamy Stadium (`stadium-chinnaswamy`), Lord's (`stadium-lords`), The Wanderers (`stadium-wanderers`), and Eden Gardens (`stadium-eden`).
+  - `calculateStadiumDeltas(stadium)`:
+    - Small grounds ($\le 65$m radius, e.g. Chinnaswamy/Wankhede): Significantly boosts FOUR and SIX logits while penalizing long running 2s/3s.
+    - Vast grounds ($\ge 78$m radius, e.g. MCG): Suppresses sixes and elevates deep running 2s and 3s into expansive outfields.
+    - High altitude thin air (e.g. Wanderers at 1750m): Models reduced aerodynamic drag, boosting aerial ball flight and six distance.
+  - `resolveAITacticalAction(state, prng)`:
+    - Autonomous tactical decision maker evaluating match phase (powerplay, middle, death overs), wickets in hand, RRR pressure, and bowler profile.
+    - Situational batting intents: `MAXIMUM_POWER` on Free Hits, `DEFEND`/`ROTATE_STRIKE` during collapses, `AGGRESSIVE`/`MAXIMUM_POWER` during death overs or steep chases ($RRR \ge 11.5$).
+    - Bowler tactical selections: High yorker & slower ball execution in death overs, attacking good-length outside off in powerplays, and googly/arm-ball variations for spinners in middle overs.
+    - Dynamic field presets (`ATTACKING_CLOSE_CATCHERS` for new batters, `DEATH_BOUNDARY_DEFENSE` in death overs, `SPIN_CHOKE` in middle overs).
+* **Files Modified / Created:**
+  - `packages/simulation-engine/src/ai/stadium-specs.ts` (new)
+  - `packages/simulation-engine/src/ai/ai-captain.ts` (new)
+  - `packages/simulation-engine/src/ai/index.ts` (new)
+  - `packages/simulation-engine/src/pipeline/types.ts`
+  - `packages/simulation-engine/src/pipeline/outcome-logits.ts`
+  - `packages/simulation-engine/src/transition/delivery-transition.ts`
+  - `packages/simulation-engine/src/index.ts`
+  - `packages/simulation-engine/tests/ai.test.ts` (new)
+* **Tests Added:**
+  - `packages/simulation-engine/tests/ai.test.ts`: 5 comprehensive unit and integration tests verifying verified stadium retrieval, boundary radius and high altitude thin air boosts, Free-Hit maximum power intent, death overs bowling tactics and boundary defense, collapse consolidation, and seamless autonomous match stepping.
+* **Verification Commands & Results:**
+  - `pnpm --filter @cricket/simulation-engine test`: 53 passed (100%).
+  - `pnpm test`: 14 tasks successful, 142 passing tests across monorepo.
+  - `pnpm typecheck`: 15 tasks successful, 0 errors.
+
+
+
 
 
 

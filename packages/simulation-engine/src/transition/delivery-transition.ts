@@ -129,6 +129,7 @@ export function stepDelivery(
     surfaceCracksIndex: state.surfaceCracksIndex,
     ballWearIndex: state.ballWearIndex,
     pitchType: state.config.pitchType,
+    stadiumId: state.config.stadiumId,
     fieldersOutsideRing: ruleset.getMaxFieldersOutsideRing(
       currentInnings.completedOvers,
     ),

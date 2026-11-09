@@ -38,6 +38,7 @@ export interface DeliveryContext {
   readonly ballWearIndex: number;
   readonly fieldersOutsideRing: number;
   readonly pitchType?: 'FLAT' | 'GREEN' | 'DUSTY' | 'HARD' | 'TURNING';
+  readonly stadiumId?: string;
 }
 
 export type OutcomeLogits = Record<DeliveryOutcome, number>;

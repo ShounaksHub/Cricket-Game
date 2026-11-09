@@ -1,5 +1,6 @@
 import type { DeliveryOutcome } from '../contracts/types.js';
 import { calculateEnvironmentalDeltas } from '../environment/environmental-engine.js';
+import { calculateStadiumDeltas, getStadiumById } from '../ai/stadium-specs.js';
 import { getFormatBaselineLogits } from './baseline-logits.js';
 import { calculateMatchupLogitDeltas } from './matchup-matrix.js';
 import type { OutcomeCalculationInput, OutcomeLogits } from './types.js';
@@ -251,6 +252,17 @@ export function calculateOutcomeLogits(input: OutcomeCalculationInput): OutcomeL
   for (const [outcomeKey, delta] of Object.entries(envDeltas)) {
     if (delta !== undefined) {
       logits[outcomeKey as DeliveryOutcome] += delta;
+    }
+  }
+
+  // 11. Stadium Boundary & Altitude Modifiers (Feature P4.9)
+  if (context.stadiumId) {
+    const stadium = getStadiumById(context.stadiumId);
+    const stadiumDeltas = calculateStadiumDeltas(stadium);
+    for (const [outcomeKey, delta] of Object.entries(stadiumDeltas)) {
+      if (delta !== undefined) {
+        logits[outcomeKey as DeliveryOutcome] += delta;
+      }
     }
   }
 
