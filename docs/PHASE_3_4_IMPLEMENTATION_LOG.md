@@ -21,8 +21,8 @@
 | **P3.7** | End-to-End Persistence, Duplication & State Sync | **PASS** | `a23d846` | 2026-11-09T23:18:00Z |
 | **P3.8** | Phase 3 Verification, Security Audit & Acceptance Gate | **PASS** | `0df4709` | 2026-11-09T23:21:00Z |
 | **P4.0** | Match Simulation Engine Architecture & Domain Contracts | **PASS** | `d527591` | 2026-11-09T23:33:00Z |
-| **P4.1** | Deterministic RNG (SplitMix64) & Replay Foundation | **PASS** | Pending | 2026-11-09T23:36:00Z |
-| **P4.2** | Multi-Format Match & Innings State Foundation | PENDING | - | - |
+| **P4.1** | Deterministic RNG (SplitMix64) & Replay Foundation | **PASS** | `8700e6e` | 2026-11-09T23:36:00Z |
+| **P4.2** | Multi-Format Match & Innings State Foundation | **PASS** | Pending | 2026-11-09T23:38:00Z |
 | **P4.3** | T20 Ruleset Engine & Playing Conditions | PENDING | - | - |
 | **P4.4** | 10-Stage Delivery Simulation Pipeline & Probability Vectors | PENDING | - | - |
 | **P4.5** | Batter vs Bowler Attribute Interaction Modeling | PENDING | - | - |
@@ -224,6 +224,30 @@
   - `pnpm --filter @cricket/simulation-engine test`: 10 passed (100%).
   - `pnpm test`: 14 tasks successful, 99 passing tests across monorepo.
   - `pnpm typecheck`: 15 tasks successful, 0 errors.
+
+### Feature P4.2: Multi-Format Match & Innings State Foundation
+* **Status:** PASS
+* **Description:** Implemented the immutable multi-format match state and scorecard foundation:
+  - `createInitialMatchState(config)`: establishes initial match state with SHA-256 $H_0$, status `IN_PROGRESS`, environmental trackers, and Innings 1.
+  - `createInitialInningsState(...)`: initializes opening batters, complete batting and bowling scorecard maps, fall of wickets log, and legal delivery counters.
+  - `verifyMatchInvariants(state)`: pure mathematical invariant verifier enforcing cricket rules on every state snapshot:
+    1. Runs Conservation Invariant: $\text{TotalRuns} = \sum \text{BatRuns} + \text{Extras}$.
+    2. Wickets Ceiling Invariant: $\text{TotalWickets} \le 10$.
+    3. Over Bounds Invariant: $\text{legalBallsInCurrentOver} \le 6$.
+    4. Fall of Wickets Count Invariant: $\text{FallOfWickets.length} \equiv \text{TotalWickets}$.
+  - Supports all 5 cricket formats (T10, T20, ODI, Test Red Ball, Test Pink Ball) within a unified domain structure.
+* **Files Modified / Created:**
+  - `packages/simulation-engine/src/state/match-state.ts` (new)
+  - `packages/simulation-engine/src/state/index.ts` (new)
+  - `packages/simulation-engine/src/index.ts`
+  - `packages/simulation-engine/tests/state.test.ts` (new)
+* **Tests Added:**
+  - `packages/simulation-engine/tests/state.test.ts`: 5 unit tests verifying initial state creation across all 5 formats, runs conservation violations, over bounds violations, wickets ceiling violations, and fall-of-wicket count checks.
+* **Verification Commands & Results:**
+  - `pnpm --filter @cricket/simulation-engine test`: 15 passed (100%).
+  - `pnpm test`: 14 tasks successful, 104 passing tests across monorepo.
+  - `pnpm typecheck`: 15 tasks successful, 0 errors.
+
 
 
 
