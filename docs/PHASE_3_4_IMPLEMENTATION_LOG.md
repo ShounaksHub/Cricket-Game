@@ -326,6 +326,36 @@
   - `pnpm test`: 14 tasks successful, 127 passing tests across monorepo.
   - `pnpm typecheck`: 15 tasks successful, 0 errors.
 
+### Feature P4.7: Over Accounting, Strike Rotation & Innings Transitions
+* **Status:** PASS
+* **Description:** Implemented the single-delivery state transition machine, over boundaries, strike rotation, innings transitions, and match result resolution:
+  - `stepDelivery(state, action, prng)`: Pure, functional, deterministic state transition $S_t, A_t, \text{prng} \to (S_{t+1}, E_t)$:
+    - Legal ball counter: Increments `legalBallsInCurrentOver` only on legal deliveries; extras (`WIDE`, `NO_BALL`) re-bowl without consuming legal deliveries.
+    - Strike rotation (MCC Law 18): Automatically swaps striker and non-striker on odd runs off the bat ($1, 3, 5$) and odd byes/leg-byes; preserves strike on even runs ($2, 4, 6$) and standard dots.
+    - Over completion: On the 6th legal delivery, advances `completedOvers`, resets over ball counter, executes end-of-over strike rotation, and changes the bowler adhering strictly to MCC Law 21.7 (consecutive over prohibition) and format quotas.
+    - Fall-of-wicket replacements: Automatically promotes next incoming batter from lineup; records structured `FallOfWicket` entry.
+    - Free-hit tracking: Detects no-ball outcome on ball $t$ to activate Free-Hit rules on delivery $t+1$.
+    - `generateTrajectory(outcome, prng)`: 2D polar physics trajectories for ground strokes, lofted boundaries, and wagon wheel visualization.
+    - `generateCommentary(context)`: Broadcast-quality contextual cricket commentary tokens.
+    - Innings and match transitions: Automatically transitions from Innings 1 to Innings 2 in limited overs with target calculation, and concludes match with margin calculations (runs, wickets, tie).
+    - Immutable scorecard tracking with invariant verification (`verifyMatchInvariants`) executed on every single delivery.
+* **Files Modified / Created:**
+  - `packages/simulation-engine/src/transition/trajectory.ts` (new)
+  - `packages/simulation-engine/src/transition/commentary.ts` (new)
+  - `packages/simulation-engine/src/transition/delivery-transition.ts` (new)
+  - `packages/simulation-engine/src/transition/index.ts` (new)
+  - `packages/simulation-engine/src/rulesets/t20-ruleset.ts`
+  - `packages/simulation-engine/src/index.ts`
+  - `packages/simulation-engine/tests/transition.test.ts` (new)
+* **Tests Added:**
+  - `packages/simulation-engine/tests/transition.test.ts`: 4 comprehensive integration tests verifying single delivery scorecard updating, full 6-ball over completion with strike swap and consecutive over prohibition, complete 20-over innings simulation with invariant checks on every ball, and end-to-end 2-innings T20 match simulation with winner declaration.
+* **Verification Commands & Results:**
+  - `pnpm --filter @cricket/simulation-engine test`: 42 passed (100%).
+  - `pnpm test`: 14 tasks successful, 131 passing tests across monorepo.
+  - `pnpm typecheck`: 15 tasks successful, 0 errors.
+
+
+
 
 
 

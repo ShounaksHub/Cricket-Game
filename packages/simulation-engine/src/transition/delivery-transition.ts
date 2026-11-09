@@ -1,0 +1,516 @@
+import type { MatchFormat, PlayerSquadContext } from '@cricket/shared-types';
+import type {
+  BatterScorecardEntry,
+  BowlerScorecardEntry,
+  DeliveryDismissal,
+  DeliveryEvent,
+  FallOfWicket,
+  InningsState,
+  MatchState,
+  MatchStatus,
+  TacticalDeliveryAction,
+} from '../contracts/types.js';
+import type { DeterministicPRNG } from '../prng/splitmix64.js';
+import { executeDeliveryPipeline } from '../pipeline/delivery-pipeline.js';
+import { resolveDeliveryOutcome } from '../pipeline/dismissal-engine.js';
+import type { DeliveryContext } from '../pipeline/types.js';
+import { getRulesetForFormat } from '../rulesets/t20-ruleset.js';
+import { createInitialInningsState, verifyMatchInvariants } from '../state/match-state.js';
+import { generateCommentary } from './commentary.js';
+import { generateTrajectory } from './trajectory.js';
+
+export interface StepDeliveryResult {
+  readonly nextState: MatchState;
+  readonly event: DeliveryEvent;
+}
+
+/**
+ * Pure, deterministic single-delivery match state transition function:
+ * S_t, A_t, PRNG_t -> (S_t+1, E_t, PRNG_t+1)
+ *
+ * Implements MCC Laws:
+ * - Legal ball counter (6 balls per over; wides/no-balls do not count).
+ * - Striker rotation on odd runs (1, 3, 5, byes, leg-byes).
+ * - Over-end strike rotation (batters swap ends).
+ * - Bowler change at over end (MCC Law 21.7: no consecutive overs).
+ * - Fall-of-wicket replacement.
+ * - Scorecard reconciliation & match invariant verification.
+ */
+export function stepDelivery(
+  state: MatchState,
+  action: TacticalDeliveryAction,
+  prng: DeterministicPRNG,
+): StepDeliveryResult {
+  if (state.status === 'COMPLETED') {
+    throw new Error('Cannot step delivery on a completed match');
+  }
+
+  const inningsIndex = state.currentInningsIndex;
+  const currentInnings = state.innings[inningsIndex];
+
+  if (!currentInnings || currentInnings.isCompleted) {
+    throw new Error('Current innings is already completed or undefined');
+  }
+
+  const ruleset = getRulesetForFormat(state.config.format);
+  const isTeam1Batting = currentInnings.battingTeamId === state.config.team1.id;
+  const battingTeam = isTeam1Batting ? state.config.team1 : state.config.team2;
+  const bowlingTeam = isTeam1Batting ? state.config.team2 : state.config.team1;
+
+  // 1. Identify active striker and bowler
+  const strikerId = currentInnings.strikerPlayerId;
+  const nonStrikerId = currentInnings.nonStrikerPlayerId;
+  const bowlerId = currentInnings.currentBowlerPlayerId;
+
+  const strikerProfile = state.config.playerProfiles.get(strikerId) ?? {
+    id: strikerId,
+    fullName: strikerId,
+    displayName: strikerId,
+    primaryRole: 'TOP_ORDER_BATTER',
+    battingHand: 'RIGHT_HAND',
+    bowlingStyle: 'RIGHT_ARM_MEDIUM',
+    isWicketkeeper: false,
+  };
+
+  const bowlerProfile = state.config.playerProfiles.get(bowlerId) ?? {
+    id: bowlerId,
+    fullName: bowlerId,
+    displayName: bowlerId,
+    primaryRole: 'PACE_BOWLER',
+    battingHand: 'RIGHT_HAND',
+    bowlingStyle: 'RIGHT_ARM_FAST',
+    isWicketkeeper: false,
+  };
+
+  // 2. Check previous delivery for Free Hit
+  const lastEvent = currentInnings.events[currentInnings.events.length - 1];
+  const isFreeHit = lastEvent ? lastEvent.outcome === 'NO_BALL' : false;
+
+  // 3. Construct DeliveryContext
+  const currentRunRate =
+    currentInnings.completedOvers > 0 || currentInnings.legalBallsInCurrentOver > 0
+      ? (currentInnings.totalRuns /
+          (currentInnings.completedOvers * 6 + currentInnings.legalBallsInCurrentOver)) *
+        6
+      : 0;
+
+  const maxTotalBalls = ruleset.maxOversPerInnings * 6;
+  const ballsBowledSoFar =
+    currentInnings.completedOvers * 6 + currentInnings.legalBallsInCurrentOver;
+  const ballsRemaining = Math.max(0, maxTotalBalls - ballsBowledSoFar);
+
+  const runsNeeded = currentInnings.targetRuns
+    ? Math.max(0, currentInnings.targetRuns - currentInnings.totalRuns)
+    : undefined;
+  const requiredRunRate =
+    runsNeeded !== undefined && ballsRemaining > 0
+      ? (runsNeeded / ballsRemaining) * 6
+      : undefined;
+
+  const deliveryContext: DeliveryContext = {
+    format: state.config.format,
+    inningsNumber: currentInnings.inningsNumber,
+    overNumber: currentInnings.completedOvers,
+    ballInOver: currentInnings.legalBallsInCurrentOver + 1,
+    isPowerplay: ruleset.isPowerplayOver(currentInnings.completedOvers),
+    isDeathOvers:
+      state.config.format === 'T20'
+        ? currentInnings.completedOvers >= 15
+        : currentInnings.completedOvers >= 40,
+    isFreeHit,
+    totalRuns: currentInnings.totalRuns,
+    totalWickets: currentInnings.totalWickets,
+    currentRunRate,
+    targetRuns: currentInnings.targetRuns,
+    requiredRunRate,
+    ballsRemaining,
+    pitchWearIndex: state.pitchWearIndex,
+    surfaceCracksIndex: state.surfaceCracksIndex,
+    ballWearIndex: state.ballWearIndex,
+    fieldersOutsideRing: ruleset.getMaxFieldersOutsideRing(
+      currentInnings.completedOvers,
+    ),
+  };
+
+  // 4. Execute Delivery Pipeline and Resolve Dismissal
+  const pipelineResult = executeDeliveryPipeline(
+    {
+      context: deliveryContext,
+      batter: strikerProfile,
+      bowler: bowlerProfile,
+      conditions: state.config.conditions,
+      tactics: action,
+    },
+    prng,
+  );
+
+  const resolution = resolveDeliveryOutcome({
+    outcome: pipelineResult.outcome,
+    isNoBall: pipelineResult.outcome === 'NO_BALL',
+    isFreeHit,
+    isWide: pipelineResult.outcome === 'WIDE',
+    strikerPlayerId: strikerId,
+    nonStrikerPlayerId: nonStrikerId,
+    bowlerPlayerId: bowlerId,
+    bowlerStyle: bowlerProfile.bowlingStyle,
+    bowlingTeamLineup: bowlingTeam.lineup,
+    fieldPreset: action.fieldPreset,
+    prng,
+  });
+
+  const trajectory = generateTrajectory(resolution.outcome, prng);
+  const commentary = generateCommentary({
+    bowlerName: bowlerProfile.displayName,
+    strikerName: strikerProfile.displayName,
+    outcome: resolution.outcome,
+    runsBat: resolution.runsBat,
+    extras: resolution.extras,
+    dismissal: resolution.dismissal,
+    isFreeHit,
+    overNumber: currentInnings.completedOvers,
+    ballInOver: currentInnings.legalBallsInCurrentOver + 1,
+  });
+
+  // 5. Scorecard Updates (Batters)
+  const battersMap = new Map<string, BatterScorecardEntry>(currentInnings.batters);
+  const existingStriker = battersMap.get(strikerId) ?? {
+    playerId: strikerId,
+    runs: 0,
+    ballsFaced: 0,
+    fours: 0,
+    sixes: 0,
+    strikeRate: 0,
+    isOut: false,
+  };
+
+  const isWideOutcome = resolution.extras.wides > 0;
+  const isDismissedStriker =
+    resolution.dismissal?.dismissedPlayerId === strikerId;
+  const isDismissedNonStriker =
+    resolution.dismissal?.dismissedPlayerId === nonStrikerId;
+
+  const newBallsFaced = isWideOutcome
+    ? existingStriker.ballsFaced
+    : existingStriker.ballsFaced + 1;
+  const newRuns = existingStriker.runs + resolution.runsBat;
+  const newFours =
+    resolution.runsBat === 4 ? existingStriker.fours + 1 : existingStriker.fours;
+  const newSixes =
+    resolution.runsBat === 6 ? existingStriker.sixes + 1 : existingStriker.sixes;
+  const newStrikeRate =
+    newBallsFaced > 0 ? (newRuns / newBallsFaced) * 100 : 0;
+
+  battersMap.set(strikerId, {
+    ...existingStriker,
+    runs: newRuns,
+    ballsFaced: newBallsFaced,
+    fours: newFours,
+    sixes: newSixes,
+    strikeRate: Math.round(newStrikeRate * 100) / 100,
+    isOut: isDismissedStriker ? true : existingStriker.isOut,
+    dismissal: isDismissedStriker ? resolution.dismissal : existingStriker.dismissal,
+  });
+
+  if (isDismissedNonStriker) {
+    const existingNonStriker = battersMap.get(nonStrikerId)!;
+    battersMap.set(nonStrikerId, {
+      ...existingNonStriker,
+      isOut: true,
+      dismissal: resolution.dismissal,
+    });
+  }
+
+  // 6. Scorecard Updates (Bowlers)
+  const bowlersMap = new Map<string, BowlerScorecardEntry>(currentInnings.bowlers);
+  const existingBowler = bowlersMap.get(bowlerId) ?? {
+    playerId: bowlerId,
+    ballsBowled: 0,
+    oversBowledFormatted: '0.0',
+    maidens: 0,
+    runsConceded: 0,
+    wickets: 0,
+    economyRate: 0,
+    wides: 0,
+    noBalls: 0,
+    dots: 0,
+  };
+
+  const newBowlerBalls = resolution.isLegalDelivery
+    ? existingBowler.ballsBowled + 1
+    : existingBowler.ballsBowled;
+  const newRunsConceded =
+    existingBowler.runsConceded +
+    resolution.runsBat +
+    resolution.extras.wides +
+    resolution.extras.noBalls;
+  const isBowlerWicket =
+    resolution.dismissal && resolution.dismissal.mode !== 'RUN_OUT';
+  const newBowlerWickets = isBowlerWicket
+    ? existingBowler.wickets + 1
+    : existingBowler.wickets;
+  const isDotBall =
+    resolution.runsBat === 0 &&
+    resolution.extras.wides === 0 &&
+    resolution.extras.noBalls === 0;
+  const newBowlerDots = isDotBall
+    ? existingBowler.dots + 1
+    : existingBowler.dots;
+
+  const oversFormatted = `${Math.floor(newBowlerBalls / 6)}.${newBowlerBalls % 6}`;
+  const newEconRate =
+    newBowlerBalls > 0 ? (newRunsConceded / (newBowlerBalls / 6)) : 0;
+
+  bowlersMap.set(bowlerId, {
+    ...existingBowler,
+    ballsBowled: newBowlerBalls,
+    oversBowledFormatted: oversFormatted,
+    runsConceded: newRunsConceded,
+    wickets: newBowlerWickets,
+    dots: newBowlerDots,
+    wides: existingBowler.wides + resolution.extras.wides,
+    noBalls: existingBowler.noBalls + resolution.extras.noBalls,
+    economyRate: Math.round(newEconRate * 100) / 100,
+  });
+
+  // 7. Total Runs & Wickets
+  const totalDeliveryRuns =
+    resolution.runsBat +
+    resolution.extras.wides +
+    resolution.extras.noBalls +
+    resolution.extras.byes +
+    resolution.extras.legByes +
+    resolution.extras.penalty;
+
+  const newTotalRuns = currentInnings.totalRuns + totalDeliveryRuns;
+  const newTotalWickets =
+    currentInnings.totalWickets + (resolution.dismissal ? 1 : 0);
+
+  // 8. Fall of Wickets
+  const newFallOfWickets: FallOfWicket[] = [...currentInnings.fallOfWickets];
+  if (resolution.dismissal) {
+    const elapsedBalls =
+      currentInnings.legalBallsInCurrentOver +
+      (resolution.isLegalDelivery ? 1 : 0);
+    newFallOfWickets.push({
+      wicketNumber: newTotalWickets,
+      teamRuns: newTotalRuns,
+      oversElapsed: `${currentInnings.completedOvers}.${elapsedBalls}`,
+      dismissedPlayerId: resolution.dismissal.dismissedPlayerId,
+    });
+  }
+
+  // 9. Batter Replacement on Dismissal
+  let nextStrikerId = strikerId;
+  let nextNonStrikerId = nonStrikerId;
+
+  if (resolution.dismissal) {
+    if (newTotalWickets < 10) {
+      // Slot index in batting lineup: wickets 1 to 9 brings slot index wickets+1 (i.e. index 2 to 10)
+      const incomingBatterSlot = battingTeam.lineup[newTotalWickets + 1];
+      const incomingBatterId = incomingBatterSlot?.playerId;
+
+      if (incomingBatterId) {
+        if (!battersMap.has(incomingBatterId)) {
+          battersMap.set(incomingBatterId, {
+            playerId: incomingBatterId,
+            runs: 0,
+            ballsFaced: 0,
+            fours: 0,
+            sixes: 0,
+            strikeRate: 0,
+            isOut: false,
+          });
+        }
+
+        if (isDismissedStriker) {
+          nextStrikerId = incomingBatterId;
+        } else {
+          nextNonStrikerId = incomingBatterId;
+        }
+      }
+    }
+  }
+
+  // 10. Strike Rotation on Runs Scored
+  // Batters swap on odd runs off bat or odd byes/leg-byes
+  const strikeRotateRuns =
+    resolution.runsBat + resolution.extras.byes + resolution.extras.legByes;
+  if (strikeRotateRuns % 2 !== 0) {
+    const temp = nextStrikerId;
+    nextStrikerId = nextNonStrikerId;
+    nextNonStrikerId = temp;
+  }
+
+  // 11. Over Accounting & Strike Rotation at End of Over
+  let nextCompletedOvers = currentInnings.completedOvers;
+  let nextLegalBalls = currentInnings.legalBallsInCurrentOver;
+  let nextBowlerId = bowlerId;
+
+  if (resolution.isLegalDelivery) {
+    nextLegalBalls += 1;
+
+    if (nextLegalBalls === 6) {
+      nextCompletedOvers += 1;
+      nextLegalBalls = 0;
+
+      // End of over strike rotation (batters switch ends)
+      const temp = nextStrikerId;
+      nextStrikerId = nextNonStrikerId;
+      nextNonStrikerId = temp;
+
+      // Select next bowler (MCC Law 21.7: bowler cannot bowl consecutive overs)
+      // Filter bowlers from bowling lineup
+      const eligibleBowlers = bowlingTeam.lineup.filter((slot) => {
+        if (slot.playerId === bowlerId) return false; // Cannot bowl consecutive overs
+        const bowlerScore = bowlersMap.get(slot.playerId);
+        const oversBowled = bowlerScore
+          ? Math.floor(bowlerScore.ballsBowled / 6)
+          : 0;
+        return oversBowled < ruleset.maxOversPerBowler;
+      });
+
+      if (eligibleBowlers.length > 0) {
+        // Pick bowler with priority or cycle
+        nextBowlerId = eligibleBowlers[0].playerId;
+      }
+    }
+  }
+
+  // 12. Create Monotonic Delivery Event
+  const sequenceNumber =
+    currentInnings.events.length > 0
+      ? currentInnings.events[currentInnings.events.length - 1].sequenceNumber + 1
+      : 1;
+
+  const event: DeliveryEvent = {
+    sequenceNumber,
+    inningsNumber: currentInnings.inningsNumber,
+    overNumber: currentInnings.completedOvers,
+    ballInOver: currentInnings.legalBallsInCurrentOver + 1,
+    isLegalDelivery: resolution.isLegalDelivery,
+    bowlerPlayerId: bowlerId,
+    strikerPlayerId: strikerId,
+    nonStrikerPlayerId: nonStrikerId,
+    outcome: resolution.outcome,
+    runsBat: resolution.runsBat,
+    extras: resolution.extras,
+    dismissal: resolution.dismissal,
+    trajectory,
+    commentary,
+    scorecardDelta: {
+      totalRuns: newTotalRuns,
+      totalWickets: newTotalWickets,
+    },
+  };
+
+  // 13. Innings Completion Evaluation
+  const isAllOut = newTotalWickets >= 10;
+  const isOverLimit = ruleset.isOverLimitReached(
+    nextCompletedOvers,
+    state.config.format,
+  );
+  const isTargetOverhauled =
+    currentInnings.targetRuns !== undefined &&
+    newTotalRuns >= currentInnings.targetRuns;
+
+  const isInningsDone = isAllOut || isOverLimit || isTargetOverhauled;
+
+  const updatedInnings: InningsState = {
+    ...currentInnings,
+    totalRuns: newTotalRuns,
+    totalWickets: newTotalWickets,
+    completedOvers: nextCompletedOvers,
+    legalBallsInCurrentOver: nextLegalBalls,
+    strikerPlayerId: nextStrikerId,
+    nonStrikerPlayerId: nextNonStrikerId,
+    currentBowlerPlayerId: nextBowlerId,
+    isCompleted: isInningsDone,
+    batters: battersMap,
+    bowlers: bowlersMap,
+    fallOfWickets: newFallOfWickets,
+    events: [...currentInnings.events, event],
+  };
+
+  // 14. Match Status Transition & Next Innings Setup
+  let matchStatus: MatchStatus = state.status;
+  let result = state.result;
+  const updatedInningsArray = [...state.innings];
+  updatedInningsArray[inningsIndex] = updatedInnings;
+
+  let nextInningsIndex = inningsIndex;
+
+  if (isInningsDone) {
+    if (currentInnings.inningsNumber === 1 && state.config.format === 'T20') {
+      // T20 Innings 1 concluded -> Initialize Innings 2 with target
+      const targetRuns = newTotalRuns + 1;
+      const innings2 = createInitialInningsState(
+        2,
+        state.config.team2.id,
+        state.config.team1.id,
+        state.config.team2.lineup as any,
+        state.config.team1.lineup as any,
+        targetRuns,
+      );
+
+      updatedInningsArray.push(innings2);
+      nextInningsIndex = 1;
+    } else if (currentInnings.inningsNumber === 2 && state.config.format === 'T20') {
+      // T20 Match Completed!
+      matchStatus = 'COMPLETED';
+      const inn1 = updatedInningsArray[0];
+      const inn2 = updatedInnings;
+
+      if (inn2.totalRuns > inn1.totalRuns) {
+        // Team 2 Won Chasing
+        const wicketsLeft = 10 - inn2.totalWickets;
+        result = {
+          winningTeamId: inn2.battingTeamId,
+          marginWickets: wicketsLeft,
+          isTie: false,
+          isDraw: false,
+          summary: `${state.config.team2.name} won by ${wicketsLeft} wicket${wicketsLeft === 1 ? '' : 's'}`,
+        };
+      } else if (inn1.totalRuns > inn2.totalRuns) {
+        // Team 1 Defended Target
+        const runsMargin = inn1.totalRuns - inn2.totalRuns;
+        result = {
+          winningTeamId: inn1.battingTeamId,
+          marginRuns: runsMargin,
+          isTie: false,
+          isDraw: false,
+          summary: `${state.config.team1.name} won by ${runsMargin} run${runsMargin === 1 ? '' : 's'}`,
+        };
+      } else {
+        // Tie
+        result = {
+          isTie: true,
+          isDraw: false,
+          summary: 'Match tied!',
+        };
+      }
+    }
+  }
+
+  // 15. Pitch & Ball Wear Progression
+  const wearDelta = resolution.isLegalDelivery ? 1 / 120 : 0;
+  const nextBallWear = Math.min(1.0, state.ballWearIndex + wearDelta);
+  const nextPitchWear = Math.min(1.0, state.pitchWearIndex + wearDelta * 0.5);
+
+  const nextState: MatchState = {
+    ...state,
+    status: matchStatus,
+    currentInningsIndex: nextInningsIndex,
+    innings: updatedInningsArray,
+    ballWearIndex: Math.round(nextBallWear * 1000) / 1000,
+    pitchWearIndex: Math.round(nextPitchWear * 1000) / 1000,
+    result,
+  };
+
+  // 16. Verify Domain Invariants
+  verifyMatchInvariants(nextState);
+
+  return {
+    nextState,
+    event,
+  };
+}

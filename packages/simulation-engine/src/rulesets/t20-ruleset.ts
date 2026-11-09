@@ -17,13 +17,16 @@ export interface RulesetInterface {
   readonly powerplay: PowerplayConfig;
 
   maxFieldersOutsideCircle(currentOver: number): number;
+  getMaxFieldersOutsideRing(currentOver: number): number;
   isPowerplayActive(currentOver: number): boolean;
+  isPowerplayOver(currentOver: number): boolean;
   canBowlerBowlOver(
     bowlerId: string,
     previousBowlerId: string,
     completedOvers: number
   ): { allowed: boolean; reason?: string };
   isInningsOver(innings: InningsState): boolean;
+  isOverLimitReached(completedOvers: number, format?: MatchFormat): boolean;
 }
 
 /**
@@ -47,8 +50,20 @@ export class T20Ruleset implements RulesetInterface {
     return this.isPowerplayActive(currentOver) ? 2 : 5;
   }
 
+  getMaxFieldersOutsideRing(currentOver: number): number {
+    return this.maxFieldersOutsideCircle(currentOver);
+  }
+
   isPowerplayActive(currentOver: number): boolean {
     return currentOver < this.powerplay.p1EndOver;
+  }
+
+  isPowerplayOver(currentOver: number): boolean {
+    return this.isPowerplayActive(currentOver);
+  }
+
+  isOverLimitReached(completedOvers: number): boolean {
+    return completedOvers >= this.maxOversPerInnings;
   }
 
   canBowlerBowlOver(
