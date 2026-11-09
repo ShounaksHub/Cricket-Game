@@ -1,5 +1,5 @@
 import type { MatchFormat, PrimaryRole, BowlingStyle, DreamTeamStatus, BattingHand } from './enums.js';
-import type { PlayerFormatRating } from './player.js';
+import type { PlayerAttributes, PlayerFormatRating } from './player.js';
 
 export type SquadValidationSeverity = 'HARD_ERROR' | 'ADVISORY_WARNING';
 
@@ -71,6 +71,7 @@ export interface PlayerSquadContext {
   readonly isWicketkeeper: boolean;
   readonly formatRating?: PlayerFormatRating;
   readonly ratings?: Partial<Record<MatchFormat, PlayerFormatRating>>;
+  readonly attributes?: PlayerAttributes;
 }
 
 export type SquadDimensionGrade = 'ELITE' | 'STRONG' | 'BALANCED' | 'VULNERABLE' | 'CRITICAL';

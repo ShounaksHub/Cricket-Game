@@ -248,6 +248,40 @@
   - `pnpm test`: 14 tasks successful, 109 passing tests across monorepo.
   - `pnpm typecheck`: 15 tasks successful, 0 errors.
 
+### Feature P4.4: 10-Stage Delivery Simulation Pipeline & Probability Vectors
+* **Status:** PASS
+* **Description:** Implemented the deterministic 10-stage delivery simulation pipeline, baseline format logit vectors, numerically stable Softmax normalization, and PRNG CDF sampling:
+  - `getFormatBaselineLogits(format)`: Format-calibrated baseline log-odds for T20, T10, ODI, and Test formats over all 11 discrete delivery outcomes (`DOT`, `RUN_1`, `RUN_2`, `RUN_3`, `FOUR`, `SIX`, `WIDE`, `NO_BALL`, `LEG_BYE`, `BYE`, `WICKET`).
+  - `calculateOutcomeLogits(input)`: Adjusts logits based on:
+    - Batter tactical intent (`DEFEND`, `ROTATE_STRIKE`, `BALANCED`, `AGGRESSIVE`, `MAXIMUM_POWER`).
+    - Free-hit delivery rules (ICC playing conditions: WICKET suppressed by -6.0; boundary aggression boosted).
+    - Field presets (`ATTACKING_CLOSE_CATCHERS`, `DEATH_BOUNDARY_DEFENSE`, `SPIN_CHOKE`, `BALANCED_RING`).
+    - Bowler tactical line and length (`YORKER`, `SHORT`, `GOOD_LENGTH`, `FULL`, `BACK_OF_LENGTH`) and variation (`SLOWER_BALL`, `BOUNCER`, `GOOGLY`, `CUTTER`).
+    - Match phase dynamics (Powerplay restrictions, Death overs urgency, Required Run Rate pressure scaling).
+    - Pitch wear and ball wear friction indices.
+    - Macro player rating differentials ($R_{\text{bat}} - R_{\text{bowl}}$).
+  - `computeSoftmax(logits, temperature)`: Numerically stable max-subtracted Softmax guarantee preventing NaN/overflow, producing probability vector summing strictly to 1.0.
+  - `sampleOutcomeFromProbabilities(probabilities, roll)`: Deterministic CDF interval lookup with float roll in $[0, 1)$.
+  - `executeDeliveryPipeline(input, prng, temperature)`: Orchestrates logits, softmax, and PRNG sampling.
+* **Files Modified / Created:**
+  - `packages/simulation-engine/src/pipeline/types.ts` (new)
+  - `packages/simulation-engine/src/pipeline/baseline-logits.ts` (new)
+  - `packages/simulation-engine/src/pipeline/softmax.ts` (new)
+  - `packages/simulation-engine/src/pipeline/outcome-logits.ts` (new)
+  - `packages/simulation-engine/src/pipeline/delivery-pipeline.ts` (new)
+  - `packages/simulation-engine/src/pipeline/index.ts` (new)
+  - `packages/simulation-engine/src/index.ts`
+  - `packages/shared-types/src/squad.ts`
+  - `packages/simulation-engine/tests/pipeline.test.ts` (new)
+* **Tests Added:**
+  - `packages/simulation-engine/tests/pipeline.test.ts`: 6 comprehensive unit tests verifying multi-format Softmax sums ($\sum P_i = 1.0$), numerical stability under extreme logits ($\pm 1000$), tactical intent shifts, free-hit wicket suppression, deterministic PRNG sampling, and 10,000-sample Monte Carlo distribution matching ($\Delta \le 0.018$).
+* **Verification Commands & Results:**
+  - `pnpm --filter @cricket/simulation-engine test`: 26 passed (100%).
+  - `pnpm test`: 14 tasks successful, 115 passing tests across monorepo.
+  - `pnpm typecheck`: 15 tasks successful, 0 errors.
+
+
+
 
 
 
