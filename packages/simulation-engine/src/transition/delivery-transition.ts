@@ -16,6 +16,7 @@ import { resolveDeliveryOutcome } from '../pipeline/dismissal-engine.js';
 import type { DeliveryContext } from '../pipeline/types.js';
 import { getRulesetForFormat } from '../rulesets/t20-ruleset.js';
 import { createInitialInningsState, verifyMatchInvariants } from '../state/match-state.js';
+import { calculateWearIncrement } from '../environment/environmental-engine.js';
 import { generateCommentary } from './commentary.js';
 import { generateTrajectory } from './trajectory.js';
 
@@ -127,6 +128,7 @@ export function stepDelivery(
     pitchWearIndex: state.pitchWearIndex,
     surfaceCracksIndex: state.surfaceCracksIndex,
     ballWearIndex: state.ballWearIndex,
+    pitchType: state.config.pitchType,
     fieldersOutsideRing: ruleset.getMaxFieldersOutsideRing(
       currentInnings.completedOvers,
     ),
@@ -492,9 +494,12 @@ export function stepDelivery(
   }
 
   // 15. Pitch & Ball Wear Progression
-  const wearDelta = resolution.isLegalDelivery ? 1 / 120 : 0;
-  const nextBallWear = Math.min(1.0, state.ballWearIndex + wearDelta);
-  const nextPitchWear = Math.min(1.0, state.pitchWearIndex + wearDelta * 0.5);
+  const { pitchWearDelta, ballWearDelta } = calculateWearIncrement(
+    state.config.format,
+    resolution.isLegalDelivery,
+  );
+  const nextBallWear = Math.min(1.0, state.ballWearIndex + ballWearDelta);
+  const nextPitchWear = Math.min(1.0, state.pitchWearIndex + pitchWearDelta);
 
   const nextState: MatchState = {
     ...state,

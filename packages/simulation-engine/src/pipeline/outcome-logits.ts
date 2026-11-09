@@ -1,4 +1,5 @@
 import type { DeliveryOutcome } from '../contracts/types.js';
+import { calculateEnvironmentalDeltas } from '../environment/environmental-engine.js';
 import { getFormatBaselineLogits } from './baseline-logits.js';
 import { calculateMatchupLogitDeltas } from './matchup-matrix.js';
 import type { OutcomeCalculationInput, OutcomeLogits } from './types.js';
@@ -233,6 +234,21 @@ export function calculateOutcomeLogits(input: OutcomeCalculationInput): OutcomeL
   // 9. Granular Batter vs Bowler Matchup Dynamics (Feature P4.5)
   const matchupDeltas = calculateMatchupLogitDeltas(batter, bowler, context, tactics);
   for (const [outcomeKey, delta] of Object.entries(matchupDeltas)) {
+    if (delta !== undefined) {
+      logits[outcomeKey as DeliveryOutcome] += delta;
+    }
+  }
+
+  // 10. Environmental, Atmospheric Swing & Dew Modifiers (Feature P4.8)
+  const envDeltas = calculateEnvironmentalDeltas({
+    pitchType: context.pitchType ?? 'HARD',
+    conditions,
+    pitchWearIndex: context.pitchWearIndex,
+    ballWearIndex: context.ballWearIndex,
+    bowlerStyle: bowler.bowlingStyle,
+    isPowerplay: context.isPowerplay,
+  });
+  for (const [outcomeKey, delta] of Object.entries(envDeltas)) {
     if (delta !== undefined) {
       logits[outcomeKey as DeliveryOutcome] += delta;
     }

@@ -37,6 +37,7 @@ export interface DeliveryContext {
   readonly surfaceCracksIndex: number;
   readonly ballWearIndex: number;
   readonly fieldersOutsideRing: number;
+  readonly pitchType?: 'FLAT' | 'GREEN' | 'DUSTY' | 'HARD' | 'TURNING';
 }
 
 export type OutcomeLogits = Record<DeliveryOutcome, number>;

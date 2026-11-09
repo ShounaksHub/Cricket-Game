@@ -354,6 +354,36 @@
   - `pnpm test`: 14 tasks successful, 131 passing tests across monorepo.
   - `pnpm typecheck`: 15 tasks successful, 0 errors.
 
+### Feature P4.8: Pitch Deterioration and Weather/Dew Modifiers
+* **Status:** PASS
+* **Description:** Built the atmospheric weather, dew, and pitch deterioration modifier engine:
+  - `calculateEnvironmentalDeltas(input)`:
+    - Dew factor ($0.0 \to 1.0$): Models slick ball mechanics under lights — neutralizes spinner grip (suppressing wicket threat by up to -0.5 and increasing boundary ease), increases pacer wide/no-ball error rates, and escalates boundary hitting.
+    - Atmospheric swing: Models cloud cover ($\ge 50\%$) and humidity ($\ge 60\%$) enhancing new-ball pacer swing in early overs.
+    - Pitch type dynamics:
+      - `GREEN`: Elevated seam movement and bounce for pace bowlers with new ball.
+      - `TURNING` / `DUSTY`: Compounding spin threat scaling with `pitchWearIndex` ($0.0 \to 1.0$).
+      - `FLAT`: Batting highway boosting boundary rates.
+      - `HARD`: True bounce and carry.
+  - `calculateWearIncrement(format, isLegalDelivery)`: Advances pitch and ball wear deterministically on legal balls only at format-calibrated rates.
+* **Files Modified / Created:**
+  - `packages/simulation-engine/src/environment/environmental-engine.ts` (new)
+  - `packages/simulation-engine/src/environment/index.ts` (new)
+  - `packages/simulation-engine/src/environment/`
+  - `packages/simulation-engine/src/pipeline/types.ts`
+  - `packages/simulation-engine/src/pipeline/outcome-logits.ts`
+  - `packages/simulation-engine/src/transition/delivery-transition.ts`
+  - `packages/simulation-engine/src/index.ts`
+  - `packages/simulation-engine/tests/environment.test.ts` (new)
+* **Tests Added:**
+  - `packages/simulation-engine/tests/environment.test.ts`: 6 comprehensive unit tests verifying heavy dew impact on spinners and boundaries, pacer extras under dew, overcast new-ball swing, compound spin threat on deteriorating turning pitches, flat track batting boosts, and legal delivery wear increments.
+* **Verification Commands & Results:**
+  - `pnpm --filter @cricket/simulation-engine test`: 48 passed (100%).
+  - `pnpm test`: 14 tasks successful, 137 passing tests across monorepo.
+  - `pnpm typecheck`: 15 tasks successful, 0 errors.
+
+
+
 
 
 
