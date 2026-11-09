@@ -72,3 +72,28 @@ export interface PlayerSquadContext {
   readonly formatRating?: PlayerFormatRating;
   readonly ratings?: Partial<Record<MatchFormat, PlayerFormatRating>>;
 }
+
+export type SquadDimensionGrade = 'ELITE' | 'STRONG' | 'BALANCED' | 'VULNERABLE' | 'CRITICAL';
+
+export interface SquadDimensionScore {
+  readonly code: string;
+  readonly name: string;
+  readonly score: number; // 0 to 100
+  readonly grade: SquadDimensionGrade;
+  readonly description: string;
+}
+
+export interface SquadAnalyticsResult {
+  readonly overallBalance: number;
+  readonly dimensions: {
+    readonly battingStrength: SquadDimensionScore;
+    readonly paceThreat: SquadDimensionScore;
+    readonly spinThreat: SquadDimensionScore;
+    readonly bowlingDepth: SquadDimensionScore;
+    readonly fieldingStrength: SquadDimensionScore;
+    readonly allRounderBalance: SquadDimensionScore;
+    readonly lowerOrderBatting: SquadDimensionScore;
+    readonly overallSquadBalance: SquadDimensionScore;
+  };
+  readonly summary: string;
+}

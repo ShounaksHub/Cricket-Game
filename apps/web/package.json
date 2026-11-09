@@ -11,6 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@cricket/cricket-rules": "workspace:*",
     "@cricket/data-ingestion": "workspace:*",
     "@cricket/player-ratings": "workspace:*",
     "@cricket/shared-types": "workspace:*",

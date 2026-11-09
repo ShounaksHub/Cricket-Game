@@ -7,7 +7,10 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { PlayersService } from '../players/players.service.js';
-import { validateDreamTeamSquad } from '@cricket/cricket-rules';
+import {
+  validateDreamTeamSquad,
+  calculateSquadAnalytics,
+} from '@cricket/cricket-rules';
 import {
   SaveDreamTeamDraftSchema,
   CreateDreamTeamSchema,
@@ -19,6 +22,7 @@ import type {
   MatchFormat,
   DreamTeamStatus,
   SquadValidationResult,
+  SquadAnalyticsResult,
   DreamTeamPlayerSlotInput,
   PlayerProfile,
   PlayerSquadContext,
@@ -77,6 +81,7 @@ export interface DreamTeamResponse {
   updatedAt: Date;
   players: EnrichedDreamTeamPlayer[];
   validation?: SquadValidationResult;
+  analytics?: SquadAnalyticsResult;
 }
 
 interface InMemSlot {
@@ -256,6 +261,7 @@ export class DreamTeamsService {
     );
 
     const strengths = this.calculateStrengths(team.formatCode, sortedSlots, contextMap);
+    const analytics = calculateSquadAnalytics(team.formatCode, sortedSlots, contextMap);
 
     return {
       id: team.id,
@@ -275,7 +281,19 @@ export class DreamTeamsService {
       updatedAt: team.updatedAt,
       players: enrichedPlayers,
       validation,
+      analytics,
     };
+  }
+
+  /**
+   * ANALYTICS: Computes 8-dimension tactical analytics for the dream team squad.
+   */
+  async getSquadAnalytics(
+    userId: string,
+    teamId: string
+  ): Promise<SquadAnalyticsResult> {
+    const team = await this.getTeamById(userId, teamId);
+    return team.analytics!;
   }
 
   /**

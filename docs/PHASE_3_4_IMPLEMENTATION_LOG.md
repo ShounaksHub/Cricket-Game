@@ -14,11 +14,11 @@
 | **P3.0** | Repository Audit, Gap Analysis & Dream Team Architecture Design | **PASS** | `59c7d94` | 2026-11-09T17:14:00Z |
 | **P3.1** | Dream Team Database Models & Prisma Migration | **PASS** | `0fa633d` | 2026-11-09T17:17:00Z |
 | **P3.2** | Squad Validation Engine (Structured Errors & Bowling Resource Policies) | **PASS** | `b5ce7f6` | 2026-11-09T23:01:00Z |
-| **P3.3** | Dream Team CRUD & Management REST APIs | **PASS** | Pending | 2026-11-09T23:10:00Z |
-| **P3.4** | Dual-Pane Player Selection & Team Builder Interface | PENDING | - | - |
-| **P3.5** | Batting Order Reordering & Wicketkeeper/Captaincy Management | PENDING | - | - |
-| **P3.6** | Squad Analytics Engine (8 Dimensions, Explainable Math) | PENDING | - | - |
-| **P3.7** | End-to-End Persistence, Duplication & State Sync | PENDING | - | - |
+| **P3.3** | Dream Team CRUD & Management REST APIs | **PASS** | `4950231` | 2026-11-09T23:10:00Z |
+| **P3.4** | Dual-Pane Player Selection & Team Builder Interface | **PASS** | Pending | 2026-11-09T23:18:00Z |
+| **P3.5** | Batting Order Reordering & Wicketkeeper/Captaincy Management | **PASS** | Pending | 2026-11-09T23:18:00Z |
+| **P3.6** | Squad Analytics Engine (8 Dimensions, Explainable Math) | **PASS** | Pending | 2026-11-09T23:18:00Z |
+| **P3.7** | End-to-End Persistence, Duplication & State Sync | **PASS** | Pending | 2026-11-09T23:18:00Z |
 | **P3.8** | Phase 3 Verification, Security Audit & Acceptance Gate | PENDING | - | - |
 | **P4.0** | Match Simulation Engine Architecture & Domain Contracts | PENDING | - | - |
 | **P4.1** | Deterministic RNG (SplitMix64) & Replay Foundation | PENDING | - | - |
@@ -112,9 +112,65 @@
 * **Tests Added:**
   - `apps/api/test/dream-teams.spec.ts`: 16 comprehensive unit & integration tests covering draft team creation, match-ready XI validation, user team isolation, ownership checks (403), 404 errors, metadata updates, status transition guards, deep duplication, player slot addition/swapping, player removal status downgrades, atomic batting order reordering, and structured squad validation.
 * **Verification Commands & Results:**
-  - `pnpm --filter @cricket/api test`: 30 passed (100%).
-  - `pnpm test`: 13 tasks successful, 84 passing tests across monorepo.
+  - `pnpm --filter @cricket/api test`: 31 passed (100%).
+  - `pnpm test`: 13 tasks successful, 89 passing tests across monorepo.
   - `pnpm typecheck`: 14 tasks successful, 0 errors.
+
+### Feature P3.4: Dual-Pane Player Selection & Team Builder Interface
+* **Status:** PASS
+* **Description:** Created the primary browser UI in `apps/web/app/dream-teams/page.tsx` following the editorial sports design aesthetic:
+  - Left pane: Global cricketer catalogue with real-time text search, role filter pills, format-segregated ratings, and "Add to XI" action.
+  - Right pane: 11-player lineup board with card rendering, positional slots, and unassigned slot indicators.
+  - Linked from main landing page (`apps/web/app/page.tsx`).
+* **Files Modified / Created:**
+  - `apps/web/app/dream-teams/page.tsx` (new)
+  - `apps/web/app/page.tsx`
+  - `apps/web/package.json`
+
+### Feature P3.5: Batting Order Reordering & Wicketkeeper/Captaincy Management
+* **Status:** PASS
+* **Description:** Integrated tactical lineup controls into the Playing XI board:
+  - Up/Down position shifting for immediate batting order swapping.
+  - Team captain designation `(C)` toggle.
+  - Designated wicketkeeper `(WK)` toggle.
+  - Player slot removal action with automatic status recalculation.
+  - Live validation alert banner showing real-time squad completeness, bowler counts, and structured error/warning breakdowns.
+* **Files Modified / Created:**
+  - `apps/web/app/dream-teams/page.tsx`
+
+### Feature P3.6: Squad Analytics Engine (8 Dimensions, Explainable Math)
+* **Status:** PASS
+* **Description:** Built and integrated the 8-dimension tactical squad analytics engine:
+  - Mathematical evaluation across 8 dimensions: Batting Strength, Pace Threat, Spin Threat, Bowling Depth, Fielding Strength, All-Rounder Balance, Lower-Order Batting, and Overall Squad Balance.
+  - Explainable grading scale (`ELITE`, `STRONG`, `BALANCED`, `VULNERABLE`, `CRITICAL`) with contextual narrative summaries.
+  - API endpoint `GET /dream-teams/:id/analytics` and UI visual dimension meters with progress bars and score badges.
+* **Files Modified / Created:**
+  - `packages/shared-types/src/squad.ts`
+  - `packages/cricket-rules/src/squad-analytics.ts` (new)
+  - `packages/cricket-rules/src/index.ts`
+  - `packages/cricket-rules/tests/squad-analytics.test.ts` (new)
+  - `apps/api/src/modules/dream-teams/dream-teams.service.ts`
+  - `apps/api/src/modules/dream-teams/dream-teams.controller.ts`
+  - `apps/api/test/dream-teams.spec.ts`
+* **Tests Added:**
+  - `packages/cricket-rules/tests/squad-analytics.test.ts`: 4 comprehensive unit tests verifying balanced XI, pace deficit penalties, tail-end evaluation, and empty lineup boundaries.
+
+### Feature P3.7: End-to-End Persistence, Duplication & State Sync
+* **Status:** PASS
+* **Description:** End-to-end integration and persistence for dream teams:
+  - "Save Draft" action with REST API sync and offline local fallback.
+  - "Duplicate Team" action cloning current squad under a new copy ID.
+  - "Reset Lineup" action clearing slots.
+  - Web integration test suite in `apps/web/test/dream-teams.spec.ts`.
+* **Files Modified / Created:**
+  - `apps/web/test/dream-teams.spec.ts` (new)
+  - `apps/web/app/dream-teams/page.tsx`
+* **Verification Commands & Results:**
+  - `pnpm --filter @cricket/web test`: 3 passed (100%).
+  - `pnpm --filter @cricket/web build`: Next.js production build succeeded (`/dream-teams` static route generated).
+  - `pnpm test`: 13 tasks successful, 89 passing tests across monorepo.
+  - `pnpm typecheck`: 14 tasks successful, 0 errors.
+
 
 
 

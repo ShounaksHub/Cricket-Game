@@ -254,6 +254,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@cricket/cricket-rules':
+        specifier: workspace:*
+        version: link:../../packages/cricket-rules
       '@cricket/data-ingestion':
         specifier: workspace:*
         version: link:../../packages/data-ingestion

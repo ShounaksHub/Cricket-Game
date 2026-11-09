@@ -380,7 +380,7 @@ describe('Dream Teams Module (API)', () => {
     });
   });
 
-  describe('POST /dream-teams/:id/validate', () => {
+  describe('POST /dream-teams/:id/validate & GET /dream-teams/:id/analytics', () => {
     it('returns structured validation result with errors/warnings', async () => {
       const team = await dreamTeamsController.createTeam(DEFAULT_USER_ID, {
         teamName: 'Validation Check',
@@ -398,6 +398,35 @@ describe('Dream Teams Module (API)', () => {
       expect(validation.summary).toBeDefined();
       expect(validation.summary.bowlerCount).toBeDefined();
       expect(validation.isMatchReady).toBe(false);
+    });
+
+    it('computes 8-dimension analytics profile for squad', async () => {
+      const team = await dreamTeamsController.createTeam(DEFAULT_USER_ID, {
+        teamName: 'Analytics Check',
+        format: 'T20',
+        primaryColor: '#111111',
+        secondaryColor: '#222222',
+        status: 'DRAFT',
+        lineup: samplePlayers.slice(0, 11).map((p, idx) => ({
+          playerId: p.id,
+          battingOrder: idx + 1,
+          isCaptain: idx === 0,
+          isDesignatedWicketkeeper: idx === 2,
+        })),
+      });
+
+      const analytics = await dreamTeamsController.getSquadAnalytics(DEFAULT_USER_ID, team.id);
+      expect(analytics).toBeDefined();
+      expect(analytics.overallBalance).toBeGreaterThan(0);
+      expect(analytics.dimensions.battingStrength.score).toBeGreaterThan(0);
+      expect(analytics.dimensions.paceThreat.score).toBeGreaterThan(0);
+      expect(analytics.dimensions.spinThreat.score).toBeGreaterThan(0);
+      expect(analytics.dimensions.bowlingDepth.score).toBeGreaterThan(0);
+      expect(analytics.dimensions.fieldingStrength.score).toBeGreaterThan(0);
+      expect(analytics.dimensions.allRounderBalance.score).toBeGreaterThan(0);
+      expect(analytics.dimensions.lowerOrderBatting.score).toBeGreaterThan(0);
+      expect(analytics.dimensions.overallSquadBalance.score).toBeGreaterThan(0);
+      expect(analytics.summary).toBeDefined();
     });
   });
 });

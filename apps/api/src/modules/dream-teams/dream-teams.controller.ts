@@ -17,7 +17,7 @@ import type { CreateDreamTeamDto } from './dto/create-dream-team.dto.js';
 import type { UpdateDreamTeamDto } from './dto/update-dream-team.dto.js';
 import type { ReorderBattingOrderDto } from './dto/reorder-lineup.dto.js';
 import type { DreamTeamPlayerSlotDto } from './dto/squad-player-slot.dto.js';
-import type { SquadValidationResult } from '@cricket/shared-types';
+import type { SquadValidationResult, SquadAnalyticsResult } from '@cricket/shared-types';
 
 @Controller('dream-teams')
 export class DreamTeamsController {
@@ -77,6 +77,14 @@ export class DreamTeamsController {
     @Param('id') id: string
   ): Promise<SquadValidationResult> {
     return this.dreamTeamsService.validateTeam(userId || DEFAULT_USER_ID, id);
+  }
+
+  @Get(':id/analytics')
+  async getSquadAnalytics(
+    @Headers('x-user-id') userId: string | undefined,
+    @Param('id') id: string
+  ): Promise<SquadAnalyticsResult> {
+    return this.dreamTeamsService.getSquadAnalytics(userId || DEFAULT_USER_ID, id);
   }
 
   @Post(':id/players')
