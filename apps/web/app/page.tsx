@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Shield, Trophy, Activity, CheckCircle2, Server, Globe2, Sparkles } from 'lucide-react';
 import type { MatchFormat } from '@cricket/shared-types';
 
@@ -83,7 +84,7 @@ export default function LandingPage() {
       <section className="max-w-4xl mx-auto text-center mt-12 md:mt-20">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0D4A38]/30 border border-[#0D4A38] text-xs text-[#D4AF37] mb-6">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>PHASE 1: FOUNDATION SCATTERED & OPERATIONAL</span>
+          <span>PHASE 2: VERIFIED PLAYER DATABASE & INGESTION ENGINE OPERATIONAL</span>
         </div>
         <h2 className="text-4xl md:text-6xl font-serif font-bold tracking-tight text-[#F8F9FA] mb-6 leading-tight">
           Global Cricket Dream Team & Simulation Engine
@@ -93,13 +94,16 @@ export default function LandingPage() {
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-4">
-          <button className="px-6 py-3.5 rounded-md bg-[#0D4A38] hover:bg-[#0D4A38]/90 text-[#F8F9FA] font-medium border border-[#D4AF37]/40 shadow-lg shadow-[#0D4A38]/20 transition flex items-center gap-2">
-            <Shield className="w-4 h-4 text-[#D4AF37]" />
-            <span>Dream Team Builder (Phase 3)</span>
-          </button>
+          <Link
+            href="/players"
+            className="px-6 py-3.5 rounded-md bg-[#0D4A38] hover:bg-[#0D4A38]/90 text-[#F8F9FA] font-medium border border-[#D4AF37]/40 shadow-lg shadow-[#0D4A38]/20 transition flex items-center gap-2"
+          >
+            <Sparkles className="w-4 h-4 text-[#D4AF37]" />
+            <span>Explore Player Catalogue & Ratings (Phase 2)</span>
+          </Link>
           <button className="px-6 py-3.5 rounded-md bg-[#181B20] hover:bg-[#22262E] text-[#F8F9FA] font-medium border border-[#2E3440] transition flex items-center gap-2">
-            <Activity className="w-4 h-4 text-[#9CA3AF]" />
-            <span>Simulation Specs (Phase 4)</span>
+            <Shield className="w-4 h-4 text-[#9CA3AF]" />
+            <span>Dream Team Builder (Phase 3)</span>
           </button>
         </div>
       </section>

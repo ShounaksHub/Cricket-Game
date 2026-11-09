@@ -12,7 +12,9 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@cricket/data-ingestion": "workspace:*",
     "@cricket/database": "workspace:*",
+    "@cricket/player-ratings": "workspace:*",
     "@cricket/shared-types": "workspace:*",
     "@cricket/validation": "workspace:*",
     "@nestjs/common": "^11.0.11",

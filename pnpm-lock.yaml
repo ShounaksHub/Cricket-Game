@@ -181,9 +181,15 @@ importers:
 
   apps/api:
     dependencies:
+      '@cricket/data-ingestion':
+        specifier: workspace:*
+        version: link:../../packages/data-ingestion
       '@cricket/database':
         specifier: workspace:*
         version: link:../../database
+      '@cricket/player-ratings':
+        specifier: workspace:*
+        version: link:../../packages/player-ratings
       '@cricket/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
@@ -245,6 +251,12 @@ importers:
 
   apps/web:
     dependencies:
+      '@cricket/data-ingestion':
+        specifier: workspace:*
+        version: link:../../packages/data-ingestion
+      '@cricket/player-ratings':
+        specifier: workspace:*
+        version: link:../../packages/player-ratings
       '@cricket/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
@@ -297,6 +309,15 @@ importers:
 
   database:
     dependencies:
+      '@cricket/data-ingestion':
+        specifier: workspace:*
+        version: link:../packages/data-ingestion
+      '@cricket/player-ratings':
+        specifier: workspace:*
+        version: link:../packages/player-ratings
+      '@cricket/shared-types':
+        specifier: workspace:*
+        version: link:../packages/shared-types
       '@prisma/client':
         specifier: ^6.4.1
         version: 6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3)
@@ -315,6 +336,44 @@ importers:
         version: 5.9.3
 
   packages/cricket-rules:
+    dependencies:
+      '@cricket/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
+    devDependencies:
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.1.4
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.7
+        version: 3.2.7(@types/node@22.20.5)(jiti@2.7.0)(lightningcss@1.33.0)(supports-color@8.1.1)(terser@5.51.2)
+
+  packages/data-ingestion:
+    dependencies:
+      '@cricket/cricket-rules':
+        specifier: workspace:*
+        version: link:../cricket-rules
+      '@cricket/player-ratings':
+        specifier: workspace:*
+        version: link:../player-ratings
+      '@cricket/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
+    devDependencies:
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.1.4
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.7
+        version: 3.2.7(@types/node@22.20.5)(jiti@2.7.0)(lightningcss@1.33.0)(supports-color@8.1.1)(terser@5.51.2)
+
+  packages/player-ratings:
     dependencies:
       '@cricket/shared-types':
         specifier: workspace:*
