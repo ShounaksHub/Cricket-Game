@@ -469,6 +469,42 @@
   - `pnpm test`: 15 tasks successful, 152 passing tests across monorepo.
   - `pnpm typecheck`: 16 tasks successful, 0 errors.
 
+### Feature P4.13: Playable T20 Match Simulation Web Interface
+* **Status:** PASS
+* **Description:** Implemented the complete, end-to-end playable browser-based match simulation interface in Next.js:
+  - **Match Setup Phase**:
+    - Format selection (T10, T20, ODI).
+    - Verified stadium selection with real-world boundary radius (meters), altitude, and dimensions.
+    - Pitch type selection (Hard, Flat, Turning, Green, Dusty).
+    - Environmental modifier controls (Dew Factor slider 0-100%, Temperature, Humidity, Cloud Cover).
+    - 64-bit SplitMix64 deterministic seed input with randomizer button.
+  - **Interactive Toss Experience**:
+    - Heads/Tails coin flip choice with deterministic toss execution.
+    - AI situational decision (electing to bowl under heavy dew; batting on dry tracks).
+  - **Live Match Viewer & Broadcast**:
+    - Live score header (Runs, Wickets, Overs, CRR, Target, RRR).
+    - Dynamic 2D SVG Cricket Ground & Wagon Wheel radar plotting polar ball trajectory ($x, y$ coordinates computed from angle, launch elevation, and distance).
+    - Real-time commentary broadcast feed with outcome badges.
+    - Situational tactical controls (Batter intent: Defend, Rotate, Balanced, Aggressive, Maximum Power; Bowler line, length, variation; Field presets).
+    - Simulation playback stepper: Next Ball, Simulate Over, Instant Result, Auto-Play timer with multi-speed acceleration (0.5x, 1x, 2x, 5x).
+  - **Reconciled Scorecards & Presentation**:
+    - Complete Innings 1 and Innings 2 Batting Scorecards with genuine cricket dismissal summaries (`c & b`, `b`, `lbw`, `c †Keeper`).
+    - Complete Bowling Scorecards (Overs, Maidens, Runs, Wickets, Economy, Dots).
+    - Player of the Match showcase banner with impact points breakdown and performance summary.
+    - Deterministic Replay Verification badge displaying initial state hash $H_0$, seed, and bit-exact reproducibility confirmation.
+* **Files Modified / Created:**
+  - `apps/web/package.json`
+  - `apps/web/app/page.tsx`
+  - `apps/web/app/match/page.tsx` (new)
+  - `apps/web/test/match.spec.ts` (new)
+* **Tests Added:**
+  - `apps/web/test/match.spec.ts`: 2 integration tests verifying verified stadium retrieval and client-side deterministic T20 match simulation with reconciled scorecards and bit-exact replay reproducibility.
+* **Verification Commands & Results:**
+  - `pnpm --filter @cricket/web test`: 5 passed (100%).
+  - `pnpm --filter @cricket/web build`: Successful production build, 7/7 static pages generated.
+  - `pnpm test`: 15 tasks successful, 154 passing tests across monorepo.
+  - `pnpm typecheck`: 16 tasks successful, 0 errors.
+
 
 
 

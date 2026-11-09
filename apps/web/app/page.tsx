@@ -84,7 +84,7 @@ export default function LandingPage() {
       <section className="max-w-4xl mx-auto text-center mt-12 md:mt-20">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0D4A38]/30 border border-[#0D4A38] text-xs text-[#D4AF37] mb-6">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>PHASE 3: DREAM TEAM BUILDER & SQUAD ANALYTICS OPERATIONAL</span>
+          <span>PHASE 4: T20 CRICKET MATCH SIMULATION ENGINE LIVE</span>
         </div>
         <h2 className="text-4xl md:text-6xl font-serif font-bold tracking-tight text-[#F8F9FA] mb-6 leading-tight">
           Global Cricket Dream Team & Simulation Engine
@@ -94,6 +94,13 @@ export default function LandingPage() {
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-4">
+          <Link
+            href="/match"
+            className="px-6 py-3.5 rounded-md bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-[#0E1013] font-bold shadow-lg shadow-[#D4AF37]/20 transition flex items-center gap-2"
+          >
+            <Trophy className="w-4 h-4 text-[#0E1013]" />
+            <span>Simulate T20 Match (Phase 4)</span>
+          </Link>
           <Link
             href="/dream-teams"
             className="px-6 py-3.5 rounded-md bg-[#0D4A38] hover:bg-[#0D4A38]/90 text-[#F8F9FA] font-medium border border-[#D4AF37]/40 shadow-lg shadow-[#0D4A38]/20 transition flex items-center gap-2"
