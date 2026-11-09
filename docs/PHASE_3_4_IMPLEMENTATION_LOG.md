@@ -20,8 +20,8 @@
 | **P3.6** | Squad Analytics Engine (8 Dimensions, Explainable Math) | **PASS** | `a23d846` | 2026-11-09T23:18:00Z |
 | **P3.7** | End-to-End Persistence, Duplication & State Sync | **PASS** | `a23d846` | 2026-11-09T23:18:00Z |
 | **P3.8** | Phase 3 Verification, Security Audit & Acceptance Gate | **PASS** | `0df4709` | 2026-11-09T23:21:00Z |
-| **P4.0** | Match Simulation Engine Architecture & Domain Contracts | **PASS** | Pending | 2026-11-09T23:33:00Z |
-| **P4.1** | Deterministic RNG (SplitMix64) & Replay Foundation | PENDING | - | - |
+| **P4.0** | Match Simulation Engine Architecture & Domain Contracts | **PASS** | `d527591` | 2026-11-09T23:33:00Z |
+| **P4.1** | Deterministic RNG (SplitMix64) & Replay Foundation | **PASS** | Pending | 2026-11-09T23:36:00Z |
 | **P4.2** | Multi-Format Match & Innings State Foundation | PENDING | - | - |
 | **P4.3** | T20 Ruleset Engine & Playing Conditions | PENDING | - | - |
 | **P4.4** | 10-Stage Delivery Simulation Pipeline & Probability Vectors | PENDING | - | - |
@@ -204,6 +204,27 @@
   - `pnpm --filter @cricket/simulation-engine test`: 3 passed (100%).
   - `pnpm test`: 14 tasks successful, 92 passing tests across monorepo.
   - `pnpm typecheck`: 15 tasks successful, 0 errors.
+
+### Feature P4.1: Deterministic RNG (SplitMix64) & Replay Foundation
+* **Status:** PASS
+* **Description:** Built the deterministic pseudo-random number generator and replay hashing foundation:
+  - `DeterministicPRNG` class implementing 64-bit SplitMix64 generator with 53-bit IEEE 754 float precision (`nextFloat()`), uniform integer selection (`nextInt(min, max)`), and Box-Muller Gaussian variates (`nextGaussian(mean, stdDev)`).
+  - Seed hierarchy function `deriveDeliverySeed(matchSeed, innings, over, ball)` guaranteeing non-overlapping deterministic entropy per delivery without state pollution.
+  - Pure TypeScript, zero-dependency SHA-256 implementation in `state-hash.ts` ensuring isomorphic execution across Web Workers, Node.js, and browser contexts.
+  - `generateInitialStateHash(config)` computing immutable fingerprint $H_0$ for exact bit-level replay validation.
+* **Files Modified / Created:**
+  - `packages/simulation-engine/src/prng/splitmix64.ts` (new)
+  - `packages/simulation-engine/src/prng/state-hash.ts` (new)
+  - `packages/simulation-engine/src/prng/index.ts` (new)
+  - `packages/simulation-engine/src/index.ts`
+  - `packages/simulation-engine/tests/prng.test.ts` (new)
+* **Tests Added:**
+  - `packages/simulation-engine/tests/prng.test.ts`: 7 unit tests verifying sequence determinism, distinct seeds, 10,000-sample statistical uniformity ($\text{mean} \approx 0.50$, $\text{variance} \approx 0.0833$), integer bounds, Box-Muller normal distribution, seed hierarchy independence, and $H_0$ sensitivity to configuration changes.
+* **Verification Commands & Results:**
+  - `pnpm --filter @cricket/simulation-engine test`: 10 passed (100%).
+  - `pnpm test`: 14 tasks successful, 99 passing tests across monorepo.
+  - `pnpm typecheck`: 15 tasks successful, 0 errors.
+
 
 
 
