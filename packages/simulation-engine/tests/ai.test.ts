@@ -114,6 +114,7 @@ describe('AI Feature P4.9: Stadium Integration & Tactical AI Captaincy', () => {
       innings: [
         {
           ...state.innings[0],
+          isFreeHit: true,
           events: [
             {
               sequenceNumber: 1,

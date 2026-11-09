@@ -2,6 +2,21 @@ import type { MatchSimulationConfig } from '../contracts/types.js';
 import type { DreamTeamPlayerSlotInput, PlayerSquadContext } from '@cricket/shared-types';
 import { simulateFullMatch } from '../runner/match-runner.js';
 
+export interface ConfidenceInterval {
+  readonly mean: number;
+  readonly lower95: number;
+  readonly upper95: number;
+  readonly stdDev: number;
+}
+
+export interface SkillTierMetrics {
+  readonly goldBattingStrikeRate: number;
+  readonly bronzeBattingStrikeRate: number;
+  readonly goldBowlingEconomy: number;
+  readonly bronzeBowlingEconomy: number;
+  readonly skillDifferentiationVerified: boolean;
+}
+
 export interface CalibrationSummary {
   readonly totalMatchesSimulated: number;
   readonly totalInningsSimulated: number;
@@ -13,6 +28,12 @@ export interface CalibrationSummary {
   readonly dotBallPercentage: number; // Target: 33% to 46%
   readonly extrasPercentage: number; // Target: 2.5% to 7.0%
   readonly dismissalDistribution: Record<string, number>;
+  readonly confidenceIntervals?: {
+    readonly runRate: ConfidenceInterval;
+    readonly dotBallPercentage: ConfidenceInterval;
+    readonly boundaryPercentage: ConfidenceInterval;
+  };
+  readonly skillTierMetrics?: SkillTierMetrics;
   readonly isCalibrated: boolean;
   readonly anomalies: readonly string[];
 }
@@ -27,7 +48,15 @@ function createCalibrationLineup(prefix: string): DreamTeamPlayerSlotInput[] {
   }));
 }
 
-function createCalibrationProfiles(prefix: string): [string, PlayerSquadContext][] {
+function createCalibrationProfiles(
+  prefix: string,
+  tier: 'GOLD' | 'BRONZE' = 'GOLD',
+): [string, PlayerSquadContext][] {
+  const isGold = tier === 'GOLD';
+  const batRating = isGold ? 88 : 50;
+  const bowlRating = isGold ? 90 : 52;
+  const overallRating = isGold ? 85 : 51;
+
   return Array.from({ length: 11 }, (_, i) => {
     const id = `${prefix}-p${i + 1}`;
     const isBowler = i >= 5;
@@ -48,15 +77,15 @@ function createCalibrationProfiles(prefix: string): [string, PlayerSquadContext]
         isWicketkeeper: i === 6,
         formatRating: {
           format: 'T20',
-          overallRating: 82,
-          battingRating: isBowler ? 35 : 85,
-          bowlingRating: isBowler ? 88 : 30,
-          fieldingRating: 78,
+          overallRating,
+          battingRating: isBowler ? 30 : batRating,
+          bowlingRating: isBowler ? bowlRating : 25,
+          fieldingRating: isGold ? 82 : 55,
           confidenceTier: 'MEASURED',
           confidenceScore: 0.9,
           ratingVersion: 'rate-1.0.0',
           explainability: {
-            rawPrimaryMetric: 'Avg: 38',
+            rawPrimaryMetric: isGold ? 'Avg: 42' : 'Avg: 20',
             eraPeerBaseline: 'T20',
             sampleSizeInnings: 50,
             shrinkageApplied: 0.02,
@@ -100,11 +129,23 @@ export function runMonteCarloCalibration(
   let totalInnings = 0;
 
   const dismissalCounts: Record<string, number> = {};
+  const perInningsRunRates: number[] = [];
+  const perInningsDots: number[] = [];
+  const perInningsBoundaries: number[] = [];
+
+  let goldBatRuns = 0;
+  let goldBatBalls = 0;
+  let bronzeBatRuns = 0;
+  let bronzeBatBalls = 0;
 
   for (let m = 0; m < matchCount; m++) {
     const seed = baseSeed + BigInt(m * 7919);
     const stadiumId = stadiums[m % stadiums.length];
     const pitchType = pitches[m % pitches.length];
+
+    // Every even match pits Gold against Bronze for skill differentiation validation
+    const team1Tier = m % 2 === 0 ? 'GOLD' : 'GOLD';
+    const team2Tier = m % 2 === 0 ? 'BRONZE' : 'GOLD';
 
     const config: MatchSimulationConfig = {
       matchId: `calib-match-${m + 1}`,
@@ -134,25 +175,38 @@ export function runMonteCarloCalibration(
         lineup: createCalibrationLineup('b'),
       },
       playerProfiles: new Map([
-        ...createCalibrationProfiles('a'),
-        ...createCalibrationProfiles('b'),
+        ...createCalibrationProfiles('a', team1Tier),
+        ...createCalibrationProfiles('b', team2Tier),
       ]),
     };
 
     const result = simulateFullMatch(config);
 
-    for (const inn of result.finalState.innings) {
+    for (let innIdx = 0; innIdx < result.finalState.innings.length; innIdx++) {
+      const inn = result.finalState.innings[innIdx];
       totalInnings++;
       totalRuns += inn.totalRuns;
       totalWickets += inn.totalWickets;
       const ballsInInn = inn.completedOvers * 6 + inn.legalBallsInCurrentOver;
       totalBalls += ballsInInn;
 
+      let innDots = 0;
+      let innBoundaries = 0;
+      let innDeliveries = 0;
+
       for (const e of inn.events) {
         totalDeliveries++;
-        if (e.outcome === 'FOUR') totalFours++;
-        else if (e.outcome === 'SIX') totalSixes++;
-        else if (e.outcome === 'DOT') totalDots++;
+        innDeliveries++;
+        if (e.outcome === 'FOUR') {
+          totalFours++;
+          innBoundaries++;
+        } else if (e.outcome === 'SIX') {
+          totalSixes++;
+          innBoundaries++;
+        } else if (e.outcome === 'DOT') {
+          totalDots++;
+          innDots++;
+        }
 
         const isExtra =
           e.extras.wides > 0 ||
@@ -164,6 +218,27 @@ export function runMonteCarloCalibration(
         if (e.dismissal) {
           const mode = e.dismissal.mode;
           dismissalCounts[mode] = (dismissalCounts[mode] ?? 0) + 1;
+        }
+      }
+
+      if (ballsInInn > 0) {
+        perInningsRunRates.push((inn.totalRuns / ballsInInn) * 6);
+      }
+      if (innDeliveries > 0) {
+        perInningsDots.push((innDots / innDeliveries) * 100);
+        perInningsBoundaries.push((innBoundaries / innDeliveries) * 100);
+      }
+
+      // Skill-tier aggregation
+      if (m % 2 === 0) {
+        if (innIdx === 0) {
+          // Team Alpha (Gold) batting
+          goldBatRuns += inn.totalRuns;
+          goldBatBalls += ballsInInn;
+        } else {
+          // Team Beta (Bronze) batting
+          bronzeBatRuns += inn.totalRuns;
+          bronzeBatBalls += ballsInInn;
         }
       }
     }
@@ -179,6 +254,50 @@ export function runMonteCarloCalibration(
     totalDeliveries > 0 ? (totalDots / totalDeliveries) * 100 : 0;
   const extrasPercentage =
     totalDeliveries > 0 ? (totalExtras / totalDeliveries) * 100 : 0;
+
+  // Confidence Interval Calculation (95% CI)
+  function calcCI(values: number[]): ConfidenceInterval {
+    if (values.length === 0) return { mean: 0, lower95: 0, upper95: 0, stdDev: 0 };
+    const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
+    const variance =
+      values.length > 1
+        ? values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / (values.length - 1)
+        : 0;
+    const stdDev = Math.sqrt(variance);
+    const margin = 1.96 * (stdDev / Math.sqrt(values.length));
+    return {
+      mean: Math.round(mean * 100) / 100,
+      lower95: Math.round((mean - margin) * 100) / 100,
+      upper95: Math.round((mean + margin) * 100) / 100,
+      stdDev: Math.round(stdDev * 100) / 100,
+    };
+  }
+
+  const confidenceIntervals = {
+    runRate: calcCI(perInningsRunRates),
+    dotBallPercentage: calcCI(perInningsDots),
+    boundaryPercentage: calcCI(perInningsBoundaries),
+  };
+
+  // Skill Tier Comparison
+  const goldBattingStrikeRate =
+    goldBatBalls > 0 ? Math.round(((goldBatRuns / goldBatBalls) * 100) * 10) / 10 : 0;
+  const bronzeBattingStrikeRate =
+    bronzeBatBalls > 0 ? Math.round(((bronzeBatRuns / bronzeBatBalls) * 100) * 10) / 10 : 0;
+  const goldBowlingEconomy =
+    bronzeBatBalls > 0 ? Math.round(((bronzeBatRuns / bronzeBatBalls) * 6) * 100) / 100 : 0;
+  const bronzeBowlingEconomy =
+    goldBatBalls > 0 ? Math.round(((goldBatRuns / goldBatBalls) * 6) * 100) / 100 : 0;
+
+  const skillTierMetrics: SkillTierMetrics = {
+    goldBattingStrikeRate,
+    bronzeBattingStrikeRate,
+    goldBowlingEconomy,
+    bronzeBowlingEconomy,
+    skillDifferentiationVerified:
+      goldBattingStrikeRate > bronzeBattingStrikeRate &&
+      goldBowlingEconomy < bronzeBowlingEconomy,
+  };
 
   // Compute percentages of dismissal modes
   const totalDismissals = Object.values(dismissalCounts).reduce(
@@ -229,6 +348,8 @@ export function runMonteCarloCalibration(
     dotBallPercentage: Math.round(dotBallPercentage * 10) / 10,
     extrasPercentage: Math.round(extrasPercentage * 10) / 10,
     dismissalDistribution,
+    confidenceIntervals,
+    skillTierMetrics,
     isCalibrated: anomalies.length === 0,
     anomalies,
   };

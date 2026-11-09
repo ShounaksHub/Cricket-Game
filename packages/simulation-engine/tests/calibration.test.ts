@@ -30,5 +30,19 @@ describe('Calibration Feature P4.11: Monte Carlo Calibration Suite', () => {
     expect(summary.dismissalDistribution['CAUGHT'] ?? 0).toBeGreaterThan(30.0);
     expect(summary.isCalibrated).toBe(true);
     expect(summary.anomalies.length).toBe(0);
+
+    // Verify Confidence Intervals and Skill Tier Differentiation (Finding 7)
+    expect(summary.confidenceIntervals).toBeDefined();
+    expect(summary.confidenceIntervals?.runRate.lower95).toBeGreaterThan(6.5);
+    expect(summary.confidenceIntervals?.runRate.upper95).toBeLessThan(10.5);
+
+    expect(summary.skillTierMetrics).toBeDefined();
+    expect(summary.skillTierMetrics?.skillDifferentiationVerified).toBe(true);
+    expect(summary.skillTierMetrics!.goldBattingStrikeRate).toBeGreaterThan(
+      summary.skillTierMetrics!.bronzeBattingStrikeRate,
+    );
+    expect(summary.skillTierMetrics!.goldBowlingEconomy).toBeLessThan(
+      summary.skillTierMetrics!.bronzeBowlingEconomy,
+    );
   });
 });

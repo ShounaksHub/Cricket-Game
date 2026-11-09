@@ -1,26 +1,69 @@
 import type { MatchSimulationConfig } from '../contracts/types.js';
 
 /**
- * Pure TypeScript, zero-dependency SHA-256 implementation.
+ * Universal UTF-8 byte encoder supporting browser and Node runtimes.
+ */
+function toUtf8Bytes(str: string): number[] {
+  const g = typeof globalThis !== 'undefined' ? (globalThis as any) : undefined;
+  if (g && typeof g.TextEncoder !== 'undefined') {
+    return Array.from(new g.TextEncoder().encode(str) as Uint8Array);
+  }
+  const bytes: number[] = [];
+  for (let i = 0; i < str.length; i++) {
+    let c = str.charCodeAt(i);
+    if (c < 0x80) {
+      bytes.push(c);
+    } else if (c < 0x800) {
+      bytes.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f));
+    } else if (c < 0xd800 || c >= 0xe000) {
+      bytes.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
+    } else {
+      i++;
+      c = 0x10000 + (((c & 0x3ff) << 10) | (str.charCodeAt(i) & 0x3ff));
+      bytes.push(
+        0xf0 | (c >> 18),
+        0x80 | ((c >> 12) & 0x3f),
+        0x80 | ((c >> 6) & 0x3f),
+        0x80 | (c & 0x3f),
+      );
+    }
+  }
+  return bytes;
+}
+
+/**
+ * Pure TypeScript, zero-dependency SHA-256 implementation (FIPS 180-4).
  * Ensures 100% isomorphic execution across Node.js, Web Workers,
  * and browsers without requiring 'node:crypto' or browser globals.
  */
-function sha256(ascii: string): string {
+export function sha256(input: string): string {
   function rightRotate(value: number, amount: number) {
     return (value >>> amount) | (value << (32 - amount));
   }
 
-  const mathPow = Math.pow;
-  const maxWord = mathPow(2, 32);
-  const lengthProperty = 'length';
-  let i = 0;
-  let j = 0;
-  let result = '';
+  const bytes = toUtf8Bytes(input);
+  const bitLength = bytes.length * 8;
 
+  // Append 0x80 (1 bit followed by zeros)
+  bytes.push(0x80);
+  // Pad with 0x00 until (length % 64) === 56
+  while (bytes.length % 64 !== 56) {
+    bytes.push(0);
+  }
+
+  // Pack bytes into 32-bit big-endian words
   const words: number[] = [];
-  const asciiBitLength = ascii[lengthProperty] * 8;
+  for (let i = 0; i < bytes.length; i++) {
+    words[i >> 2] = (words[i >> 2] ?? 0) | (bytes[i] << ((3 - (i % 4)) * 8));
+  }
 
-  let hash = [
+  // Append 64-bit length in bits (big-endian)
+  const highBits = Math.floor(bitLength / 0x100000000);
+  const lowBits = bitLength >>> 0;
+  words.push(highBits);
+  words.push(lowBits);
+
+  const hash = [
     0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
     0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
   ];
@@ -44,62 +87,57 @@ function sha256(ascii: string): string {
     0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
   ];
 
-  let compositeCount = 2;
-  const isComposite: Record<number, number> = {};
+  for (let j = 0; j < words.length; j += 16) {
+    const w = words.slice(j, j + 16);
+    const oldHash = [...hash];
 
-  ascii += '\x80';
-  while ((ascii[lengthProperty] % 64) - 56) ascii += '\x00';
-  for (i = 0; i < ascii[lengthProperty]; i++) {
-    j = ascii.charCodeAt(i);
-    if (j >> 8) return ''; // ASCII check
-    words[i >> 2] |= j << ((3 - (i % 4)) * 8);
-  }
-  words[words[lengthProperty]] = (asciiBitLength / maxWord) | 0;
-  words[words[lengthProperty]] = asciiBitLength;
-
-  for (j = 0; j < words[lengthProperty]; ) {
-    const w = words.slice(j, (j += 16));
-    const oldHash = hash;
-    hash = hash.slice(0, 8);
-
-    for (i = 0; i < 64; i++) {
-      const i2 = i + j;
-      const w15 = w[i - 15];
-      const w2 = w[i - 2];
-
-      const a = hash[0];
-      const e = hash[4];
-      const temp1 =
-        hash[7] +
-        (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) +
-        ((e & hash[5]) ^ (~e & hash[6])) +
-        k[i] +
-        (w[i] =
-          i < 16
-            ? w[i]
-            : (w[i - 16] +
-                (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) +
-                w[i - 7] +
-                (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) |
-              0);
+    for (let i = 0; i < 64; i++) {
+      let temp1: number;
+      if (i < 16) {
+        temp1 =
+          hash[7] +
+          (rightRotate(hash[4], 6) ^ rightRotate(hash[4], 11) ^ rightRotate(hash[4], 25)) +
+          ((hash[4] & hash[5]) ^ (~hash[4] & hash[6])) +
+          k[i] +
+          w[i];
+      } else {
+        const w15 = w[i - 15];
+        const w2 = w[i - 2];
+        const s0 = rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3);
+        const s1 = rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10);
+        w[i] = (w[i - 16] + s0 + w[i - 7] + s1) | 0;
+        temp1 =
+          hash[7] +
+          (rightRotate(hash[4], 6) ^ rightRotate(hash[4], 11) ^ rightRotate(hash[4], 25)) +
+          ((hash[4] & hash[5]) ^ (~hash[4] & hash[6])) +
+          k[i] +
+          w[i];
+      }
 
       const temp2 =
-        (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) +
-        ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+        (rightRotate(hash[0], 2) ^ rightRotate(hash[0], 13) ^ rightRotate(hash[0], 22)) +
+        ((hash[0] & hash[1]) ^ (hash[0] & hash[2]) ^ (hash[1] & hash[2]));
 
-      hash = [(temp1 + temp2) | 0].concat(hash);
-      hash[4] = (hash[4] + temp1) | 0;
+      hash[7] = hash[6];
+      hash[6] = hash[5];
+      hash[5] = hash[4];
+      hash[4] = (hash[3] + temp1) | 0;
+      hash[3] = hash[2];
+      hash[2] = hash[1];
+      hash[1] = hash[0];
+      hash[0] = (temp1 + temp2) | 0;
     }
 
-    for (i = 0; i < 8; i++) {
+    for (let i = 0; i < 8; i++) {
       hash[i] = (hash[i] + oldHash[i]) | 0;
     }
   }
 
-  for (i = 0; i < 8; i++) {
-    for (j = 3; j + 1; j--) {
-      const b = (hash[i] >> (j * 8)) & 255;
-      result += (b < 16 ? 0 : '') + b.toString(16);
+  let result = '';
+  for (let i = 0; i < 8; i++) {
+    for (let j = 3; j >= 0; j--) {
+      const b = (hash[i] >>> (j * 8)) & 0xff;
+      result += (b < 16 ? '0' : '') + b.toString(16);
     }
   }
   return result;

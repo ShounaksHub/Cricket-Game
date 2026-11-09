@@ -139,7 +139,7 @@ export function reconcileMatchScorecard(state: MatchState): ReconciledMatchScore
       batters: sortedBatters,
       bowlers: sortedBowlers,
       fallOfWickets: inn.fallOfWickets,
-      partnerships: [], // Reconciled from fall of wickets
+      partnerships: calculatePartnerships(inn),
     });
   }
 
@@ -233,4 +233,112 @@ export function calculatePlayerOfTheMatch(state: MatchState): PlayerOfTheMatch |
     impactPoints: maxPoints,
     performanceSummary: bestData.summary,
   };
+}
+
+/**
+ * Deterministically reconstructs sequential partnerships (completed and unbroken)
+ * for an innings from its delivery event stream.
+ */
+export function calculatePartnerships(inn: InningsState): readonly PartnershipEntry[] {
+  if (inn.events.length === 0) {
+    return [];
+  }
+
+  const partnerships: PartnershipEntry[] = [];
+  let wicketNumber = 1;
+
+  // Initial pair from the first delivery event
+  let batter1Id = inn.events[0].strikerPlayerId;
+  let batter2Id = inn.events[0].nonStrikerPlayerId;
+  let batter1Runs = 0;
+  let batter2Runs = 0;
+  let totalRuns = 0;
+  let balls = 0;
+
+  for (let i = 0; i < inn.events.length; i++) {
+    const e = inn.events[i];
+    const deliveryRuns =
+      e.runsBat +
+      e.extras.wides +
+      e.extras.noBalls +
+      e.extras.byes +
+      e.extras.legByes +
+      e.extras.penalty;
+
+    totalRuns += deliveryRuns;
+    if (e.isLegalDelivery) {
+      balls++;
+    }
+
+    if (e.runsBat > 0) {
+      if (e.strikerPlayerId === batter1Id) {
+        batter1Runs += e.runsBat;
+      } else if (e.strikerPlayerId === batter2Id) {
+        batter2Runs += e.runsBat;
+      } else {
+        batter1Runs += e.runsBat;
+      }
+    }
+
+    if (e.dismissal) {
+      partnerships.push({
+        wicketNumber,
+        batter1Id,
+        batter1Runs,
+        batter2Id,
+        batter2Runs,
+        totalRuns,
+        balls,
+      });
+
+      wicketNumber++;
+      totalRuns = 0;
+      balls = 0;
+      batter1Runs = 0;
+      batter2Runs = 0;
+
+      const dismissedId = e.dismissal.dismissedPlayerId;
+      const survivingId =
+        dismissedId === batter1Id
+          ? batter2Id
+          : dismissedId === batter2Id
+            ? batter1Id
+            : e.strikerPlayerId === dismissedId
+              ? e.nonStrikerPlayerId
+              : e.strikerPlayerId;
+
+      let incomingId = '';
+      for (let j = i + 1; j < inn.events.length; j++) {
+        const nextE = inn.events[j];
+        if (nextE.strikerPlayerId !== survivingId) {
+          incomingId = nextE.strikerPlayerId;
+          break;
+        }
+        if (nextE.nonStrikerPlayerId !== survivingId) {
+          incomingId = nextE.nonStrikerPlayerId;
+          break;
+        }
+      }
+
+      batter1Id = survivingId;
+      batter2Id = incomingId;
+    }
+  }
+
+  // Unbroken partnership at innings conclusion
+  if (balls > 0 || totalRuns > 0 || inn.totalWickets < 10) {
+    if (partnerships.length === 0 || totalRuns > 0 || balls > 0) {
+      partnerships.push({
+        wicketNumber,
+        batter1Id,
+        batter1Runs,
+        batter2Id,
+        batter2Runs,
+        totalRuns,
+        balls,
+      });
+    }
+  }
+
+  return partnerships;
 }

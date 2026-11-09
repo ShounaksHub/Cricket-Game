@@ -86,6 +86,7 @@ export function createInitialInningsState(
     isFollowOn: false,
     isDeclared: false,
     isCompleted: false,
+    isFreeHit: false,
     batters: battersMap,
     bowlers: bowlersMap,
     fallOfWickets: [],

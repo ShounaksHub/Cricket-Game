@@ -185,6 +185,74 @@ describe('Matches Simulation Module (API)', () => {
       expect(stepResult.event).toBeDefined();
       expect(stepResult.event.outcome).toBeDefined();
     });
+
+    it('enforces deterministic delivery stepping from the same match state and seed', async () => {
+      const sim = await matchesController.simulateMatch({
+        team1Id: createdTeamId,
+        format: 'T20',
+        seed: '777777',
+      });
+
+      const baseStepDto = {
+        matchId: 'ephemeral-match-det',
+        format: 'T20' as const,
+        stadiumId: 'stadium-eden',
+        pitchType: 'FLAT' as const,
+        currentState: {
+          ...sim.finalState,
+          status: 'IN_PROGRESS' as const,
+          currentInningsIndex: 0,
+          innings: [
+            {
+              ...sim.finalState.innings[0],
+              isCompleted: false,
+              completedOvers: 1,
+              legalBallsInCurrentOver: 0,
+              events: sim.finalState.innings[0].events.slice(0, 6),
+            },
+          ],
+        },
+        tactics: {
+          batterIntent: 'BALANCED' as const,
+          bowlerLength: 'GOOD_LENGTH' as const,
+          bowlerLine: 'OUTSIDE_OFF' as const,
+        },
+      };
+
+      const step1 = await matchesController.stepDelivery(baseStepDto);
+      const step2 = await matchesController.stepDelivery(baseStepDto);
+
+      expect(step1.event.outcome).toBe(step2.event.outcome);
+      expect(step1.event.runsBat).toBe(step2.event.runsBat);
+      expect(step1.event.bowlerPlayerId).toBe(step2.event.bowlerPlayerId);
+      expect(step1.event.strikerPlayerId).toBe(step2.event.strikerPlayerId);
+    });
+
+    it('rejects tampered match state for pre-registered matches (anti-cheat authority)', async () => {
+      const sim = await matchesController.simulateMatch({
+        team1Id: createdTeamId,
+        format: 'T20',
+        seed: '999999',
+      });
+
+      await expect(
+        matchesController.stepDelivery({
+          matchId: sim.matchId,
+          format: 'T20',
+          stadiumId: 'stadium-eden',
+          pitchType: 'FLAT',
+          currentState: {
+            ...sim.finalState,
+            config: {
+              ...sim.finalState.config,
+              matchId: sim.matchId,
+            },
+            initialStateHash: 'tampered-hash-000000000000000000000000000000000000000000000000',
+            status: 'IN_PROGRESS',
+          },
+        }),
+      ).rejects.toThrow('Match state hash mismatch');
+    });
   });
 
   describe('GET /matches/:id/stream (Server-Sent Events Delivery Streaming)', () => {

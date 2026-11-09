@@ -190,7 +190,7 @@ describe('Pipeline Feature P4.4: Softmax & Probability Resolution', () => {
     const freeHitProbs = computeSoftmax(calculateOutcomeLogits(freeHitInput));
 
     expect(regularProbs.WICKET).toBeGreaterThan(0.01);
-    expect(freeHitProbs.WICKET).toBeLessThan(0.001); // Near zero wicket risk
+    expect(freeHitProbs.WICKET).toBe(0.0); // Hard rule constraint: standard dismissals are legally impossible
     expect(freeHitProbs.SIX).toBeGreaterThan(regularProbs.SIX);
   });
 

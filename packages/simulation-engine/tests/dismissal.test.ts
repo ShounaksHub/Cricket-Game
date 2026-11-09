@@ -79,8 +79,9 @@ describe('Dismissal Feature P4.6: Extras & Wicket Dismissal Engine (MCC Laws)', 
     }
   });
 
-  it('should enforce MCC Law 22.17 (Wide allows only STUMPED or RUN_OUT)', () => {
-    for (let i = 0; i < 50; i++) {
+  it('should enforce MCC Law 22.17 (Wide allows only STUMPED, RUN_OUT, or HIT_WICKET)', () => {
+    let observedHitWicket = false;
+    for (let i = 0; i < 150; i++) {
       const prng = new DeterministicPRNG(BigInt(7000 + i));
       const res = resolveDeliveryOutcome({
         ...defaultInput,
@@ -94,13 +95,18 @@ describe('Dismissal Feature P4.6: Extras & Wicket Dismissal Engine (MCC Laws)', 
       expect(res.isLegalDelivery).toBe(false);
       expect(res.extras.wides).toBe(1);
       expect(res.dismissal).toBeDefined();
-      expect(['STUMPED', 'RUN_OUT'].includes(res.dismissal!.mode)).toBe(true);
+      expect(['STUMPED', 'RUN_OUT', 'HIT_WICKET'].includes(res.dismissal!.mode)).toBe(true);
 
       if (res.dismissal?.mode === 'STUMPED') {
         expect(res.dismissal.fielderPlayerId).toBe('player-7'); // Keeper
+        expect(res.dismissal.fielderRole).toBe('WICKETKEEPER');
+        expect(res.dismissal.dismissedPlayerId).toBe('batter-striker');
+      } else if (res.dismissal?.mode === 'HIT_WICKET') {
+        observedHitWicket = true;
         expect(res.dismissal.dismissedPlayerId).toBe('batter-striker');
       }
     }
+    expect(observedHitWicket).toBe(true);
   });
 
   it('should assign wicketkeeper for CAUGHT_BEHIND and leave fielder undefined for BOWLED/LBW', () => {
@@ -124,6 +130,7 @@ describe('Dismissal Feature P4.6: Extras & Wicket Dismissal Engine (MCC Laws)', 
       } else if (res.dismissal?.mode === 'CAUGHT_BEHIND') {
         observedCaughtBehind = true;
         expect(res.dismissal.fielderPlayerId).toBe('player-7');
+        expect(res.dismissal.fielderRole).toBe('WICKETKEEPER');
       }
     }
 

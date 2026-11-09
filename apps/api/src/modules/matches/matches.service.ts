@@ -355,9 +355,26 @@ export class MatchesService {
 
   /**
    * Interactive delivery stepping for manual/ball-by-ball match play.
+   * Enforces server authority and deterministic seed derivation.
    */
   async stepDelivery(dto: StepDeliveryDto): Promise<any> {
     let state = hydrateMatchState(dto.currentState);
+
+    if (!state || !state.config || !state.innings) {
+      throw new BadRequestException('Invalid match state supplied in step request');
+    }
+
+    // Cryptographic match integrity verification if match was pre-registered
+    const storedMatch = this.matches.get(state.config.matchId);
+    if (storedMatch) {
+      if (
+        state.initialStateHash &&
+        storedMatch.result.initialStateHash &&
+        state.initialStateHash !== storedMatch.result.initialStateHash
+      ) {
+        throw new BadRequestException('Match state hash mismatch: state has been tampered with or desynchronized');
+      }
+    }
 
     if (state.status === 'COMPLETED') {
       return {
@@ -367,7 +384,17 @@ export class MatchesService {
       };
     }
 
-    const prng = new DeterministicPRNG(BigInt(Date.now()));
+    // Deterministic hierarchical seed derivation per delivery:
+    // (matchSeed ^ (inningsIndex + 1) * 1000003 ^ (eventsCount + 1) * 7919)
+    const eventCount = state.innings[state.currentInningsIndex]?.events.length ?? 0;
+    const rawSeed = state.config.seed ?? 123456789n;
+    const matchSeed = typeof rawSeed === 'bigint' ? rawSeed : BigInt(rawSeed);
+    const deliverySeed =
+      matchSeed ^
+      (BigInt(state.currentInningsIndex + 1) * 1000003n) ^
+      (BigInt(eventCount + 1) * 7919n);
+
+    const prng = new DeterministicPRNG(deliverySeed);
     const defaultAction = resolveAITacticalAction(state, prng);
 
     const action = {

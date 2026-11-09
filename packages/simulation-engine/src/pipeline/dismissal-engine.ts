@@ -80,25 +80,34 @@ export function resolveDeliveryOutcome(
     let dismissal: DeliveryDismissal | undefined;
 
     if (isWicket) {
-      // MCC Law 22.17: On wide, only Stumped or Run Out possible
+      // MCC Law 22.17.1: On wide, Stumped, Run Out, or Hit Wicket are possible
       const keeperId = getWicketkeeperId(bowlingTeamLineup);
       const isSpin = isSpinBowling(bowlerStyle);
       const roll = prng.nextFloat();
 
-      if (isSpin && roll < 0.85) {
+      if (isSpin && roll < 0.80) {
         dismissal = {
           mode: 'STUMPED',
           dismissedPlayerId: strikerPlayerId,
           bowlerPlayerId,
           fielderPlayerId: keeperId,
+          fielderRole: 'WICKETKEEPER',
         };
-      } else {
+      } else if (roll < 0.95) {
         const isStrikerOut = prng.nextFloat() < 0.7;
         dismissal = {
           mode: 'RUN_OUT',
           dismissedPlayerId: isStrikerOut ? strikerPlayerId : nonStrikerPlayerId,
           bowlerPlayerId,
           fielderPlayerId: keeperId,
+          fielderRole: 'WICKETKEEPER',
+        };
+      } else {
+        // MCC Law 22.17.1 & Law 35: Hit Wicket on a Wide
+        dismissal = {
+          mode: 'HIT_WICKET',
+          dismissedPlayerId: strikerPlayerId,
+          bowlerPlayerId,
         };
       }
     }
@@ -247,6 +256,7 @@ export function resolveDeliveryOutcome(
     const roll = prng.nextFloat();
     let mode: DismissalMode;
     let fielderPlayerId: string | undefined;
+    let fielderRole: 'WICKETKEEPER' | 'SLIP' | 'GULLY' | 'OUTFIELDER' | 'BOWLER' | undefined;
 
     if (isSpin) {
       // Spin dismissal distribution: Caught (40%), LBW (22%), Bowled (18%), Stumped (14%), Caught Behind (4%), Run Out (2%)
@@ -257,6 +267,7 @@ export function resolveDeliveryOutcome(
           catchers.length > 0
             ? catchers[prng.nextInt(0, catchers.length - 1)].playerId
             : bowlerPlayerId;
+        fielderRole = fielderPlayerId === bowlerPlayerId ? 'BOWLER' : 'OUTFIELDER';
       } else if (roll < 0.62) {
         mode = 'LBW';
         fielderPlayerId = undefined;
@@ -266,9 +277,11 @@ export function resolveDeliveryOutcome(
       } else if (roll < 0.94) {
         mode = 'STUMPED';
         fielderPlayerId = keeperId;
+        fielderRole = 'WICKETKEEPER';
       } else if (roll < 0.98) {
         mode = 'CAUGHT_BEHIND';
         fielderPlayerId = keeperId;
+        fielderRole = 'WICKETKEEPER';
       } else {
         mode = 'RUN_OUT';
         fielderPlayerId =
@@ -283,9 +296,11 @@ export function resolveDeliveryOutcome(
           catchers.length > 0
             ? catchers[prng.nextInt(0, catchers.length - 1)].playerId
             : bowlerPlayerId;
+        fielderRole = fielderPlayerId === bowlerPlayerId ? 'BOWLER' : 'OUTFIELDER';
       } else if (roll < 0.66) {
         mode = 'CAUGHT_BEHIND';
         fielderPlayerId = keeperId;
+        fielderRole = 'WICKETKEEPER';
       } else if (roll < 0.84) {
         mode = 'BOWLED';
         fielderPlayerId = undefined;
@@ -317,6 +332,7 @@ export function resolveDeliveryOutcome(
         dismissedPlayerId,
         bowlerPlayerId,
         fielderPlayerId,
+        fielderRole,
       },
     };
   }
@@ -328,4 +344,17 @@ export function resolveDeliveryOutcome(
     extras: ZERO_EXTRAS,
     isLegalDelivery: true,
   };
+}
+
+/**
+ * Maps engine dismissal mode to canonical MCC Law 32 classification.
+ * Specifically canonicalizes broadcast 'CAUGHT_BEHIND' into MCC 'CAUGHT'.
+ */
+export function toCanonicalDismissalMode(
+  mode: DismissalMode,
+): Exclude<DismissalMode, 'CAUGHT_BEHIND'> {
+  if (mode === 'CAUGHT_BEHIND') {
+    return 'CAUGHT';
+  }
+  return mode;
 }

@@ -120,6 +120,18 @@ describe('Runner Feature P4.10: Reconciled Scorecard & Replay Verification', () 
     expect(inn2.battingTeamName).toBe('Australia XI');
     expect(inn2.totalRuns).toBeGreaterThan(0);
 
+    // Verify Reconciled Partnerships (Finding 6)
+    expect(inn1.partnerships.length).toBeGreaterThanOrEqual(1);
+    const inn1PartnershipRuns = inn1.partnerships.reduce((sum, p) => sum + p.totalRuns, 0);
+    expect(inn1PartnershipRuns).toBe(inn1.totalRuns);
+    expect(inn1.partnerships[0].batter1Id).toBeDefined();
+    expect(inn1.partnerships[0].batter2Id).toBeDefined();
+    expect(inn1.partnerships[0].wicketNumber).toBe(1);
+
+    expect(inn2.partnerships.length).toBeGreaterThanOrEqual(1);
+    const inn2PartnershipRuns = inn2.partnerships.reduce((sum, p) => sum + p.totalRuns, 0);
+    expect(inn2PartnershipRuns).toBe(inn2.totalRuns);
+
     // Verify Player of the Match
     expect(scorecard.playerOfTheMatch).toBeDefined();
     expect(scorecard.playerOfTheMatch?.playerId).toBeDefined();

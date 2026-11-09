@@ -83,9 +83,10 @@ export function stepDelivery(
     isWicketkeeper: false,
   };
 
-  // 2. Check previous delivery for Free Hit
+  // 2. Check current innings state for Free Hit (ICC Clause 21.19)
   const lastEvent = currentInnings.events[currentInnings.events.length - 1];
-  const isFreeHit = lastEvent ? lastEvent.outcome === 'NO_BALL' : false;
+  const isFreeHit =
+    currentInnings.isFreeHit || (lastEvent ? lastEvent.outcome === 'NO_BALL' : false);
 
   // 3. Construct DeliveryContext
   const currentRunRate =
@@ -419,6 +420,21 @@ export function stepDelivery(
 
   const isInningsDone = isAllOut || isOverLimit || isTargetOverhauled;
 
+  // Free Hit State Transition (ICC Men's T20I Playing Conditions Clause 21.19):
+  // 1. A No-Ball always creates a Free Hit for the next delivery.
+  // 2. If the current delivery was a Free Hit and the bowler bowls an illegal ball (Wide or No-Ball),
+  //    the Free Hit carries over to the subsequent delivery.
+  // 3. If the current delivery was a Free Hit and is bowled legally, the Free Hit is consumed.
+  // 4. A Free Hit never carries over between innings or after an innings is completed.
+  let nextIsFreeHit = false;
+  if (!isInningsDone) {
+    if (resolution.outcome === 'NO_BALL' || resolution.extras.noBalls > 0) {
+      nextIsFreeHit = true;
+    } else if (isFreeHit && !resolution.isLegalDelivery) {
+      nextIsFreeHit = true;
+    }
+  }
+
   const updatedInnings: InningsState = {
     ...currentInnings,
     totalRuns: newTotalRuns,
@@ -429,6 +445,7 @@ export function stepDelivery(
     nonStrikerPlayerId: nextNonStrikerId,
     currentBowlerPlayerId: nextBowlerId,
     isCompleted: isInningsDone,
+    isFreeHit: nextIsFreeHit,
     batters: battersMap,
     bowlers: bowlersMap,
     fallOfWickets: newFallOfWickets,

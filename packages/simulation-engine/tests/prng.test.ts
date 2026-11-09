@@ -3,6 +3,7 @@ import {
   DeterministicPRNG,
   deriveDeliverySeed,
   generateInitialStateHash,
+  sha256,
 } from '../src/prng/index.js';
 import type { MatchSimulationConfig } from '../src/contracts/types.js';
 
@@ -153,5 +154,32 @@ describe('Deterministic PRNG (SplitMix64) & Replay Foundation (P4.1)', () => {
     };
     const hash3 = generateInitialStateHash(modifiedConfig);
     expect(hash3).not.toBe(hash1);
+  });
+
+  it('validates NIST FIPS 180-4 known-answer test vectors and UTF-8 encoding for SHA-256', () => {
+    // NIST Known-Answer Test Vector 1: Empty string
+    expect(sha256('')).toBe(
+      'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    );
+
+    // NIST Known-Answer Test Vector 2: "abc"
+    expect(sha256('abc')).toBe(
+      'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad',
+    );
+
+    // NIST Known-Answer Test Vector 3: 56-byte message
+    expect(
+      sha256('abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq'),
+    ).toBe('248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1');
+
+    // International cricketer names with non-ASCII and Unicode characters
+    const unicodeHash1 = sha256('Colin Cowdrey & Müller & Ravindra Jadeja');
+    expect(unicodeHash1.length).toBe(64);
+    expect(unicodeHash1).not.toBe('');
+
+    const unicodeHash2 = sha256('Virat Kohli 🏏');
+    expect(unicodeHash2.length).toBe(64);
+    expect(unicodeHash2).not.toBe('');
+    expect(unicodeHash1).not.toBe(unicodeHash2);
   });
 });

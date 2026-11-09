@@ -96,6 +96,7 @@ export interface DeliveryDismissal {
   readonly dismissedPlayerId: string;
   readonly bowlerPlayerId: string;
   readonly fielderPlayerId?: string;
+  readonly fielderRole?: 'WICKETKEEPER' | 'SLIP' | 'GULLY' | 'OUTFIELDER' | 'BOWLER';
 }
 
 export interface DeliveryEvent {
@@ -166,6 +167,7 @@ export interface InningsState {
   readonly isFollowOn: boolean;
   readonly isDeclared: boolean;
   readonly isCompleted: boolean;
+  readonly isFreeHit: boolean;
   readonly batters: ReadonlyMap<string, BatterScorecardEntry>;
   readonly bowlers: ReadonlyMap<string, BowlerScorecardEntry>;
   readonly fallOfWickets: readonly FallOfWicket[];

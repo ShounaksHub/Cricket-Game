@@ -57,9 +57,10 @@ export function calculateOutcomeLogits(input: OutcomeCalculationInput): OutcomeL
       break;
   }
 
-  // 3. Free-Hit Rule (ICC Playing Conditions: Cannot be out except run-out)
+  // 3. Free-Hit Rule (MCC Law 21.18 & ICC Playing Conditions Clause 21.19)
+  // Standard dismissals (Bowled, Caught, LBW, Stumped, Hit Wicket) are legally impossible
   if (context.isFreeHit) {
-    logits.WICKET -= 6.0; // Virtually impossible to get standard wicket dismissal
+    logits.WICKET = -Infinity; // Hard legal rule constraint: strictly 0.0 probability for standard wicket
     logits.FOUR += 0.4;
     logits.SIX += 0.6;
     logits.DOT -= 0.3;

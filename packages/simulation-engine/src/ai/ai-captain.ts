@@ -40,7 +40,8 @@ export function resolveAITacticalAction(
   const isMiddle = !isPowerplay && !isDeath;
 
   const lastEvent = currentInnings.events[currentInnings.events.length - 1];
-  const isFreeHit = lastEvent ? lastEvent.outcome === 'NO_BALL' : false;
+  const isFreeHit =
+    currentInnings.isFreeHit || (lastEvent ? lastEvent.outcome === 'NO_BALL' : false);
 
   const currentBowler = state.config.playerProfiles.get(
     currentInnings.currentBowlerPlayerId,

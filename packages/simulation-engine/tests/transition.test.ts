@@ -207,4 +207,37 @@ describe('Transition Feature P4.7: Over Accounting, Strike Rotation & Innings Tr
       expect(state.result?.isTie).toBe(true);
     }
   });
+
+  it('should preserve Free-Hit status across non-legal deliveries (Wides & No-Balls) and consume it on legal deliveries (ICC Clause 21.19)', () => {
+    let state = createTestMatchState(99887766n);
+
+    // 1. Manually activate a Free Hit on the current innings
+    const inn0 = state.innings[0];
+    const stateWithFreeHit: MatchState = {
+      ...state,
+      innings: [
+        {
+          ...inn0,
+          isFreeHit: true,
+        },
+      ],
+    };
+
+    // 2. Step with a mock delivery or PRNG seed that produces wide/no-ball or legal delivery
+    // Verify that across 50 simulated steps from Free Hit:
+    // Whenever an event is non-legal (Wide/No-Ball), isFreeHit remains true in nextState
+    // Whenever an event is legal, isFreeHit becomes false in nextState
+    for (let i = 0; i < 50; i++) {
+      const prng = new DeterministicPRNG(BigInt(88000 + i));
+      const { nextState, event } = stepDelivery(stateWithFreeHit, defaultTactics, prng);
+
+      if (!event.isLegalDelivery) {
+        // Non-legal delivery (Wide or No-Ball) must preserve Free-Hit
+        expect(nextState.innings[0].isFreeHit).toBe(true);
+      } else {
+        // Legal delivery consumes Free-Hit
+        expect(nextState.innings[0].isFreeHit).toBe(false);
+      }
+    }
+  });
 });
