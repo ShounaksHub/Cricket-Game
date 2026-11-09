@@ -379,11 +379,12 @@ export function stepDelivery(
     }
   }
 
-  // 12. Create Monotonic Delivery Event
-  const sequenceNumber =
-    currentInnings.events.length > 0
-      ? currentInnings.events[currentInnings.events.length - 1].sequenceNumber + 1
-      : 1;
+  // 12. Create Monotonic Delivery Event (strictly monotonic across the whole match)
+  let totalPriorEvents = 0;
+  for (let i = 0; i < state.currentInningsIndex; i++) {
+    totalPriorEvents += state.innings[i].events.length;
+  }
+  const sequenceNumber = totalPriorEvents + currentInnings.events.length + 1;
 
   const event: DeliveryEvent = {
     sequenceNumber,

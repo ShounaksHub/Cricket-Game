@@ -411,6 +411,32 @@
   - `pnpm test`: 14 tasks successful, 142 passing tests across monorepo.
   - `pnpm typecheck`: 15 tasks successful, 0 errors.
 
+### Feature P4.10: Reconciled Scorecard Generation & Monotonic Event Sequence
+* **Status:** PASS
+* **Description:** Implemented the autonomous full match simulator runner, reconciled scorecard generators, and bit-exact deterministic replay verifier:
+  - `simulateFullMatch(config, options)`: Simulates a complete cricket match from initial state hash $H_0$ through to completion:
+    - Autonomously iterates delivery-by-delivery, driving dynamic AI captaincy actions for both teams.
+    - Enforces match-wide monotonic delivery event sequencing ($1, 2, \dots, N$).
+  - `reconcileMatchScorecard(state)`:
+    - Reconciles match state into structured cricket scorecard tables: Batting scorecard (runs, balls faced, strike rate, boundaries, dismissal attribution), Bowling scorecard (overs, maidens, runs conceded, wickets, economy, dots, wides, no-balls), extras breakdown (`wides`, `noBalls`, `byes`, `legByes`, `penalties`), and fall-of-wickets timeline.
+    - `calculatePlayerOfTheMatch(state)`: Computes composite performance impact points across batting runs/boundaries and bowling wickets/dots to award the Player of the Match.
+  - `verifyMatchReplay(result)`: Re-simulates match from initial seed and config, verifying bit-for-bit event sequence equality, initial state hash match, and scorecard equality.
+* **Files Modified / Created:**
+  - `packages/simulation-engine/src/runner/scorecard-reconciler.ts` (new)
+  - `packages/simulation-engine/src/runner/match-runner.ts` (new)
+  - `packages/simulation-engine/src/runner/replay-verifier.ts` (new)
+  - `packages/simulation-engine/src/runner/index.ts` (new)
+  - `packages/simulation-engine/src/index.ts`
+  - `packages/simulation-engine/tests/runner.test.ts` (new)
+* **Tests Added:**
+  - `packages/simulation-engine/tests/runner.test.ts`: 3 comprehensive integration tests verifying autonomous match simulation and scorecard reconciliation, 100% bit-exact replay reproducibility via `verifyMatchReplay`, and discrepancy detection upon seed tampering.
+* **Verification Commands & Results:**
+  - `pnpm --filter @cricket/simulation-engine test`: 56 passed (100%).
+  - `pnpm test`: 14 tasks successful, 145 passing tests across monorepo.
+  - `pnpm typecheck`: 15 tasks successful, 0 errors.
+
+
+
 
 
 
