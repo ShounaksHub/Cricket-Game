@@ -13,8 +13,8 @@
 |---|---|---|---|---|
 | **P3.0** | Repository Audit, Gap Analysis & Dream Team Architecture Design | **PASS** | `59c7d94` | 2026-11-09T17:14:00Z |
 | **P3.1** | Dream Team Database Models & Prisma Migration | **PASS** | `0fa633d` | 2026-11-09T17:17:00Z |
-| **P3.2** | Squad Validation Engine (Structured Errors & Bowling Resource Policies) | **PASS** | Pending | 2026-11-09T23:01:00Z |
-| **P3.3** | Dream Team CRUD & Management REST APIs | PENDING | - | - |
+| **P3.2** | Squad Validation Engine (Structured Errors & Bowling Resource Policies) | **PASS** | `b5ce7f6` | 2026-11-09T23:01:00Z |
+| **P3.3** | Dream Team CRUD & Management REST APIs | **PASS** | Pending | 2026-11-09T23:10:00Z |
 | **P3.4** | Dual-Pane Player Selection & Team Builder Interface | PENDING | - | - |
 | **P3.5** | Batting Order Reordering & Wicketkeeper/Captaincy Management | PENDING | - | - |
 | **P3.6** | Squad Analytics Engine (8 Dimensions, Explainable Math) | PENDING | - | - |
@@ -89,5 +89,32 @@
   - `pnpm --filter @cricket/validation test`: 5 passed (100%).
   - `pnpm test`: 13 tasks successful, 68 passing tests across monorepo.
   - `pnpm typecheck`: 14 tasks successful, 0 errors.
+
+### Feature P3.3: Dream Team CRUD & Management REST APIs
+* **Status:** PASS
+* **Description:** Implemented the complete NestJS `DreamTeamsModule` in `apps/api/src/modules/dream-teams/`:
+  - DTOs: `CreateDreamTeamDto`, `UpdateDreamTeamDto`, `DreamTeamPlayerSlotDto`, `ReorderBattingOrderDto`.
+  - Service: `DreamTeamsService` supporting full CRUD, user authorization & ownership checks (403 Forbidden for cross-user operations, 404 for missing resources), squad validation integration via `@cricket/cricket-rules`, deep team duplication with independent IDs, atomic batting order reordering, and dynamic squad strength calculation (overall, batting, bowling).
+  - Controller: `DreamTeamsController` exposing 10 REST endpoints (`POST /dream-teams`, `GET /dream-teams`, `GET /dream-teams/:id`, `PATCH /dream-teams/:id`, `DELETE /dream-teams/:id`, `POST /dream-teams/:id/duplicate`, `POST /dream-teams/:id/validate`, `POST /dream-teams/:id/players`, `DELETE /dream-teams/:id/players/:playerId`, `PATCH /dream-teams/:id/batting-order`).
+  - Registered `DreamTeamsModule` in `AppModule`.
+* **Files Modified / Created:**
+  - `apps/api/package.json`
+  - `apps/api/src/app.module.ts`
+  - `apps/api/src/modules/dream-teams/dto/create-dream-team.dto.ts` (new)
+  - `apps/api/src/modules/dream-teams/dto/update-dream-team.dto.ts` (new)
+  - `apps/api/src/modules/dream-teams/dto/squad-player-slot.dto.ts` (new)
+  - `apps/api/src/modules/dream-teams/dto/reorder-lineup.dto.ts` (new)
+  - `apps/api/src/modules/dream-teams/dream-teams.service.ts` (new)
+  - `apps/api/src/modules/dream-teams/dream-teams.controller.ts` (new)
+  - `apps/api/src/modules/dream-teams/dream-teams.module.ts` (new)
+  - `apps/api/test/dream-teams.spec.ts` (new)
+  - `packages/shared-types/src/squad.ts`
+* **Tests Added:**
+  - `apps/api/test/dream-teams.spec.ts`: 16 comprehensive unit & integration tests covering draft team creation, match-ready XI validation, user team isolation, ownership checks (403), 404 errors, metadata updates, status transition guards, deep duplication, player slot addition/swapping, player removal status downgrades, atomic batting order reordering, and structured squad validation.
+* **Verification Commands & Results:**
+  - `pnpm --filter @cricket/api test`: 30 passed (100%).
+  - `pnpm test`: 13 tasks successful, 84 passing tests across monorepo.
+  - `pnpm typecheck`: 14 tasks successful, 0 errors.
+
 
 

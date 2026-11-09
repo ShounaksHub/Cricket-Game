@@ -1,4 +1,4 @@
-import type { MatchFormat, PrimaryRole, BowlingStyle, DreamTeamStatus } from './enums.js';
+import type { MatchFormat, PrimaryRole, BowlingStyle, DreamTeamStatus, BattingHand } from './enums.js';
 import type { PlayerFormatRating } from './player.js';
 
 export type SquadValidationSeverity = 'HARD_ERROR' | 'ADVISORY_WARNING';
@@ -66,7 +66,9 @@ export interface PlayerSquadContext {
   readonly fullName: string;
   readonly displayName: string;
   readonly primaryRole: PrimaryRole;
+  readonly battingHand: BattingHand;
   readonly bowlingStyle: BowlingStyle;
   readonly isWicketkeeper: boolean;
   readonly formatRating?: PlayerFormatRating;
+  readonly ratings?: Partial<Record<MatchFormat, PlayerFormatRating>>;
 }
