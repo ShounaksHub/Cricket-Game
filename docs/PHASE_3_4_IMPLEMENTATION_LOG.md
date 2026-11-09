@@ -280,6 +280,33 @@
   - `pnpm test`: 14 tasks successful, 115 passing tests across monorepo.
   - `pnpm typecheck`: 15 tasks successful, 0 errors.
 
+### Feature P4.5: Batter vs Bowler Attribute Interaction Modeling
+* **Status:** PASS
+* **Description:** Implemented granular micro-level player attribute interaction modeling, handedness asymmetries, and tactical execution dynamics:
+  - `extractPlayerAttributes(player, format)`: Graceful attribute resolution extracting granular 0-100 attributes (`technique`, `power`, `againstPace`, `againstSpin`, `shortBallHandling`, `yorkerHandling`, `lineAndLength`, `seamOrTurn`, `swingOrDrift`, `yorkerExecution`, `bouncerExecution`, `newBallEffectiveness`, `slowerBallExecution`, etc.), falling back to format composite ratings when granular attributes are absent.
+  - `calculateMatchupLogitDeltas(batter, bowler, context, tactics)`:
+    - Pace contest: Evaluates bowler line/length and pace/swing against batter technique and `againstPace`.
+    - Spin contest: Evaluates bowler seam/turn and drift against batter `againstSpin` and footwork technique.
+    - Yorker duel: Yorker execution and death-over bowling vs yorker handling and death-over batting.
+    - Short ball contest: Bouncer execution vs short-ball handling (punishing poor technique with dismissal risk; rewarding pull masters with boundaries).
+    - Asymmetric handedness dynamics: Left-hand batter vs Right-arm off-break (ball turning into pads/gate), Right-hand batter vs Right-arm leg-break (turning away), and Right-hand batter vs Left-arm pace (powerplay inswinger).
+    - Powerplay new-ball swing vs top-order technique.
+    - Slower ball deception vs batter timing and match awareness.
+  - Directly plugged into 10-stage delivery simulation pipeline (`outcome-logits.ts`).
+* **Files Modified / Created:**
+  - `packages/simulation-engine/src/pipeline/matchup-matrix.ts` (new)
+  - `packages/simulation-engine/src/pipeline/outcome-logits.ts`
+  - `packages/simulation-engine/src/pipeline/index.ts`
+  - `packages/simulation-engine/tests/matchup.test.ts` (new)
+* **Tests Added:**
+  - `packages/simulation-engine/tests/matchup.test.ts`: 6 comprehensive unit tests verifying fallback resolution, pace domination against weak technique, spin mastery vs vulnerability, short-ball hook/pull reward vs vulnerability, asymmetric handedness advantages, and end-to-end integration with Softmax.
+* **Verification Commands & Results:**
+  - `pnpm --filter @cricket/simulation-engine test`: 32 passed (100%).
+  - `pnpm test`: 14 tasks successful, 121 passing tests across monorepo.
+  - `pnpm typecheck`: 15 tasks successful, 0 errors.
+
+
+
 
 
 

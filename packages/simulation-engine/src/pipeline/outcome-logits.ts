@@ -1,5 +1,6 @@
 import type { DeliveryOutcome } from '../contracts/types.js';
 import { getFormatBaselineLogits } from './baseline-logits.js';
+import { calculateMatchupLogitDeltas } from './matchup-matrix.js';
 import type { OutcomeCalculationInput, OutcomeLogits } from './types.js';
 
 /**
@@ -228,6 +229,14 @@ export function calculateOutcomeLogits(input: OutcomeCalculationInput): OutcomeL
   logits.RUN_1 += ratingDiff * 0.3;
   logits.WICKET -= ratingDiff * 0.65;
   logits.DOT -= ratingDiff * 0.55;
+
+  // 9. Granular Batter vs Bowler Matchup Dynamics (Feature P4.5)
+  const matchupDeltas = calculateMatchupLogitDeltas(batter, bowler, context, tactics);
+  for (const [outcomeKey, delta] of Object.entries(matchupDeltas)) {
+    if (delta !== undefined) {
+      logits[outcomeKey as DeliveryOutcome] += delta;
+    }
+  }
 
   return logits;
 }
