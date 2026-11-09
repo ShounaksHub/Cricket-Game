@@ -90,3 +90,5 @@ export type LicenseType =
   | 'OPEN_DATA';
 
 export type TossDecision = 'BAT' | 'BOWL';
+
+export type DreamTeamStatus = 'DRAFT' | 'MATCH_READY';

@@ -111,6 +111,11 @@ enum ConfidenceTier {
   IMPUTED
 }
 
+enum DreamTeamStatus {
+  DRAFT
+  MATCH_READY
+}
+
 // -----------------------------------------------------------------------------
 // USER DOMAIN
 // -----------------------------------------------------------------------------
@@ -463,6 +468,8 @@ model DreamTeam {
   userId                String            @map("user_id") @db.Uuid
   user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   teamName              String            @map("team_name") @db.VarChar(64)
+  description           String?           @db.VarChar(255)
+  status                DreamTeamStatus   @default(DRAFT)
   badgeIcon             String            @default("SHIELD_CLASSIC") @map("badge_icon") @db.VarChar(64)
   primaryColor          String            @default("#0D4A38") @map("primary_color") @db.VarChar(7)
   secondaryColor        String            @default("#D4AF37") @map("secondary_color") @db.VarChar(7)
@@ -491,6 +498,7 @@ model DreamTeamPlayer {
   isViceCaptain             Boolean   @default(false) @map("is_vice_captain")
   isDesignatedWicketkeeper  Boolean   @default(false) @map("is_designated_wicketkeeper")
   bowlingPriority           Int?      @map("bowling_priority")
+  createdAt                 DateTime  @default(now()) @map("created_at") @db.Timestamptz
 
   @@unique([dreamTeamId, battingOrder])
   @@unique([dreamTeamId, playerId])
