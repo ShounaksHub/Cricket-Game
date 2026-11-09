@@ -196,6 +196,9 @@ importers:
       '@cricket/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
+      '@cricket/simulation-engine':
+        specifier: workspace:*
+        version: link:../../packages/simulation-engine
       '@cricket/validation':
         specifier: workspace:*
         version: link:../../packages/validation

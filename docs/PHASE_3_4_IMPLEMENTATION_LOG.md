@@ -440,6 +440,35 @@
   - `pnpm test`: 14 tasks successful, 146 passing tests across monorepo.
   - `pnpm typecheck`: 15 tasks successful, 0 errors.
 
+### Feature P4.12: Match Simulation REST & SSE Streaming Endpoints in NestJS API
+* **Status:** PASS
+* **Description:** Implemented match simulation REST and Server-Sent Events (SSE) streaming endpoints in `apps/api`:
+  - `GET /matches/stadiums`: Exposes verified real-world stadiums with boundary dimensions (radius) and altitude metadata.
+  - `POST /matches/simulate`:
+    - Resolves user dream teams from `DreamTeamsService` or builds an intelligent AI World Legends XI from verified benchmark legends.
+    - Resolves environmental conditions, format, pitch characteristics, and 64-bit hierarchical seed.
+    - Executes full autonomous simulation via `@cricket/simulation-engine` (`simulateFullMatch`).
+    - Validates bit-exact replay determinism (`verifyMatchReplay`).
+    - Handles BigInt serialization and hydrates domain maps safely.
+  - `GET /matches/:id`: Retrieves persisted match result and full reconciled scorecard.
+  - `GET /matches/:id/verify`: Validates 100% bit-exact replay determinism from initial state hash $H_0$.
+  - `POST /matches/step`: Step-by-step interactive single-delivery simulation with customizable tactical intent (defend, attack, line, length, field presets).
+  - `GET /matches/:id/stream` (`@Sse`): Streams ball-by-ball delivery events with trajectory, commentary, and running scorecard via browser-native Server-Sent Events.
+* **Files Modified / Created:**
+  - `apps/api/package.json`
+  - `apps/api/src/app.module.ts`
+  - `apps/api/src/modules/matches/dto/simulate-match.dto.ts` (new)
+  - `apps/api/src/modules/matches/matches.service.ts` (new)
+  - `apps/api/src/modules/matches/matches.controller.ts` (new)
+  - `apps/api/src/modules/matches/matches.module.ts` (new)
+  - `apps/api/test/matches.spec.ts` (new)
+* **Tests Added:**
+  - `apps/api/test/matches.spec.ts`: 6 comprehensive integration tests verifying verified stadiums listing, full T20 simulation against AI opponent, benchmark fallback, bit-exact replay verification, interactive single-delivery stepping, and real-time SSE delivery streaming.
+* **Verification Commands & Results:**
+  - `pnpm --filter @cricket/api test`: 37 passed (100%).
+  - `pnpm test`: 15 tasks successful, 152 passing tests across monorepo.
+  - `pnpm typecheck`: 16 tasks successful, 0 errors.
+
 
 
 

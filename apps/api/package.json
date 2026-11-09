@@ -17,6 +17,7 @@
     "@cricket/database": "workspace:*",
     "@cricket/player-ratings": "workspace:*",
     "@cricket/shared-types": "workspace:*",
+    "@cricket/simulation-engine": "workspace:*",
     "@cricket/validation": "workspace:*",
     "@nestjs/common": "^11.0.11",
     "@nestjs/config": "^4.0.1",
