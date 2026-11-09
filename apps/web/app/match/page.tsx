@@ -54,6 +54,25 @@ import {
   VERIFIED_BENCHMARK_PLAYERS,
   ingestPlayerRecord,
 } from '@cricket/data-ingestion';
+import dynamic from 'next/dynamic';
+
+const CricketVisualizerCanvas = dynamic(
+  () =>
+    import('./visualizer/CricketVisualizerCanvas').then(
+      (mod) => mod.CricketVisualizerCanvas,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[580px] bg-[#030d07] rounded-xl flex items-center justify-center border border-emerald-950/60 shadow-2xl">
+        <div className="flex items-center space-x-2 text-emerald-400 font-mono text-xs uppercase tracking-widest">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping inline-block" />
+          <span>INITIALIZING PIXIJS V8 2D BROADCAST VISUALIZER...</span>
+        </div>
+      </div>
+    ),
+  },
+);
 
 type MatchPhase = 'SETUP' | 'TOSS' | 'LIVE' | 'COMPLETED';
 
@@ -815,6 +834,22 @@ export default function MatchSimulationPage() {
             </div>
           </div>
 
+          {/* PixiJS v8 2D Match Visualizer & Television Broadcast Theater */}
+          {liveState && (
+            <div className="mb-6">
+              <CricketVisualizerCanvas
+                matchState={liveState}
+                activeEvent={currentEvent}
+                isPlaying={isPlaying}
+                playSpeed={playSpeed}
+                onPlayPauseToggle={() => setIsPlaying(!isPlaying)}
+                onStepNextBall={stepToNextDelivery}
+                onSkipOver={handleSimulateOver}
+                onSpeedChange={(speed) => setPlaySpeed(speed)}
+              />
+            </div>
+          )}
+
           {/* 3-Column Interactive Dashboard */}
           <div className="grid lg:grid-cols-12 gap-6">
             {/* Column 1: Live Ball-by-Ball Pitch Wagon Wheel & Trajectory (5 cols) */}
@@ -1230,6 +1265,44 @@ export default function MatchSimulationPage() {
                         </tbody>
                       </table>
                     </div>
+
+                    {/* Partnerships Table */}
+                    {simulationResult.scorecard.innings[selectedInningsTab].partnerships &&
+                      simulationResult.scorecard.innings[selectedInningsTab].partnerships.length > 0 && (
+                        <div className="overflow-x-auto pt-2">
+                          <div className="text-[11px] font-bold text-[#D4AF37] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5" /> Reconciled Partnerships Breakdown
+                          </div>
+                          <table className="w-full text-left text-xs">
+                            <thead>
+                              <tr className="border-b border-[#222A36] text-[#8A94A6]">
+                                <th className="py-2 px-3">Wicket</th>
+                                <th className="py-2 px-3">Batter 1</th>
+                                <th className="py-2 px-3">Batter 2</th>
+                                <th className="py-2 px-3 text-right">Runs (Balls)</th>
+                                <th className="py-2 px-3 text-right">Partnership Total</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {simulationResult.scorecard.innings[selectedInningsTab].partnerships.map((p, pIdx) => (
+                                <tr key={pIdx} className="border-b border-[#181F2A] hover:bg-[#161D27]">
+                                  <td className="py-2 px-3 font-mono font-bold text-amber-400">#{p.wicketNumber}</td>
+                                  <td className="py-2 px-3 font-semibold text-[#F8F9FA]">
+                                    {getPlayerDisplayName(p.batter1Id)}{' '}
+                                    <span className="text-[#8A94A6] font-mono text-[11px]">({p.batter1Runs})</span>
+                                  </td>
+                                  <td className="py-2 px-3 font-semibold text-[#F8F9FA]">
+                                    {getPlayerDisplayName(p.batter2Id)}{' '}
+                                    <span className="text-[#8A94A6] font-mono text-[11px]">({p.batter2Runs})</span>
+                                  </td>
+                                  <td className="py-2 px-3 text-right font-mono text-[#8A94A6]">{p.totalRuns} ({p.balls}b)</td>
+                                  <td className="py-2 px-3 text-right font-mono font-bold text-emerald-400">{p.totalRuns}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
                   </div>
                 )}
               </div>
