@@ -51,7 +51,7 @@ describe('Environment Feature P4.8: Pitch Deterioration and Weather/Dew Modifier
 
     // Wet conditions skid on: boundaries elevated
     expect(wetDeltas.FOUR).toBeGreaterThan(0.3);
-    expect(wetDeltas.SIX).toBeGreaterThan(0.15);
+    expect(wetDeltas.SIX).toBeGreaterThan(0.1);
   });
 
   it('should increase pace bowler wide and no-ball error rates under heavy dew', () => {

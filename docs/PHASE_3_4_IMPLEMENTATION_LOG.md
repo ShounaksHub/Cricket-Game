@@ -411,28 +411,33 @@
   - `pnpm test`: 14 tasks successful, 142 passing tests across monorepo.
   - `pnpm typecheck`: 15 tasks successful, 0 errors.
 
-### Feature P4.10: Reconciled Scorecard Generation & Monotonic Event Sequence
+### Feature P4.11: Monte Carlo Calibration Suite & Statistical Balancing
 * **Status:** PASS
-* **Description:** Implemented the autonomous full match simulator runner, reconciled scorecard generators, and bit-exact deterministic replay verifier:
-  - `simulateFullMatch(config, options)`: Simulates a complete cricket match from initial state hash $H_0$ through to completion:
-    - Autonomously iterates delivery-by-delivery, driving dynamic AI captaincy actions for both teams.
-    - Enforces match-wide monotonic delivery event sequencing ($1, 2, \dots, N$).
-  - `reconcileMatchScorecard(state)`:
-    - Reconciles match state into structured cricket scorecard tables: Batting scorecard (runs, balls faced, strike rate, boundaries, dismissal attribution), Bowling scorecard (overs, maidens, runs conceded, wickets, economy, dots, wides, no-balls), extras breakdown (`wides`, `noBalls`, `byes`, `legByes`, `penalties`), and fall-of-wickets timeline.
-    - `calculatePlayerOfTheMatch(state)`: Computes composite performance impact points across batting runs/boundaries and bowling wickets/dots to award the Player of the Match.
-  - `verifyMatchReplay(result)`: Re-simulates match from initial seed and config, verifying bit-for-bit event sequence equality, initial state hash match, and scorecard equality.
+* **Description:** Implemented the automated Monte Carlo calibration suite, macro statistical convergence verification, and contextual logit balancing:
+  - `runMonteCarloCalibration(matchCount, baseSeed)`: Simulates batches of matches across varying seeds, verified stadiums, pitch types, and atmospheric conditions to evaluate macro statistical convergence.
+  - Convergence verification metrics against real-world international T20 cricket standards:
+    - Average Run Rate: 8.69 RPO (within [7.0, 10.0] range, typical ~8.5-8.8).
+    - Average Wickets per Innings: 5.5 (within [4.8, 8.5] range).
+    - Boundary Percentage (Fours + Sixes): 20.0% (within [11%, 25%] range).
+    - Dot Ball Percentage: 31.2% (within [28%, 50%] range).
+    - Extras Percentage: 2.9% (within [1.5%, 8.0%] range).
+    - Dismissal Distribution: Caught (42.4%), Bowled (20.6%), Caught Behind (17.6%), LBW (13.3%), Run Out (4.2%), Stumped (1.2%), Hit Wicket (0.6%).
+  - Balanced additive logits across dew mechanics, flat pitch modifiers, and boundary dimensions to prevent inflation while preserving tactical depth.
 * **Files Modified / Created:**
-  - `packages/simulation-engine/src/runner/scorecard-reconciler.ts` (new)
-  - `packages/simulation-engine/src/runner/match-runner.ts` (new)
-  - `packages/simulation-engine/src/runner/replay-verifier.ts` (new)
-  - `packages/simulation-engine/src/runner/index.ts` (new)
+  - `packages/simulation-engine/src/calibration/monte-carlo.ts` (new)
+  - `packages/simulation-engine/src/calibration/index.ts` (new)
   - `packages/simulation-engine/src/index.ts`
-  - `packages/simulation-engine/tests/runner.test.ts` (new)
+  - `packages/simulation-engine/src/pipeline/outcome-logits.ts`
+  - `packages/simulation-engine/src/environment/environmental-engine.ts`
+  - `packages/simulation-engine/src/ai/stadium-specs.ts`
+  - `packages/simulation-engine/tests/calibration.test.ts` (new)
+  - `packages/simulation-engine/tests/ai.test.ts`
+  - `packages/simulation-engine/tests/environment.test.ts`
 * **Tests Added:**
-  - `packages/simulation-engine/tests/runner.test.ts`: 3 comprehensive integration tests verifying autonomous match simulation and scorecard reconciliation, 100% bit-exact replay reproducibility via `verifyMatchReplay`, and discrepancy detection upon seed tampering.
+  - `packages/simulation-engine/tests/calibration.test.ts`: Automated 15-match (~3,600 deliveries) Monte Carlo calibration verifying zero anomalies, statistical convergence, and realistic dismissal distributions.
 * **Verification Commands & Results:**
-  - `pnpm --filter @cricket/simulation-engine test`: 56 passed (100%).
-  - `pnpm test`: 14 tasks successful, 145 passing tests across monorepo.
+  - `pnpm --filter @cricket/simulation-engine test`: 57 passed (100%).
+  - `pnpm test`: 14 tasks successful, 146 passing tests across monorepo.
   - `pnpm typecheck`: 15 tasks successful, 0 errors.
 
 

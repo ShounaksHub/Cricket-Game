@@ -87,11 +87,11 @@ export function calculateStadiumDeltas(
 
   // 1. Boundary Radius Impact
   if (stadium.averageBoundaryRadiusMeters <= 65) {
-    deltas.FOUR = 0.35;
-    deltas.SIX = 0.45;
+    deltas.FOUR = 0.3;
+    deltas.SIX = 0.35;
     deltas.RUN_2 = -0.2;
     deltas.RUN_3 = -0.3;
-    deltas.DOT = -0.2;
+    deltas.DOT = -0.1;
   } else if (stadium.averageBoundaryRadiusMeters >= 78) {
     deltas.SIX = -0.4;
     deltas.FOUR = -0.2;

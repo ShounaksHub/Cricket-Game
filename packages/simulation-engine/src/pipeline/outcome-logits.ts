@@ -18,21 +18,21 @@ export function calculateOutcomeLogits(input: OutcomeCalculationInput): OutcomeL
   // 2. Batter Tactical Intention Adjustments
   switch (tactics.batterIntent) {
     case 'DEFEND':
-      logits.DOT += 1.4;
-      logits.RUN_1 -= 0.8;
-      logits.RUN_2 -= 1.2;
-      logits.RUN_3 -= 1.5;
-      logits.FOUR -= 2.2;
-      logits.SIX -= 3.5;
-      logits.WICKET -= 0.5;
+      logits.DOT += 0.8;
+      logits.RUN_1 -= 0.4;
+      logits.RUN_2 -= 0.6;
+      logits.RUN_3 -= 0.8;
+      logits.FOUR -= 1.0;
+      logits.SIX -= 1.8;
+      logits.WICKET -= 0.3;
       break;
 
     case 'ROTATE_STRIKE':
-      logits.RUN_1 += 0.65;
-      logits.RUN_2 += 0.35;
-      logits.DOT -= 0.55;
-      logits.FOUR -= 0.5;
-      logits.SIX -= 1.2;
+      logits.RUN_1 += 0.4;
+      logits.RUN_2 += 0.2;
+      logits.DOT -= 0.35;
+      logits.FOUR -= 0.3;
+      logits.SIX -= 0.6;
       logits.WICKET -= 0.1;
       break;
 
@@ -41,28 +41,28 @@ export function calculateOutcomeLogits(input: OutcomeCalculationInput): OutcomeL
       break;
 
     case 'AGGRESSIVE':
-      logits.FOUR += 0.55;
-      logits.SIX += 0.75;
-      logits.WICKET += 0.4;
-      logits.DOT -= 0.35;
-      logits.RUN_1 -= 0.2;
+      logits.FOUR += 0.3;
+      logits.SIX += 0.35;
+      logits.WICKET += 0.25;
+      logits.DOT -= 0.2;
+      logits.RUN_1 -= 0.1;
       break;
 
     case 'MAXIMUM_POWER':
-      logits.FOUR += 0.85;
-      logits.SIX += 1.3;
-      logits.WICKET += 0.8;
-      logits.DOT -= 0.55;
-      logits.RUN_1 -= 0.4;
+      logits.FOUR += 0.45;
+      logits.SIX += 0.65;
+      logits.WICKET += 0.45;
+      logits.DOT -= 0.3;
+      logits.RUN_1 -= 0.2;
       break;
   }
 
   // 3. Free-Hit Rule (ICC Playing Conditions: Cannot be out except run-out)
   if (context.isFreeHit) {
     logits.WICKET -= 6.0; // Virtually impossible to get standard wicket dismissal
-    logits.FOUR += 0.6;
-    logits.SIX += 0.9;
-    logits.DOT -= 0.5;
+    logits.FOUR += 0.4;
+    logits.SIX += 0.6;
+    logits.DOT -= 0.3;
   }
 
   // 4. Field Presets
@@ -182,24 +182,24 @@ export function calculateOutcomeLogits(input: OutcomeCalculationInput): OutcomeL
 
   // 6. Match Context Dynamics (Powerplay, Death Overs, Required Rate)
   if (context.isPowerplay) {
-    logits.FOUR += 0.45;
-    logits.SIX += 0.25;
-    logits.DOT -= 0.2;
+    logits.FOUR += 0.25;
+    logits.SIX += 0.15;
+    logits.DOT -= 0.08;
   }
 
   if (context.isDeathOvers) {
-    logits.FOUR += 0.35;
-    logits.SIX += 0.5;
-    logits.WICKET += 0.4;
-    logits.DOT -= 0.3;
+    logits.FOUR += 0.2;
+    logits.SIX += 0.3;
+    logits.WICKET += 0.3;
+    logits.DOT -= 0.08;
   }
 
   if (context.requiredRunRate && context.requiredRunRate > 9.0) {
-    const pressure = Math.min(2.0, (context.requiredRunRate - 9.0) * 0.1);
-    logits.SIX += pressure;
-    logits.FOUR += pressure * 0.7;
-    logits.WICKET += pressure * 0.8;
-    logits.DOT -= pressure * 0.6;
+    const pressure = Math.min(1.0, (context.requiredRunRate - 9.0) * 0.05);
+    logits.SIX += pressure * 0.4;
+    logits.FOUR += pressure * 0.3;
+    logits.WICKET += pressure * 0.4;
+    logits.DOT -= pressure * 0.25;
   }
 
   // 7. Pitch & Ball Wear

@@ -45,9 +45,9 @@ export function calculateEnvironmentalDeltas(
     const dew = Math.min(1.0, conditions.dewFactor);
 
     // Ball skids onto the bat, outfield gets slippery: batting becomes easier
-    addDelta('FOUR', 0.45 * dew);
-    addDelta('SIX', 0.35 * dew);
-    addDelta('DOT', -0.4 * dew);
+    addDelta('FOUR', 0.4 * dew);
+    addDelta('SIX', 0.3 * dew);
+    addDelta('DOT', -0.18 * dew);
 
     if (isSpin) {
       // Spinners cannot grip the wet ball: severe reduction in spin & deception
@@ -110,10 +110,10 @@ export function calculateEnvironmentalDeltas(
 
     case 'FLAT':
       // True batting paradise / highway
-      addDelta('FOUR', 0.4);
-      addDelta('SIX', 0.3);
-      addDelta('DOT', -0.35);
-      addDelta('WICKET', -0.3);
+      addDelta('FOUR', 0.35);
+      addDelta('SIX', 0.25);
+      addDelta('DOT', -0.18);
+      addDelta('WICKET', -0.25);
       break;
 
     case 'HARD':
