@@ -22,7 +22,7 @@
 | **P3.8** | Phase 3 Verification, Security Audit & Acceptance Gate | **PASS** | `0df4709` | 2026-11-09T23:21:00Z |
 | **P4.0** | Match Simulation Engine Architecture & Domain Contracts | **PASS** | `d527591` | 2026-11-09T23:33:00Z |
 | **P4.1** | Deterministic RNG (SplitMix64) & Replay Foundation | **PASS** | `8700e6e` | 2026-11-09T23:36:00Z |
-| **P4.2** | Multi-Format Match & Innings State Foundation | **PASS** | Pending | 2026-11-09T23:38:00Z |
+| **P4.2** | Multi-Format Match & Innings State Foundation | **PASS** | `eae1959` | 2026-11-09T23:38:00Z |
 | **P4.3** | T20 Ruleset Engine & Playing Conditions | PENDING | - | - |
 | **P4.4** | 10-Stage Delivery Simulation Pipeline & Probability Vectors | PENDING | - | - |
 | **P4.5** | Batter vs Bowler Attribute Interaction Modeling | PENDING | - | - |
@@ -225,28 +225,30 @@
   - `pnpm test`: 14 tasks successful, 99 passing tests across monorepo.
   - `pnpm typecheck`: 15 tasks successful, 0 errors.
 
-### Feature P4.2: Multi-Format Match & Innings State Foundation
+### Feature P4.3: T20 Ruleset Engine, Over Quotas, Powerplays & Playing Conditions
 * **Status:** PASS
-* **Description:** Implemented the immutable multi-format match state and scorecard foundation:
-  - `createInitialMatchState(config)`: establishes initial match state with SHA-256 $H_0$, status `IN_PROGRESS`, environmental trackers, and Innings 1.
-  - `createInitialInningsState(...)`: initializes opening batters, complete batting and bowling scorecard maps, fall of wickets log, and legal delivery counters.
-  - `verifyMatchInvariants(state)`: pure mathematical invariant verifier enforcing cricket rules on every state snapshot:
-    1. Runs Conservation Invariant: $\text{TotalRuns} = \sum \text{BatRuns} + \text{Extras}$.
-    2. Wickets Ceiling Invariant: $\text{TotalWickets} \le 10$.
-    3. Over Bounds Invariant: $\text{legalBallsInCurrentOver} \le 6$.
-    4. Fall of Wickets Count Invariant: $\text{FallOfWickets.length} \equiv \text{TotalWickets}$.
-  - Supports all 5 cricket formats (T10, T20, ODI, Test Red Ball, Test Pink Ball) within a unified domain structure.
+* **Description:** Implemented the format-specific ruleset engine with full T20 specification and extensible multi-format factory:
+  - `T20Ruleset` class implementing `FormatRuleset` contract with `rule-1.0.0`:
+    - Strict 20-over innings limit (`maxOversPerInnings: 20`).
+    - Bowler quota enforcement: max 4 overs per bowler in T20 (and proportional $N/5$ in other limited overs).
+    - Powerplay enforcement: Overs 1–6 (overs index 0–5) capped at maximum 2 fielders outside 30-yard circle; overs 7–20 capped at maximum 5 fielders outside.
+    - MCC Law 21.7 enforcement: Bowler cannot bowl consecutive overs from either end (`canBowlerBowlNextOver` explicitly checks `bowlerId === previousBowlerId`).
+    - Free hit after front-foot/illegal delivery flags.
+    - Comprehensive innings completion evaluation (`isOverLimitReached`, `areAllOut`, `isTargetReachedInSecondInnings`).
+  - `getRulesetForFormat(format)` factory providing concrete rulesets for T20, T10 (10 overs, 2 overs quota), ODI (50 overs, 10 overs quota), and Test formats (unlimited overs/quotas, no free hits).
 * **Files Modified / Created:**
-  - `packages/simulation-engine/src/state/match-state.ts` (new)
-  - `packages/simulation-engine/src/state/index.ts` (new)
+  - `packages/simulation-engine/src/rulesets/t20-ruleset.ts` (new)
+  - `packages/simulation-engine/src/rulesets/index.ts` (new)
   - `packages/simulation-engine/src/index.ts`
-  - `packages/simulation-engine/tests/state.test.ts` (new)
+  - `packages/simulation-engine/tests/ruleset.test.ts` (new)
 * **Tests Added:**
-  - `packages/simulation-engine/tests/state.test.ts`: 5 unit tests verifying initial state creation across all 5 formats, runs conservation violations, over bounds violations, wickets ceiling violations, and fall-of-wicket count checks.
+  - `packages/simulation-engine/tests/ruleset.test.ts`: 5 unit tests verifying over quotas, powerplay field restrictions, consecutive over prohibition (MCC Law 21.7), target reached / all out innings completion conditions, and multi-format ruleset instantiation.
 * **Verification Commands & Results:**
-  - `pnpm --filter @cricket/simulation-engine test`: 15 passed (100%).
-  - `pnpm test`: 14 tasks successful, 104 passing tests across monorepo.
+  - `pnpm --filter @cricket/simulation-engine test`: 20 passed (100%).
+  - `pnpm test`: 14 tasks successful, 109 passing tests across monorepo.
   - `pnpm typecheck`: 15 tasks successful, 0 errors.
+
+
 
 
 
