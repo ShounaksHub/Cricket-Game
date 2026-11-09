@@ -305,6 +305,29 @@
   - `pnpm test`: 14 tasks successful, 121 passing tests across monorepo.
   - `pnpm typecheck`: 15 tasks successful, 0 errors.
 
+### Feature P4.6: Extras & Wicket Dismissal Engine (MCC Laws)
+* **Status:** PASS
+* **Description:** Built the cricket rules-compliant extras and conditional dismissal engine adhering strictly to MCC Laws:
+  - `resolveDeliveryOutcome(input)`:
+    - Enforces MCC Law 21.18: A delivery called a No-Ball permits solely `RUN_OUT` dismissals (Bowled, LBW, Caught, Caught Behind, Stumped, and Hit Wicket are strictly prohibited).
+    - Enforces ICC Free-Hit Playing Conditions: Batters on a Free-Hit are immune to standard dismissal modes; only `RUN_OUT` is legal.
+    - Enforces MCC Law 22.17: Deliveries called a Wide permit solely `STUMPED` or `RUN_OUT` dismissals.
+    - `getWicketkeeperId(lineup)`: Automatically resolves designated wicketkeeper from the bowling team's lineup for `CAUGHT_BEHIND` and `STUMPED` dismissals.
+    - Fielder assignment: Correctly sets `fielderPlayerId` to `undefined` for `BOWLED` and `LBW` dismissals, and samples catchers / run-out throwers from outfielders.
+    - Full extras accounting: Correctly populates `DeliveryExtras` (`wides`, `noBalls`, `legByes`, `byes`) and sets `isLegalDelivery` flag (`false` for Wides and No-Balls; `true` for Byes, Leg-Byes, and Bat runs).
+* **Files Modified / Created:**
+  - `packages/simulation-engine/src/pipeline/dismissal-engine.ts` (new)
+  - `packages/simulation-engine/src/pipeline/index.ts`
+  - `packages/simulation-engine/tests/dismissal.test.ts` (new)
+* **Tests Added:**
+  - `packages/simulation-engine/tests/dismissal.test.ts`: 6 comprehensive unit tests verifying designated keeper identification, MCC Law 21.18 no-ball dismissal restrictions across 50 stochastic trials, Free-Hit protection, MCC Law 22.17 wide dismissal rules, fielder assignment constraints (caught behind / bowled / lbw), and extras / legal delivery flags.
+* **Verification Commands & Results:**
+  - `pnpm --filter @cricket/simulation-engine test`: 38 passed (100%).
+  - `pnpm test`: 14 tasks successful, 127 passing tests across monorepo.
+  - `pnpm typecheck`: 15 tasks successful, 0 errors.
+
+
+
 
 
 
