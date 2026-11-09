@@ -1,0 +1,38 @@
+{
+  "name": "@cricket/api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "nest build",
+    "clean": "rimraf dist",
+    "start": "nest start",
+    "dev": "nest start --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@cricket/database": "workspace:*",
+    "@cricket/shared-types": "workspace:*",
+    "@cricket/validation": "workspace:*",
+    "@nestjs/common": "^11.0.11",
+    "@nestjs/config": "^4.0.1",
+    "@nestjs/core": "^11.0.11",
+    "@nestjs/platform-express": "^11.0.11",
+    "@nestjs/terminus": "^11.0.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.5",
+    "@nestjs/schematics": "^11.0.2",
+    "@nestjs/testing": "^11.0.11",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.9",
+    "rimraf": "^6.0.1",
+    "supertest": "^7.0.0",
+    "@types/supertest": "^6.0.2",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.7"
+  }
+}
