@@ -20,7 +20,7 @@
 | **P3.6** | Squad Analytics Engine (8 Dimensions, Explainable Math) | **PASS** | `a23d846` | 2026-11-09T23:18:00Z |
 | **P3.7** | End-to-End Persistence, Duplication & State Sync | **PASS** | `a23d846` | 2026-11-09T23:18:00Z |
 | **P3.8** | Phase 3 Verification, Security Audit & Acceptance Gate | **PASS** | `0df4709` | 2026-11-09T23:21:00Z |
-| **P4.0** | Match Simulation Engine Architecture & Domain Contracts | PENDING | - | - |
+| **P4.0** | Match Simulation Engine Architecture & Domain Contracts | **PASS** | Pending | 2026-11-09T23:33:00Z |
 | **P4.1** | Deterministic RNG (SplitMix64) & Replay Foundation | PENDING | - | - |
 | **P4.2** | Multi-Format Match & Innings State Foundation | PENDING | - | - |
 | **P4.3** | T20 Ruleset Engine & Playing Conditions | PENDING | - | - |
@@ -181,6 +181,30 @@
 * **Files Modified / Created:**
   - `docs/PHASE_3_VERIFICATION_REPORT.md` (new)
   - `docs/PHASE_3_4_IMPLEMENTATION_LOG.md`
+
+### Feature P4.0: Match Simulation Engine Architecture & Domain Contracts
+* **Status:** PASS
+* **Description:** Initiated Phase 4 by defining the match simulation engine architecture and core domain contracts:
+  - Authored `docs/MATCH_ENGINE_ARCHITECTURE.md` establishing the deterministic functional state transition model $\text{simulateDelivery}(S_t, A_t, \text{PRNG}_t) \to (S_{t+1}, E_t, \text{PRNG}_{t+1})$.
+  - Established the complete versioning triad (`simulationVersion: sim-1.0.0`, `rulesetVersion: rules-t20-icc-2026.1`, `ratingVersion: rate-1.0.0`), initial state hash $H_0$ calculation, and monotonic event sequencing.
+  - Scaffolded the pure TypeScript `@cricket/simulation-engine` package with zero runtime dependencies.
+  - Defined comprehensive domain contracts in `packages/simulation-engine/src/contracts/types.ts`: `MatchState`, `InningsState`, `DeliveryEvent`, `DeliveryOutcome`, `DismissalMode`, `TacticalDeliveryAction`, `Trajectory2D`, `BatterScorecardEntry`, `BowlerScorecardEntry`, and `FallOfWicket`.
+* **Files Modified / Created:**
+  - `docs/MATCH_ENGINE_ARCHITECTURE.md` (new)
+  - `packages/simulation-engine/package.json` (new)
+  - `packages/simulation-engine/tsconfig.json` (new)
+  - `packages/simulation-engine/src/contracts/types.ts` (new)
+  - `packages/simulation-engine/src/contracts/index.ts` (new)
+  - `packages/simulation-engine/src/index.ts` (new)
+  - `packages/simulation-engine/tests/contracts.test.ts` (new)
+  - `pnpm-lock.yaml`
+* **Tests Added:**
+  - `packages/simulation-engine/tests/contracts.test.ts`: 3 unit tests verifying version triad enforcement, tactical delivery action types, and 11 delivery outcomes / 7 dismissal modes.
+* **Verification Commands & Results:**
+  - `pnpm --filter @cricket/simulation-engine test`: 3 passed (100%).
+  - `pnpm test`: 14 tasks successful, 92 passing tests across monorepo.
+  - `pnpm typecheck`: 15 tasks successful, 0 errors.
+
 
 
 
