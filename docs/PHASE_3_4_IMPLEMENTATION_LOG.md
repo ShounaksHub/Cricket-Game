@@ -12,8 +12,8 @@
 | Feature ID | Description | Status | Commit Hash | Verified At |
 |---|---|---|---|---|
 | **P3.0** | Repository Audit, Gap Analysis & Dream Team Architecture Design | **PASS** | `59c7d94` | 2026-11-09T17:14:00Z |
-| **P3.1** | Dream Team Database Models & Prisma Migration | **PASS** | Pending | 2026-11-09T17:17:00Z |
-| **P3.2** | Squad Validation Engine (Structured Errors & Bowling Resource Policies) | PENDING | - | - |
+| **P3.1** | Dream Team Database Models & Prisma Migration | **PASS** | `0fa633d` | 2026-11-09T17:17:00Z |
+| **P3.2** | Squad Validation Engine (Structured Errors & Bowling Resource Policies) | **PASS** | Pending | 2026-11-09T23:01:00Z |
 | **P3.3** | Dream Team CRUD & Management REST APIs | PENDING | - | - |
 | **P3.4** | Dual-Pane Player Selection & Team Builder Interface | PENDING | - | - |
 | **P3.5** | Batting Order Reordering & Wicketkeeper/Captaincy Management | PENDING | - | - |
@@ -66,4 +66,28 @@
   - `pnpm --filter @cricket/database test`: 3 passed (100%).
   - `pnpm typecheck`: 14 tasks successful, 0 errors.
   - `pnpm test`: 13 tasks successful, 54 passing tests across monorepo.
+
+### Feature P3.2: Squad Validation Engine (Structured Errors & Bowling Resource Policies)
+* **Status:** PASS
+* **Description:** Implemented domain squad validation contracts in `@cricket/shared-types` (`SquadValidationIssue`, `SquadValidationResult`, `DreamTeamPlayerSlotInput`, `PlayerSquadContext`), validation schemas in `@cricket/validation` (`DreamTeamStatusSchema`, `SaveDreamTeamDraftSchema`, `UpdateDreamTeamSchema`, `ReorderBattingOrderSchema`), and full squad rule evaluation engine in `@cricket/cricket-rules`:
+  - Format-specific bowling quotas: T20/T10/ODI = 5 bowlers minimum, Test = 4 bowlers minimum.
+  - Realistic bowling option detection based on format bowling rating ($\ge 40$) and bowling styles, rather than nominal role strings alone; active wicketkeepers excluded from bowling quota.
+  - Batting order integrity: uniqueness, contiguous 1..11 order for match-ready XIs, gap detection, range validation.
+  - Advisory warnings: multiple keepers, no captain, spin/pace deficiency, extended tail.
+  - Draft mode validation support (`requireMatchReady: false`) allowing intermediate progress saves.
+* **Files Modified / Created:**
+  - `packages/shared-types/src/squad.ts` (new)
+  - `packages/shared-types/src/index.ts`
+  - `packages/cricket-rules/src/squad-validator.ts` (new)
+  - `packages/cricket-rules/src/index.ts`
+  - `packages/validation/src/index.ts`
+  - `packages/cricket-rules/tests/squad-validator.test.ts` (new)
+* **Tests Added:**
+  - `packages/cricket-rules/tests/squad-validator.test.ts`: 14 comprehensive unit tests verifying squad size, duplicate players, batting order gaps/duplicates, wicketkeeper requirement, multiple captains, bowling quotas across formats, all-rounder bowling detection, draft mode relaxed checks, and warning generation.
+* **Verification Commands & Results:**
+  - `pnpm --filter @cricket/cricket-rules test`: 24 passed (100%).
+  - `pnpm --filter @cricket/validation test`: 5 passed (100%).
+  - `pnpm test`: 13 tasks successful, 68 passing tests across monorepo.
+  - `pnpm typecheck`: 14 tasks successful, 0 errors.
+
 

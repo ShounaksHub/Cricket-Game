@@ -12,6 +12,8 @@ export const DifficultySchema = z.enum(['EASY', 'MEDIUM', 'HARD']);
 
 export const TossDecisionSchema = z.enum(['BAT', 'BOWL']);
 
+export const DreamTeamStatusSchema = z.enum(['DRAFT', 'MATCH_READY']);
+
 export const DreamTeamPlayerSlotSchema = z.object({
   playerId: z.string().uuid(),
   battingOrder: z.number().int().min(1).max(11),
@@ -23,10 +25,12 @@ export const DreamTeamPlayerSlotSchema = z.object({
 
 export const CreateDreamTeamSchema = z.object({
   teamName: z.string().min(2).max(64).trim(),
+  description: z.string().max(255).optional(),
   badgeIcon: z.string().min(2).max(64).default('SHIELD_CLASSIC'),
   primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Must be a valid hex color code'),
   secondaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Must be a valid hex color code'),
   format: MatchFormatSchema,
+  status: DreamTeamStatusSchema.default('MATCH_READY'),
   lineup: z
     .array(DreamTeamPlayerSlotSchema)
     .length(11, 'A complete Playing XI must contain exactly 11 players')
@@ -38,6 +42,39 @@ export const CreateDreamTeamSchema = z.object({
       const uniqueBattingOrders = new Set(lineup.map((p) => p.battingOrder));
       return uniqueBattingOrders.size === 11;
     }, 'Batting orders 1 through 11 must be unique'),
+});
+
+export const SaveDreamTeamDraftSchema = z.object({
+  teamName: z.string().min(2).max(64).trim(),
+  description: z.string().max(255).optional(),
+  badgeIcon: z.string().min(2).max(64).default('SHIELD_CLASSIC'),
+  primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Must be a valid hex color code'),
+  secondaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Must be a valid hex color code'),
+  format: MatchFormatSchema,
+  status: z.literal('DRAFT').default('DRAFT'),
+  lineup: z
+    .array(DreamTeamPlayerSlotSchema)
+    .max(11, 'Squad cannot exceed 11 players')
+    .default([]),
+});
+
+export const UpdateDreamTeamSchema = z.object({
+  teamName: z.string().min(2).max(64).trim().optional(),
+  description: z.string().max(255).optional(),
+  badgeIcon: z.string().min(2).max(64).optional(),
+  primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+  secondaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+  format: MatchFormatSchema.optional(),
+  status: DreamTeamStatusSchema.optional(),
+});
+
+export const ReorderBattingOrderSchema = z.object({
+  orders: z.array(
+    z.object({
+      playerId: z.string().uuid(),
+      battingOrder: z.number().int().min(1).max(11),
+    })
+  ),
 });
 
 export const CreateMatchSchema = z.object({
