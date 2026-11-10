@@ -114,6 +114,7 @@ export interface TacticalDeliveryAction {
   readonly bowlingPlan?: BowlingPlan;
   readonly activePhase?: string;
   readonly actionId?: string;
+  readonly managementMode?: 'MANUAL' | 'ASSISTED' | 'AUTOMATIC';
 }
 
 export interface Trajectory2D {

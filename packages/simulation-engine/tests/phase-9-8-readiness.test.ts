@@ -3,6 +3,7 @@ import {
   createInitialMatchState,
   getRulesetForFormat,
   reconcileMatchScorecard,
+  resolveAITacticalAction,
   simulateFullMatch,
   stepDelivery,
   DeterministicPRNG,
@@ -117,5 +118,21 @@ describe('Phase 9.8 readiness checks', () => {
     expect(replayed.innings[0].totalRuns).toBe(original.innings[0].totalRuns);
     expect(replayed.innings[0].totalWickets).toBe(original.innings[0].totalWickets);
     expect(replayed.innings[0].events.map((event) => event.outcome)).toEqual(original.innings[0].events.map((event) => event.outcome));
+  });
+
+  it('automatic captaincy recommends and applies a legal next-over bowler', () => {
+    const config = makeConfig('T20', 'automatic-bowling-check');
+    let state = createInitialMatchState(config);
+    const prng = new DeterministicPRNG(config.seed);
+    let guard = 0;
+    while (state.innings[0].legalBallsInCurrentOver < 5 && guard++ < 30) {
+      state = stepDelivery(state, manualAction, prng).nextState;
+    }
+    expect(state.innings[0].legalBallsInCurrentOver).toBe(5);
+    const recommendation = resolveAITacticalAction(state, prng);
+    expect(recommendation.bowlingPlan).toBeDefined();
+    expect(recommendation.nextBowlerPlayerId).toBeDefined();
+    const next = stepDelivery(state, recommendation, prng).nextState;
+    expect(next.innings[0].currentBowlerPlayerId).toBe(recommendation.nextBowlerPlayerId);
   });
 });

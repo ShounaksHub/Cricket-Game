@@ -279,6 +279,27 @@ export function resolveAITacticalAction(
     }
   }
 
+  const bowlingPlan = isDeath
+    ? 'DEFENSIVE' as const
+    : isPowerplay || isNewBatter
+      ? 'ATTACK' as const
+      : 'BALANCED' as const;
+
+  // Recommend a legal next-over bowler from the actual bowling workload. The
+  // transition layer remains the final authority and revalidates this choice.
+  const bowlingTeam = currentInnings.bowlingTeamId === state.config.team1.id
+    ? state.config.team1
+    : state.config.team2;
+  const nextBowlerPlayerId = currentInnings.legalBallsInCurrentOver === 5
+    ? bowlingTeam.lineup
+        .filter((slot) => slot.playerId !== currentInnings.currentBowlerPlayerId)
+        .filter((slot) => {
+          const figures = currentInnings.bowlers.get(slot.playerId);
+          return (figures?.ballsBowled ?? 0) / 6 < getRulesetForFormat(format).maxOversPerBowler;
+        })
+        .sort((a, b) => (a.bowlingPriority ?? 99) - (b.bowlingPriority ?? 99))[0]?.playerId
+    : undefined;
+
   return {
     batterIntent,
     bowlerLine,
@@ -288,5 +309,7 @@ export function resolveAITacticalAction(
     takeNewBall,
     declareInnings,
     enforceFollowOn,
+    bowlingPlan,
+    nextBowlerPlayerId,
   };
 }

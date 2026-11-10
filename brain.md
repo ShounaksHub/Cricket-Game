@@ -471,4 +471,8 @@ c:\Users\shoun\OneDrive\Desktop\cricket game\
 - **Status:** Accepted (November 2026)
 - **Decision:** Keep one pure delivery pipeline and add structured high-level bowling plans (`ATTACK`, `BALANCED`, `DEFENSIVE`) that map into the existing tactical action/logit inputs. Resolve phases from active format/context: T10/T20/ODI limited-overs boundaries and contextual Test phases. Record the effective action on every delivery event. The interactive live state is authoritative at completion; result/history hydration must reconcile that state, never the precomputed autonomous fallback. Persist the exact config snapshot and recorded actions for deterministic resume. Represent unlimited Test bowling with `Infinity` internally and `∞` in the beginner UI, never arbitrary sentinel quotas.
 
+### ADR-019: Captaincy Decision Points Share the Delivery Action Pipeline (Phase 9.8)
+- **Status:** Accepted (November 2026)
+- **Decision:** Manual and Assisted bowling pause only after authoritative over completion; Automatic mode evaluates the same context internally and continues without a modal. Recommendations and next-bowler choices are validated by the existing transition rules. Management mode is recorded with delivery tactics so mode-driven decisions remain part of the deterministic action history. Beginner controls expose plan, bowler, field and one next action while advanced controls remain progressively disclosed.
+
 *End of Master Project Brain (`brain.md`) — Maintained by Antigravity AI Engine & Engineering Team.*

@@ -232,6 +232,8 @@ export default function MatchSimulationPage() {
   const [userBowlingPlan, setUserBowlingPlan] = useState<BowlingPlan>('BALANCED');
   const [managementMode, setManagementMode] = useState<'MANUAL' | 'ASSISTED' | 'AUTOMATIC'>('ASSISTED');
   const [showAdvancedTactics, setShowAdvancedTactics] = useState(false);
+  const [overDecisionPending, setOverDecisionPending] = useState(false);
+  const [lastCompletedOverSummary, setLastCompletedOverSummary] = useState<{ over: number; runs: number; wickets: number; phaseChanged: boolean } | null>(null);
   const [userNominatedBowlerId, setUserNominatedBowlerId] = useState<string>('');
   const [userOpeningBowlerId, setUserOpeningBowlerId] = useState<string>('');
   const [userBattingLineup, setUserBattingLineup] = useState<DreamTeamPlayerSlotInput[]>([]);
@@ -952,6 +954,7 @@ export default function MatchSimulationPage() {
     const currentInnings = state.innings[state.currentInningsIndex];
     const isUserBatting = currentInnings?.battingTeamId === 'user-team';
     const isUserBowling = currentInnings?.bowlingTeamId === 'user-team';
+    const automaticBowling = isUserBowling && managementMode === 'AUTOMATIC';
 
     // The fundamental principle: The USER manages their own Dream XI. The OPPONENT is managed entirely by CPU AI.
     // When user's team is batting: User controls batter intent; CPU controls bowler line/length/variation/field.
@@ -971,14 +974,14 @@ export default function MatchSimulationPage() {
 
     const action: TacticalDeliveryAction = {
       batterIntent: isUserBatting ? userIntent : aiAction.batterIntent,
-      bowlerLength: isUserBowling ? userLength : aiAction.bowlerLength,
-      bowlerLine: isUserBowling ? userLine : aiAction.bowlerLine,
-      bowlerVariation: isUserBowling ? userVariation : aiAction.bowlerVariation,
-      fieldPreset: isUserBowling ? userField : aiAction.fieldPreset,
-      customFieldPositions: isUserBowling && mappedCustomField.length > 0 ? mappedCustomField : undefined,
-      bowlingPaceStrategy: isUserBowling ? userPaceStrategy : aiAction.bowlingPaceStrategy,
-      bowlingIntent: isUserBowling ? userBowlingIntent : aiAction.bowlingIntent,
-      bowlingPlan: isUserBowling ? userBowlingPlan : aiAction.bowlingPlan,
+      bowlerLength: isUserBowling && !automaticBowling ? userLength : aiAction.bowlerLength,
+      bowlerLine: isUserBowling && !automaticBowling ? userLine : aiAction.bowlerLine,
+      bowlerVariation: isUserBowling && !automaticBowling ? userVariation : aiAction.bowlerVariation,
+      fieldPreset: isUserBowling && !automaticBowling ? userField : aiAction.fieldPreset,
+      customFieldPositions: isUserBowling && !automaticBowling && mappedCustomField.length > 0 ? mappedCustomField : undefined,
+      bowlingPaceStrategy: isUserBowling && !automaticBowling ? userPaceStrategy : aiAction.bowlingPaceStrategy,
+      bowlingIntent: isUserBowling && !automaticBowling ? userBowlingIntent : aiAction.bowlingIntent,
+      bowlingPlan: isUserBowling && !automaticBowling ? userBowlingPlan : aiAction.bowlingPlan,
       activePhase: getActiveBowlingPhase(
         state.config.format,
         currentInnings?.completedOvers ?? 0,
@@ -987,7 +990,10 @@ export default function MatchSimulationPage() {
       ).id,
       actionId: `${state.config.matchId}:${state.currentInningsIndex}:${currentInnings?.events.length ?? 0}`,
       pauseForBatterSelection: isUserBatting,
-      nextBowlerPlayerId: isUserBowling && userNominatedBowlerId ? userNominatedBowlerId : undefined,
+      nextBowlerPlayerId: isUserBowling && !automaticBowling && userNominatedBowlerId
+        ? userNominatedBowlerId
+        : aiAction.nextBowlerPlayerId,
+      managementMode,
     };
 
     const { nextState, event } = stepDelivery(state, action, prng);
@@ -1003,6 +1009,28 @@ export default function MatchSimulationPage() {
       setSelectedNextBatterId('');
       saveActiveSession(nextState, nextEvents, nextIndex);
       return;
+    }
+
+    const completedOver = nextState.innings[nextState.currentInningsIndex]?.completedOvers ?? 0;
+    const overFinished = nextState.innings[nextState.currentInningsIndex]?.legalBallsInCurrentOver === 0 &&
+      completedOver > (state.innings[state.currentInningsIndex]?.completedOvers ?? 0);
+    const nextPhase = getActiveBowlingPhase(
+      state.config.format,
+      completedOver,
+      nextState.currentSessionNumber ?? 1,
+      nextState.innings[nextState.currentInningsIndex]?.totalWickets ?? 0,
+    );
+    if (isUserBowling && overFinished && managementMode !== 'AUTOMATIC') {
+      const overEvents = (nextState.innings[nextState.currentInningsIndex]?.events ?? [])
+        .filter((delivery) => delivery.overNumber === completedOver - 1);
+      setLastCompletedOverSummary({
+        over: completedOver,
+        runs: overEvents.reduce((total, delivery) => total + delivery.runsBat + delivery.extras.wides + delivery.extras.noBalls, 0),
+        wickets: overEvents.filter((delivery) => delivery.dismissal).length,
+        phaseChanged: nextPhase.id !== activeBowlingPhase?.id,
+      });
+      setOverDecisionPending(true);
+      setIsPlaying(false);
     }
 
     if (nextState.status === 'COMPLETED') {
@@ -1035,6 +1063,19 @@ export default function MatchSimulationPage() {
     setIsPlaying(false);
     setPhase('COMPLETED');
     archiveCompletedMatch(simulationResult);
+  }
+
+  function resumeCaptaincyDecision() {
+    setOverDecisionPending(false);
+    setLastCompletedOverSummary(null);
+    setIsPlaying(true);
+  }
+
+  function acceptBowlingRecommendation() {
+    setUserBowlingPlan(recommendedPlan);
+    if (recommendedBowler) setUserNominatedBowlerId(recommendedBowler.playerId);
+    setUserField(recommendedPlan === 'DEFENSIVE' ? 'DEATH_BOUNDARY_DEFENSE' : recommendedPlan === 'ATTACK' ? 'ATTACKING_CLOSE_CATCHERS' : 'BALANCED_RING');
+    resumeCaptaincyDecision();
   }
 
   function handleConfirmIncomingBatter() {
@@ -1206,6 +1247,22 @@ export default function MatchSimulationPage() {
     ? getActiveBowlingPhase(format, activeInnings.completedOvers, liveState?.currentSessionNumber ?? 1, activeInnings.totalWickets)
     : undefined;
   const displayedQuota = format === 'T10' ? 2 : format === 'T20' ? 4 : format === 'ODI' ? 10 : undefined;
+  const recommendedBowler = liveState && activeInnings && isUserBowling
+    ? userBowlingSlots
+        .filter((slot) => slot.playerId !== bowlerId)
+        .filter((slot) => displayedQuota === undefined || Math.floor(activeInnings.bowlers.get(slot.playerId)?.ballsBowled ?? 0) / 6 < displayedQuota)
+        .sort((a, b) => (a.bowlingPriority ?? 99) - (b.bowlingPriority ?? 99))[0]
+    : undefined;
+  const recommendedPlan: BowlingPlan = activeBowlingPhase?.id === 'DEATH_OVERS'
+    ? 'DEFENSIVE'
+    : activeInnings?.totalWickets && activeInnings.totalWickets >= 5
+      ? 'ATTACK'
+      : 'BALANCED';
+  const recommendationReason = activeInnings?.totalWickets && activeInnings.totalWickets >= 5
+    ? 'A new batter or a fragile innings creates a wicket-taking opportunity.'
+    : activeBowlingPhase?.id === 'DEATH_OVERS'
+      ? 'Boundary protection is the priority in the closing overs.'
+      : 'Keep pressure on the scoring rate while preserving bowling control.';
 
   // Calculate live win probability
   const liveWinProb = targetRuns !== undefined
@@ -3229,6 +3286,32 @@ export default function MatchSimulationPage() {
                       {showAdvancedTactics ? '▾ Hide advanced tactics' : '▸ Advanced tactics'}
                     </button>
                   </div>
+
+                  {managementMode === 'AUTOMATIC' && (
+                    <div className="rounded-lg border border-telemetry-blue/40 bg-telemetry-blue/10 px-3 py-2 text-[10px] font-bold uppercase tracking-wide text-telemetry-blue">
+                      Automatic bowling management active · AI selects legal bowlers, plans and fields
+                    </div>
+                  )}
+
+                  {overDecisionPending && lastCompletedOverSummary && managementMode !== 'AUTOMATIC' && (
+                    <div className="rounded-xl border border-primary/50 bg-primary/10 p-3 flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs font-bold text-text-chalk">Over {lastCompletedOverSummary.over} complete</p>
+                          <p className="text-[10px] text-text-subdued">{lastCompletedOverSummary.runs} runs · {lastCompletedOverSummary.wickets} wickets · {runRate} current run rate</p>
+                        </div>
+                        {lastCompletedOverSummary.phaseChanged && <span className="rounded bg-secondary/20 px-2 py-1 text-[9px] font-bold uppercase text-secondary">{activeBowlingPhase?.label} begins</span>}
+                      </div>
+                      <div className="rounded-lg bg-surface-card/70 p-2 text-[10px] text-text-slate">
+                        <span className="font-bold text-text-chalk">Recommended:</span> {recommendedBowler ? getPlayerDisplayName(recommendedBowler.playerId) : 'Keep current rotation'} · {recommendedPlan} · {recommendationReason}
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+                        <button type="button" onClick={acceptBowlingRecommendation} className="rounded bg-primary px-2 py-2 text-[10px] font-bold uppercase text-on-primary">Accept recommendation</button>
+                        <button type="button" onClick={() => { setOverDecisionPending(false); setShowAdvancedTactics(true); }} className="rounded border border-border-hairline bg-surface-card px-2 py-2 text-[10px] font-bold uppercase text-text-slate hover:text-text-chalk">Customise</button>
+                        <button type="button" onClick={resumeCaptaincyDecision} className="rounded border border-border-hairline bg-surface-card px-2 py-2 text-[10px] font-bold uppercase text-text-slate hover:text-text-chalk">Keep current plan</button>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Bowler Selection / Change */}
                   {userBowlingSlots.length > 0 && (
