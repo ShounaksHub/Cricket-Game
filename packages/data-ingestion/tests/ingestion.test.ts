@@ -12,6 +12,11 @@ import {
   VERIFIED_BENCHMARK_PLAYERS,
   COHORT_INTERNATIONAL_CONTEMPORARY,
   COHORT_INTERNATIONAL_LEGENDS,
+  COHORT_DOMESTIC_INDIA,
+  COHORT_DOMESTIC_AUSTRALIA,
+  COHORT_DOMESTIC_ENGLAND,
+  COHORT_DOMESTIC_WORLD,
+  GLOBAL_CRICKET_PLAYER_REGISTRY,
 } from '../src/index.js';
 import type { CricsheetMatchJson } from '../src/index.js';
 
@@ -290,7 +295,7 @@ describe('Data Ingestion Engine (@cricket/data-ingestion)', () => {
       expect(bradman.ratings.TEST_RED_BALL?.confidenceTier).toBe('MEASURED');
       expect(bradman.ratings.T20?.overallRating).toBeLessThan(bradman.ratings.TEST_RED_BALL!.overallRating);
 
-      const warneRaw = VERIFIED_BENCHMARK_PLAYERS.find(p => p.fullName.includes('Warne'))!;
+      const warneRaw = VERIFIED_BENCHMARK_PLAYERS.find(p => p.fullName.includes('Shane Warne'))!;
       const warne = ingestPlayerRecord(warneRaw);
       expect(warne.ratings.TEST_RED_BALL?.bowlingRating).toBeGreaterThanOrEqual(90);
     });
@@ -383,6 +388,54 @@ describe('Data Ingestion Engine (@cricket/data-ingestion)', () => {
       // Verify UUID format for all players (RFC 4122 36 characters)
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       for (const p of internationalCombined) {
+        expect(p.id).toMatch(uuidRegex);
+      }
+    });
+
+    it('Gate P7.3: verifies domestic & franchise expansion across India, Australia, England and World (1,000+ total players, zero duplicates)', () => {
+      expect(COHORT_DOMESTIC_INDIA.length).toBeGreaterThanOrEqual(200);
+      expect(COHORT_DOMESTIC_AUSTRALIA.length).toBeGreaterThanOrEqual(120);
+      expect(COHORT_DOMESTIC_ENGLAND.length).toBeGreaterThanOrEqual(110);
+      expect(COHORT_DOMESTIC_WORLD.length).toBeGreaterThanOrEqual(100);
+
+      // Verify overall registry reaches 1,000+ players
+      expect(GLOBAL_CRICKET_PLAYER_REGISTRY.length).toBeGreaterThanOrEqual(1000);
+
+      // Audit complete registry for zero duplicates
+      const fullAudit = detectDuplicatePlayers(GLOBAL_CRICKET_PLAYER_REGISTRY);
+      expect(fullAudit.hasDuplicates).toBe(false);
+      expect(fullAudit.duplicateIdCount).toBe(0);
+      expect(fullAudit.duplicateCount).toBe(0);
+      expect(fullAudit.issues).toHaveLength(0);
+
+      // Verify domestic players carry DOMESTIC_ONLY and competition tags
+      for (const p of COHORT_DOMESTIC_INDIA) {
+        expect(p.careerCategory).toBe('DOMESTIC_ONLY');
+        expect(p.isDomesticOnly).toBe(true);
+        expect(p.competitions && p.competitions.length).toBeGreaterThan(0);
+      }
+
+      for (const p of COHORT_DOMESTIC_AUSTRALIA) {
+        expect(p.careerCategory).toBe('DOMESTIC_ONLY');
+        expect(p.isDomesticOnly).toBe(true);
+        expect(p.competitions && p.competitions.length).toBeGreaterThan(0);
+      }
+
+      for (const p of COHORT_DOMESTIC_ENGLAND) {
+        expect(p.careerCategory).toBe('DOMESTIC_ONLY');
+        expect(p.isDomesticOnly).toBe(true);
+        expect(p.competitions && p.competitions.length).toBeGreaterThan(0);
+      }
+
+      for (const p of COHORT_DOMESTIC_WORLD) {
+        expect(p.careerCategory).toBe('DOMESTIC_ONLY');
+        expect(p.isDomesticOnly).toBe(true);
+        expect(p.competitions && p.competitions.length).toBeGreaterThan(0);
+      }
+
+      // Verify UUID validity on all 1,000+ players
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      for (const p of GLOBAL_CRICKET_PLAYER_REGISTRY) {
         expect(p.id).toMatch(uuidRegex);
       }
     });
