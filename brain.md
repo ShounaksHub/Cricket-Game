@@ -1,7 +1,7 @@
 # Global Cricket Dream Team & Simulation Game — Master Project Brain (`brain.md`)
 
-**Document Version:** 2.3.0  
-**Last Updated:** November 2026 (Post-Phase 9.3.3 Upcoming Features Experience & Placeholder Transparency)  
+**Document Version:** 2.4.0  
+**Last Updated:** November 2026 (Post-Phase 9.4 User-Controlled Team Management & Match Flow Redesign)  
 **System Status:** Production-Ready Single-Project Monorepo (Next.js 15.5.29, NestJS 11, Turborepo 2.3, PixiJS v8.22, Prisma v6, PostgreSQL 16)  
 **Deployment Target:** Unified Vercel Monorepo (`apps/web` + standalone `@cricket/simulation-engine` package)  
 **Active Services & URLs:**
@@ -408,6 +408,15 @@ All workspace verification commands execute cleanly with 100% passing results:
   2. Permanently remove artificial progress bars, simulated network delays, and fake success toasts.
   3. Label incomplete systems with subtle `COMING SOON` or `IN DEV` badges and provide an interactive roadmap modal detailing current development status and offline availability assurances.
   4. Ensure working features (local offline match simulation, team building with 1,144 players, 5 cricket formats, guest manager records) remain pristine.
+
+### ADR-017: User-Controlled Team Management & Pre-Innings Match Flow Redesign (Phase 9.4)
+- **Status:** Accepted (November 2026)
+- **Context:** Transitioning directly from toss to live delivery deprived team managers of strategic agency over opening pairs, batting order sequences, and opening bowling assignments.
+- **Decision:**
+  1. Redesign match flow: `Team Selection → Match Setup → Toss → Toss Decision → Pre-Innings Management → Match Begins`.
+  2. Implement `PreInningsManagementModal` enabling custom batting order arrangement (promoting/demoting #1 to #11) and opening bowler nomination.
+  3. Implement `DecisionModal` for in-match wicket falls (incoming batter nomination) and over completions (bowling changes enforcing MCC Law 21.7).
+  4. Implement Decision Mode toggle (`MANUAL` vs. `AUTOMATIC`) allowing managers to control every tactical event or delegate to AI at will.
 
 ---
 

@@ -102,6 +102,7 @@ export interface TacticalDeliveryAction {
   readonly bowlingPaceStrategy?: BowlingPaceStrategy;
   readonly bowlingIntent?: BowlingIntent;
   readonly nextBowlerPlayerId?: string;
+  readonly nextBatterPlayerId?: string;
   readonly takeNewBall?: boolean;
   readonly declareInnings?: boolean;
   readonly enforceFollowOn?: boolean;

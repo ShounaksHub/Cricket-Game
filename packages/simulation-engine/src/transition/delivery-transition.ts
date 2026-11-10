@@ -341,9 +341,25 @@ export function stepDelivery(
 
   if (resolution.dismissal) {
     if (newTotalWickets < 10) {
-      // Slot index in batting lineup: wickets 1 to 9 brings slot index wickets+1 (i.e. index 2 to 10)
-      const incomingBatterSlot = battingTeam.lineup[newTotalWickets + 1];
-      const incomingBatterId = incomingBatterSlot?.playerId;
+      let incomingBatterId: string | undefined = undefined;
+
+      // Check if user/captain nominated a valid next batter
+      if (action.nextBatterPlayerId) {
+        const isAlreadyAtCrease = action.nextBatterPlayerId === strikerId || action.nextBatterPlayerId === nonStrikerId;
+        const batterRecord = battersMap.get(action.nextBatterPlayerId);
+        const isAlreadyOut = batterRecord?.isOut === true;
+        const isInLineup = battingTeam.lineup.some((s) => s.playerId === action.nextBatterPlayerId);
+
+        if (isInLineup && !isAlreadyAtCrease && !isAlreadyOut) {
+          incomingBatterId = action.nextBatterPlayerId;
+        }
+      }
+
+      // Fallback: Slot index in batting lineup
+      if (!incomingBatterId) {
+        const incomingBatterSlot = battingTeam.lineup[newTotalWickets + 1];
+        incomingBatterId = incomingBatterSlot?.playerId;
+      }
 
       if (incomingBatterId) {
         if (!battersMap.has(incomingBatterId)) {
