@@ -31,6 +31,30 @@ export const SOUNDTRACK_PLAYLIST: AudioTrack[] = [
     src: '/audio/de-ghuma-ke.mp3',
   },
   {
+    id: 'csk-anthem',
+    title: 'CSK Anthem',
+    subtitle: 'Chennai Super Kings • Whistle Podu',
+    src: '/audio/csk-anthem.mp3',
+  },
+  {
+    id: 'rcb-anthem',
+    title: 'RCB Anthem',
+    subtitle: 'Royal Challengers Bengaluru • Play Bold',
+    src: '/audio/rcb-anthem.mp3',
+  },
+  {
+    id: 'mi-anthem',
+    title: 'MI Anthem',
+    subtitle: 'Mumbai Indians • Duniya Hila Denge',
+    src: '/audio/mi-anthem.mp3',
+  },
+  {
+    id: 'kkr-anthem',
+    title: 'KKR Anthem',
+    subtitle: 'Kolkata Knight Riders • Korbo Lorbo Jeetbo',
+    src: '/audio/kkr-anthem.mp3',
+  },
+  {
     id: 'char-chooka',
     title: 'Char Chooka',
     subtitle: 'Cricket Stadium Anthem',
