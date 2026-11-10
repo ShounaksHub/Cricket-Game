@@ -59,10 +59,10 @@ export function StitchFooter() {
               <span>GitHub</span>
             </a>
             <a
-              href="https://instagram.com/shounaksahaofficial"
+              href="https://instagram.com/shounak_tt"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Shounak Saha on Instagram"
+              aria-label="Shounak Saha on Instagram (@shounak_tt)"
               className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-card hover:bg-surface-elevated text-text-slate hover:text-text-chalk border border-border-hairline hover:border-pink-500/40 transition-all font-mono text-[11px]"
             >
               <svg
