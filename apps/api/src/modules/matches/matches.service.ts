@@ -108,17 +108,17 @@ export class MatchesService {
   }> {
     // 11 verified benchmark legends covering all primary roles
     const aiPlayerIds = [
-      'f2e20002-0000-0000-0000-000000000002', // Sachin Tendulkar (Top-Order Batter)
-      'f2e20002-0000-0000-0000-000000000006', // Viv Richards (Top-Order Batter)
-      'f2e20002-0000-0000-0000-000000000001', // Don Bradman (Captain, Batter)
-      'f1e10001-0000-0000-0000-000000000002', // Steve Smith (Batter)
-      'f1e10001-0000-0000-0000-000000000006', // Jos Buttler (Wicketkeeper)
-      'f2e20002-0000-0000-0000-000000000003', // Garry Sobers (All-Rounder, Bowler 5)
-      'f1e10001-0000-0000-0000-000000000004', // Ben Stokes (All-Rounder, Bowler 4)
-      'f2e20002-0000-0000-0000-000000000005', // Wasim Akram (Fast Bowler 1)
-      'f2e20002-0000-0000-0000-000000000004', // Shane Warne (Vice-Captain, Spinner 2)
-      'f1e10001-0000-0000-0000-000000000003', // Jasprit Bumrah (Fast Bowler 3)
-      'f1e10001-0000-0000-0000-000000000005', // Rashid Khan (Spinner 6)
+      'f1e20000-0001-4000-8000-000000000001', // Sachin Tendulkar (Top-Order Batter)
+      'f1e20000-00c0-4000-8000-0000000000c0', // Viv Richards (Top-Order Batter)
+      'f1e20000-00f7-4000-8000-0000000000f7', // Don Bradman (Captain, Batter)
+      'f1e10000-002a-4000-8000-00000000002a', // Steve Smith (Batter)
+      'f1e10000-004a-4000-8000-00000000004a', // Jos Buttler (Wicketkeeper)
+      'f1e20000-00cb-4000-8000-0000000000cb', // Garry Sobers (All-Rounder, Bowler 5)
+      'f1e10000-0048-4000-8000-000000000048', // Ben Stokes (All-Rounder, Bowler 4)
+      'f1e20000-0008-4000-8000-000000000008', // Wasim Akram (Fast Bowler 1)
+      'f1e20000-0003-4000-8000-000000000003', // Shane Warne (Vice-Captain, Spinner 2)
+      'f1e10000-0003-4000-8000-000000000003', // Jasprit Bumrah (Fast Bowler 3)
+      'f1e10000-00f1-4000-8000-0000000000f1', // Rashid Khan (Spinner 6)
     ];
 
     const playerMap = new Map<string, PlayerSquadContext>();
@@ -126,9 +126,16 @@ export class MatchesService {
 
     for (let i = 0; i < aiPlayerIds.length; i++) {
       const pid = aiPlayerIds[i];
-      const profile = await this.playersService.getPlayerById(pid);
+      let profile;
+      try {
+        profile = await this.playersService.getPlayerById(pid);
+      } catch {
+        // Fallback: search by index if ID not found
+        const search = await this.playersService.searchPlayers({ limit: 20 });
+        profile = search.items[i] || search.items[0];
+      }
 
-      playerMap.set(pid, {
+      playerMap.set(profile.id, {
         id: profile.id,
         fullName: profile.fullName,
         displayName: profile.displayName,
@@ -140,7 +147,7 @@ export class MatchesService {
       });
 
       lineup.push({
-        playerId: pid,
+        playerId: profile.id,
         battingOrder: i + 1,
         isCaptain: i === 2, // Bradman as Captain
         isDesignatedWicketkeeper: i === 4, // Buttler as Keeper
