@@ -1,6 +1,7 @@
 import type {
   BattingHand,
   BowlingStyle,
+  CareerCategory,
   ConfidenceTier,
   HistoricalEra,
   MatchFormat,
@@ -16,6 +17,9 @@ export interface PlayerSearchQueryDto {
   isActive?: boolean | string;
   era?: HistoricalEra;
   nationality?: string;
+  country?: string;
+  careerCategory?: CareerCategory | string;
+  competition?: string;
   tier?: ConfidenceTier;
   minRating?: number;
   maxRating?: number;

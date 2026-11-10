@@ -40,9 +40,9 @@ describe('Web Dream Team Builder & Persistence Engine (P6.2)', () => {
     const deVilliers = allPlayers.find((p) => p.fullName.includes('Villiers'))!;
     const sobers = allPlayers.find((p) => p.fullName.includes('Sobers'))!;
     const stokes = allPlayers.find((p) => p.fullName.includes('Stokes'))!;
-    const jadeja = allPlayers.find((p) => p.fullName.includes('Jadeja'))!;
+    const jadeja = allPlayers.find((p) => p.fullName.includes('Ravindra Jadeja'))!;
     const akram = allPlayers.find((p) => p.fullName.includes('Akram'))!;
-    const warne = allPlayers.find((p) => p.fullName.includes('Warne'))!;
+    const warne = allPlayers.find((p) => p.fullName.includes('Shane Warne'))!;
     const bumrah = allPlayers.find((p) => p.fullName.includes('Bumrah'))!;
 
     return [

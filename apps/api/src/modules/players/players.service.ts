@@ -81,11 +81,25 @@ export class PlayersService {
       allProfiles = allProfiles.filter((p) => p.historicalEra === query.era);
     }
 
-    // 4. Nationality Filter
-    if (query.nationality) {
-      const nat = query.nationality.toLowerCase();
+    // 4. Nationality / Country Filter
+    const targetCountry = query.country ?? query.nationality;
+    if (targetCountry && targetCountry !== 'ALL') {
+      const nat = targetCountry.toLowerCase();
       allProfiles = allProfiles.filter((p) =>
         p.primaryNationality.toLowerCase().includes(nat)
+      );
+    }
+
+    // 4b. Career Category Filter
+    if (query.careerCategory && query.careerCategory !== 'ALL') {
+      allProfiles = allProfiles.filter((p) => p.careerCategory === query.careerCategory);
+    }
+
+    // 4c. Competition Filter
+    if (query.competition && query.competition !== 'ALL') {
+      const compLower = query.competition.toLowerCase();
+      allProfiles = allProfiles.filter((p) =>
+        p.competitions?.some((c) => c.toLowerCase().includes(compLower))
       );
     }
 

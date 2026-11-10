@@ -10,14 +10,19 @@ import {
   Award,
   Zap,
   Target,
+  ChevronLeft,
   ChevronRight,
   X,
   ExternalLink,
   ArrowUpDown,
   Flame,
   CheckCircle2,
+  Globe,
+  Building2,
+  Trophy,
 } from 'lucide-react';
 import type {
+  CareerCategory,
   HistoricalEra,
   MatchFormat,
   PlayerFormatRating,
@@ -46,6 +51,31 @@ const ROLE_OPTIONS: Array<{ id: PrimaryRole | 'ALL'; label: string }> = [
   { id: 'BOWLING_ALL_ROUNDER', label: 'Bowling All-Rounder' },
   { id: 'PACE_BOWLER', label: 'Pace Bowler' },
   { id: 'SPIN_BOWLER', label: 'Spin Bowler' },
+];
+
+const CATEGORY_OPTIONS: Array<{ id: CareerCategory | 'ALL'; label: string }> = [
+  { id: 'ALL', label: 'All Categories' },
+  { id: 'INTERNATIONAL', label: 'International Stars' },
+  { id: 'DOMESTIC_ONLY', label: 'Domestic Specialists' },
+  { id: 'HISTORICAL_LEGEND', label: 'Historical Legends' },
+];
+
+const COMPETITION_OPTIONS: Array<{ id: string; label: string }> = [
+  { id: 'ALL', label: 'All Competitions' },
+  { id: 'IPL', label: 'IPL (India)' },
+  { id: 'Ranji Trophy', label: 'Ranji Trophy (India)' },
+  { id: 'BBL', label: 'BBL (Australia)' },
+  { id: 'Sheffield Shield', label: 'Sheffield Shield (Australia)' },
+  { id: 'County Championship', label: 'County Championship (England)' },
+  { id: 'T20 Blast', label: 'T20 Blast (England)' },
+  { id: 'The Hundred', label: 'The Hundred (UK)' },
+  { id: 'SA20', label: 'SA20 (South Africa)' },
+  { id: 'PSL', label: 'PSL (Pakistan)' },
+  { id: 'CPL', label: 'CPL (West Indies)' },
+  { id: 'Super Smash', label: 'Super Smash (New Zealand)' },
+  { id: 'DPL', label: 'DPL / BPL (Bangladesh)' },
+  { id: 'LPL', label: 'LPL (Sri Lanka)' },
+  { id: 'Major League Cricket', label: 'MLC (USA)' },
 ];
 
 const ERA_OPTIONS: Array<{ id: HistoricalEra | 'ALL'; label: string }> = [
@@ -102,6 +132,12 @@ function getCountryBadgeStyle(country: string): string {
       return 'from-neutral-800 to-neutral-950 border-neutral-400/40 text-neutral-200';
     case 'sri lanka':
       return 'from-amber-950 to-yellow-950 border-amber-500/40 text-amber-200';
+    case 'bangladesh':
+      return 'from-emerald-950 to-teal-950 border-emerald-500/40 text-emerald-300';
+    case 'afghanistan':
+      return 'from-blue-950 to-cyan-950 border-cyan-500/40 text-cyan-200';
+    case 'usa':
+      return 'from-red-900 to-blue-950 border-blue-400/40 text-slate-100';
     default:
       return 'from-[#0D4A38] to-[#082218] border-[#D4AF37]/40 text-[#D4AF37]';
   }
@@ -112,17 +148,52 @@ export default function PlayersCataloguePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState<PrimaryRole | 'ALL'>('ALL');
   const [selectedEra, setSelectedEra] = useState<HistoricalEra | 'ALL'>('ALL');
+  const [selectedCountry, setSelectedCountry] = useState<string>('ALL');
+  const [selectedCategory, setSelectedCategory] = useState<CareerCategory | 'ALL'>('ALL');
+  const [selectedCompetition, setSelectedCompetition] = useState<string>('ALL');
   const [selectedHand, setSelectedHand] = useState<'ALL' | 'RIGHT_HAND' | 'LEFT_HAND'>('ALL');
   const [selectedBowling, setSelectedBowling] = useState<'ALL' | 'FAST' | 'SPIN' | 'MEDIUM'>('ALL');
   const [selectedStatus, setSelectedStatus] = useState<'ALL' | 'ACTIVE' | 'RETIRED'>('ALL');
   const [minRating, setMinRating] = useState<number>(0);
   const [sortBy, setSortBy] = useState<'rating' | 'name' | 'debut'>('rating');
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerProfile | null>(null);
 
-  // Load benchmark dataset
+  const PAGE_SIZE = 24;
+
+  // Load global player database
   const allPlayers = useMemo<PlayerProfile[]>(() => {
     return VERIFIED_BENCHMARK_PLAYERS.map((raw) => ingestPlayerRecord(raw));
   }, []);
+
+  // Available countries sorted by representation
+  const availableCountries = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of allPlayers) {
+      counts.set(p.primaryNationality, (counts.get(p.primaryNationality) || 0) + 1);
+    }
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([country, count]) => ({ country, count }));
+  }, [allPlayers]);
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    searchQuery,
+    selectedRole,
+    selectedEra,
+    selectedCountry,
+    selectedCategory,
+    selectedCompetition,
+    selectedHand,
+    selectedBowling,
+    selectedStatus,
+    minRating,
+    sortBy,
+    selectedFormat,
+  ]);
 
   // Filtered & sorted players
   const filteredPlayers = useMemo(() => {
@@ -134,8 +205,27 @@ export default function PlayersCataloguePage() {
           const matchName =
             p.fullName.toLowerCase().includes(q) ||
             p.displayName.toLowerCase().includes(q) ||
-            p.primaryNationality.toLowerCase().includes(q);
+            p.primaryNationality.toLowerCase().includes(q) ||
+            (p.competitions && p.competitions.some((c) => c.toLowerCase().includes(q)));
           if (!matchName) return false;
+        }
+
+        // Country filter
+        if (selectedCountry !== 'ALL' && p.primaryNationality !== selectedCountry) {
+          return false;
+        }
+
+        // Career Category filter
+        if (selectedCategory !== 'ALL' && p.careerCategory !== selectedCategory) {
+          return false;
+        }
+
+        // Competition filter
+        if (
+          selectedCompetition !== 'ALL' &&
+          (!p.competitions || !p.competitions.some((c) => c.toLowerCase().includes(selectedCompetition.toLowerCase())))
+        ) {
+          return false;
         }
 
         // Role filter
@@ -186,7 +276,28 @@ export default function PlayersCataloguePage() {
         const rB = b.ratings[selectedFormat]?.overallRating ?? 50;
         return rB - rA;
       });
-  }, [allPlayers, searchQuery, selectedRole, selectedHand, selectedBowling, selectedStatus, selectedEra, selectedFormat, minRating, sortBy]);
+  }, [
+    allPlayers,
+    searchQuery,
+    selectedCountry,
+    selectedCategory,
+    selectedCompetition,
+    selectedRole,
+    selectedHand,
+    selectedBowling,
+    selectedStatus,
+    selectedEra,
+    selectedFormat,
+    minRating,
+    sortBy,
+  ]);
+
+  // Paginated slice
+  const totalPages = Math.max(1, Math.ceil(filteredPlayers.length / PAGE_SIZE));
+  const paginatedPlayers = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredPlayers.slice(start, start + PAGE_SIZE);
+  }, [filteredPlayers, currentPage, PAGE_SIZE]);
 
   return (
     <div className="min-h-screen bg-[#0A0D12] text-[#F8F9FA] flex flex-col font-sans">
@@ -204,20 +315,20 @@ export default function PlayersCataloguePage() {
             <div className="flex items-center space-x-2">
               <div className="w-2.5 h-2.5 rounded-full bg-[#10B981] animate-pulse" />
               <h1 className="font-serif text-lg font-bold tracking-wide text-[#F8F9FA]">
-                Global Cricketer Catalogue & Ratings Engine
+                Global Cricketer Database & Ratings Engine
               </h1>
             </div>
             <span className="text-xs px-2 py-0.5 rounded bg-[#1A202C] text-[#D4AF37] border border-[#D4AF37]/30 font-mono">
-              rate-1.0.0
+              1,000+ Verified Players
             </span>
           </div>
 
           <div className="text-xs text-[#9CA3AF] flex items-center space-x-4">
             <span>
-              Verified Profiles: <strong className="text-white">{allPlayers.length}</strong>
+              Total Verified: <strong className="text-white">{allPlayers.length}</strong>
             </span>
             <span>
-              Matching: <strong className="text-[#D4AF37]">{filteredPlayers.length}</strong>
+              Matching Filters: <strong className="text-[#D4AF37]">{filteredPlayers.length}</strong>
             </span>
           </div>
         </div>
@@ -256,45 +367,61 @@ export default function PlayersCataloguePage() {
 
         {/* Filter Controls Grid */}
         <div className="bg-[#131722] border border-[#232936] rounded-xl p-4 space-y-3">
-          {/* Row 1: Search, Role, Era, Sort */}
+          {/* Row 1: Search, Country, Category, Competition, Sort */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
             {/* Search Box */}
             <div className="md:col-span-4 relative">
               <Search className="w-4 h-4 text-[#9CA3AF] absolute left-3 top-3" />
               <input
                 type="text"
-                placeholder="Search player, country, initials..."
+                placeholder="Search 1,000+ players, countries, teams..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg pl-9 pr-3 py-2 text-sm text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
               />
             </div>
 
-            {/* Role Filter */}
-            <div className="md:col-span-3">
+            {/* Country Filter */}
+            <div className="md:col-span-2">
               <select
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value as PrimaryRole | 'ALL')}
+                value={selectedCountry}
+                onChange={(e) => setSelectedCountry(e.target.value)}
                 className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg px-3 py-2 text-sm text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
               >
-                {ROLE_OPTIONS.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.label}
+                <option value="ALL">All Nations ({allPlayers.length})</option>
+                {availableCountries.map((c) => (
+                  <option key={c.country} value={c.country}>
+                    {c.country} ({c.count})
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Era Filter */}
-            <div className="md:col-span-3">
+            {/* Career Category Filter */}
+            <div className="md:col-span-2">
               <select
-                value={selectedEra}
-                onChange={(e) => setSelectedEra(e.target.value as HistoricalEra | 'ALL')}
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value as CareerCategory | 'ALL')}
                 className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg px-3 py-2 text-sm text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
               >
-                {ERA_OPTIONS.map((era) => (
-                  <option key={era.id} value={era.id}>
-                    {era.label}
+                {CATEGORY_OPTIONS.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Competition Filter */}
+            <div className="md:col-span-2">
+              <select
+                value={selectedCompetition}
+                onChange={(e) => setSelectedCompetition(e.target.value)}
+                className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg px-3 py-2 text-sm text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
+              >
+                {COMPETITION_OPTIONS.map((comp) => (
+                  <option key={comp.id} value={comp.id}>
+                    {comp.label}
                   </option>
                 ))}
               </select>
@@ -314,14 +441,44 @@ export default function PlayersCataloguePage() {
             </div>
           </div>
 
-          {/* Row 2: Batting Hand, Bowling Style, Career Status, Min Rating */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 pt-2 border-t border-[#1E2433]">
+          {/* Row 2: Role, Era, Batting Hand, Bowling Style, Status, Min Rating */}
+          <div className="grid grid-cols-2 md:grid-cols-12 gap-3 pt-2 border-t border-[#1E2433]">
+            {/* Role Filter */}
+            <div className="col-span-1 md:col-span-2">
+              <select
+                value={selectedRole}
+                onChange={(e) => setSelectedRole(e.target.value as PrimaryRole | 'ALL')}
+                className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg px-2.5 py-1.5 text-xs text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
+              >
+                {ROLE_OPTIONS.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Era Filter */}
+            <div className="col-span-1 md:col-span-2">
+              <select
+                value={selectedEra}
+                onChange={(e) => setSelectedEra(e.target.value as HistoricalEra | 'ALL')}
+                className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg px-2.5 py-1.5 text-xs text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
+              >
+                {ERA_OPTIONS.map((era) => (
+                  <option key={era.id} value={era.id}>
+                    {era.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Batting Hand */}
-            <div className="md:col-span-3">
+            <div className="col-span-1 md:col-span-2">
               <select
                 value={selectedHand}
                 onChange={(e) => setSelectedHand(e.target.value as 'ALL' | 'RIGHT_HAND' | 'LEFT_HAND')}
-                className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg px-3 py-2 text-xs text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
+                className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg px-2.5 py-1.5 text-xs text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
               >
                 {HAND_OPTIONS.map((h) => (
                   <option key={h.id} value={h.id}>
@@ -332,11 +489,11 @@ export default function PlayersCataloguePage() {
             </div>
 
             {/* Bowling Style */}
-            <div className="md:col-span-3">
+            <div className="col-span-1 md:col-span-2">
               <select
                 value={selectedBowling}
                 onChange={(e) => setSelectedBowling(e.target.value as 'ALL' | 'FAST' | 'SPIN' | 'MEDIUM')}
-                className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg px-3 py-2 text-xs text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
+                className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg px-2.5 py-1.5 text-xs text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
               >
                 {BOWLING_OPTIONS.map((b) => (
                   <option key={b.id} value={b.id}>
@@ -347,11 +504,11 @@ export default function PlayersCataloguePage() {
             </div>
 
             {/* Career Status */}
-            <div className="md:col-span-3">
+            <div className="col-span-1 md:col-span-2">
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value as 'ALL' | 'ACTIVE' | 'RETIRED')}
-                className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg px-3 py-2 text-xs text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
+                className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg px-2.5 py-1.5 text-xs text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
               >
                 {STATUS_OPTIONS.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -362,8 +519,8 @@ export default function PlayersCataloguePage() {
             </div>
 
             {/* Min Rating Slider */}
-            <div className="md:col-span-3 flex items-center space-x-2 bg-[#181D2A] border border-[#2B3242] rounded-lg px-3 py-1.5">
-              <span className="text-[11px] text-[#9CA3AF] whitespace-nowrap">Min OVR: {minRating}</span>
+            <div className="col-span-1 md:col-span-2 flex items-center space-x-2 bg-[#181D2A] border border-[#2B3242] rounded-lg px-2.5 py-1">
+              <span className="text-[10px] text-[#9CA3AF] whitespace-nowrap">Min: {minRating}</span>
               <input
                 type="range"
                 min="0"
@@ -377,9 +534,27 @@ export default function PlayersCataloguePage() {
           </div>
         </div>
 
-        {/* Player Grid */}
+        {/* Discovery Summary & Active Filters */}
+        <div className="flex items-center justify-between text-xs text-[#9CA3AF] px-1">
+          <div>
+            Showing <strong className="text-white">{filteredPlayers.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1}</strong> –{' '}
+            <strong className="text-white">{Math.min(currentPage * PAGE_SIZE, filteredPlayers.length)}</strong> of{' '}
+            <strong className="text-[#D4AF37]">{filteredPlayers.length}</strong> players
+            {selectedCategory !== 'ALL' && <span className="ml-2 px-2 py-0.5 rounded bg-[#1C2230] text-[#0EA5E9] border border-[#0EA5E9]/30">Category: {selectedCategory}</span>}
+            {selectedCountry !== 'ALL' && <span className="ml-2 px-2 py-0.5 rounded bg-[#1C2230] text-[#10B981] border border-[#10B981]/30">Country: {selectedCountry}</span>}
+            {selectedCompetition !== 'ALL' && <span className="ml-2 px-2 py-0.5 rounded bg-[#1C2230] text-[#D4AF37] border border-[#D4AF37]/30">Comp: {selectedCompetition}</span>}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center space-x-1.5 font-mono">
+              <span>Page {currentPage} of {totalPages}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Player Grid (Paginated for smooth 60fps responsiveness) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredPlayers.map((player) => {
+          {paginatedPlayers.map((player) => {
             const formatRating: PlayerFormatRating | undefined = player.ratings[selectedFormat];
             const ratingVal = formatRating?.overallRating ?? 50;
             const confidenceTier = formatRating?.confidenceTier ?? 'ESTIMATED';
@@ -390,22 +565,38 @@ export default function PlayersCataloguePage() {
                 className="bg-[#131722] border border-[#232936] hover:border-[#D4AF37]/60 rounded-xl p-5 flex flex-col justify-between transition-all group shadow-md"
               >
                 <div>
-                  {/* Top Bar: Era Badge & Confidence */}
+                  {/* Top Bar: Era Badge & Category Pill */}
                   <div className="flex items-center justify-between text-xs mb-3">
-                    <span className="px-2 py-0.5 rounded bg-[#1C2230] text-[#9CA3AF] border border-[#2B3242] font-mono">
+                    <span className="px-2 py-0.5 rounded bg-[#1C2230] text-[#9CA3AF] border border-[#2B3242] font-mono text-[10px]">
                       {player.historicalEra.replace(/_/g, ' ')}
                     </span>
-                    <span
-                      className={`px-2 py-0.5 rounded font-mono text-[11px] font-bold ${
-                        confidenceTier === 'MEASURED'
-                          ? 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30'
-                          : confidenceTier === 'ESTIMATED'
-                            ? 'bg-[#F59E0B]/15 text-[#F59E0B] border border-[#F59E0B]/30'
-                            : 'bg-[#6366F1]/15 text-[#6366F1] border border-[#6366F1]/30'
-                      }`}
-                    >
-                      {confidenceTier}
-                    </span>
+                    <div className="flex items-center space-x-1.5">
+                      {player.careerCategory === 'DOMESTIC_ONLY' ? (
+                        <span className="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                          DOMESTIC
+                        </span>
+                      ) : player.careerCategory === 'HISTORICAL_LEGEND' ? (
+                        <span className="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                          LEGEND
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-sky-500/15 text-sky-300 border border-sky-500/30">
+                          INTL
+                        </span>
+                      )}
+
+                      <span
+                        className={`px-2 py-0.5 rounded font-mono text-[10px] font-bold ${
+                          confidenceTier === 'MEASURED'
+                            ? 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30'
+                            : confidenceTier === 'ESTIMATED'
+                              ? 'bg-[#F59E0B]/15 text-[#F59E0B] border border-[#F59E0B]/30'
+                              : 'bg-[#6366F1]/15 text-[#6366F1] border border-[#6366F1]/30'
+                        }`}
+                      >
+                        {confidenceTier}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Player Identity with Procedural Avatar */}
@@ -450,8 +641,27 @@ export default function PlayersCataloguePage() {
                     </div>
                   </div>
 
+                  {/* Competitions Badges */}
+                  {player.competitions && player.competitions.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-2.5">
+                      {player.competitions.slice(0, 3).map((comp) => (
+                        <span
+                          key={comp}
+                          className="text-[9px] px-1.5 py-0.5 rounded bg-[#181D2A] text-[#CBD5E1] border border-[#283244] font-medium"
+                        >
+                          {comp}
+                        </span>
+                      ))}
+                      {player.competitions.length > 3 && (
+                        <span className="text-[9px] px-1 py-0.5 text-[#9CA3AF]">
+                          +{player.competitions.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
                   {/* Attributes Sub-Pills */}
-                  <div className="grid grid-cols-3 gap-2 py-2.5 px-3 bg-[#181D2A] rounded-lg border border-[#252C3B] text-center text-xs mb-3">
+                  <div className="grid grid-cols-3 gap-2 py-2 px-3 bg-[#181D2A] rounded-lg border border-[#252C3B] text-center text-xs mb-3">
                     <div>
                       <div className="text-[10px] text-[#9CA3AF] uppercase">Bat</div>
                       <div className="font-bold text-[#F8F9FA] font-mono">
@@ -500,9 +710,76 @@ export default function PlayersCataloguePage() {
           })}
         </div>
 
+        {/* Empty State */}
         {filteredPlayers.length === 0 && (
           <div className="text-center py-16 bg-[#131722] border border-[#232936] rounded-xl">
             <p className="text-[#9CA3AF] text-sm">No cricketers found matching your filter criteria.</p>
+          </div>
+        )}
+
+        {/* Pagination Navigation Bar */}
+        {totalPages > 1 && (
+          <div className="bg-[#131722] border border-[#232936] rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-xs text-[#9CA3AF]">
+              Page <strong className="text-white">{currentPage}</strong> of <strong className="text-white">{totalPages}</strong> ({filteredPlayers.length} total players)
+            </div>
+
+            <div className="flex items-center space-x-1">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className={`px-3 py-1.5 rounded-lg border text-xs font-medium flex items-center space-x-1 transition ${
+                  currentPage === 1
+                    ? 'border-[#232936] text-[#4B5563] cursor-not-allowed'
+                    : 'border-[#2B3242] text-[#F8F9FA] hover:bg-[#1E2433] hover:border-[#D4AF37]'
+                }`}
+              >
+                <ChevronLeft className="w-4 h-4 mr-0.5" />
+                <span>Prev</span>
+              </button>
+
+              {/* Number buttons: 1, dynamic window, totalPages */}
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum: number;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+
+                const isActive = pageNum === currentPage;
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`w-8 h-8 rounded-lg text-xs font-mono font-medium transition ${
+                      isActive
+                        ? 'bg-[#D4AF37] text-[#0A0D12] font-bold shadow'
+                        : 'text-[#9CA3AF] hover:bg-[#1E2433] hover:text-white'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className={`px-3 py-1.5 rounded-lg border text-xs font-medium flex items-center space-x-1 transition ${
+                  currentPage === totalPages
+                    ? 'border-[#232936] text-[#4B5563] cursor-not-allowed'
+                    : 'border-[#2B3242] text-[#F8F9FA] hover:bg-[#1E2433] hover:border-[#D4AF37]'
+                }`}
+              >
+                <span>Next</span>
+                <ChevronRight className="w-4 h-4 ml-0.5" />
+              </button>
+            </div>
           </div>
         )}
       </main>
@@ -521,12 +798,20 @@ export default function PlayersCataloguePage() {
                   <span className="text-xs text-[#9CA3AF] font-mono">
                     Format: {selectedFormat}
                   </span>
+                  {selectedPlayer.careerCategory && (
+                    <span className="text-xs px-2 py-0.5 rounded bg-[#1C2230] text-sky-400 font-mono font-medium border border-sky-500/30">
+                      {selectedPlayer.careerCategory}
+                    </span>
+                  )}
                 </div>
                 <h2 className="text-xl font-bold font-serif text-[#F8F9FA] mt-1">
                   {selectedPlayer.fullName}
                 </h2>
                 <p className="text-xs text-[#9CA3AF]">
                   {selectedPlayer.primaryNationality} • Era: {selectedPlayer.historicalEra.replace(/_/g, ' ')}
+                  {selectedPlayer.competitions && selectedPlayer.competitions.length > 0 && (
+                    <span> • Teams: {selectedPlayer.competitions.join(', ')}</span>
+                  )}
                 </p>
               </div>
 
