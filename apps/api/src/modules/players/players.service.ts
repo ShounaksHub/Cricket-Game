@@ -60,6 +60,22 @@ export class PlayersService {
       allProfiles = allProfiles.filter((p) => p.primaryRole === query.role);
     }
 
+    // 2b. Batting Hand Filter
+    if (query.battingHand) {
+      allProfiles = allProfiles.filter((p) => p.battingHand === query.battingHand);
+    }
+
+    // 2c. Bowling Style Filter
+    if (query.bowlingStyle) {
+      allProfiles = allProfiles.filter((p) => p.bowlingStyle === query.bowlingStyle);
+    }
+
+    // 2d. Active / Career Status Filter
+    if (query.isActive !== undefined) {
+      const activeBool = query.isActive === true || query.isActive === 'true';
+      allProfiles = allProfiles.filter((p) => Boolean(p.isActive) === activeBool);
+    }
+
     // 3. Historical Era Filter
     if (query.era) {
       allProfiles = allProfiles.filter((p) => p.historicalEra === query.era);
@@ -80,11 +96,17 @@ export class PlayersService {
       );
     }
 
-    // 6. Minimum Rating Filter
+    // 6. Rating Range Filters
     if (query.minRating) {
       const minR = Number(query.minRating);
       allProfiles = allProfiles.filter(
         (p) => (p.ratings[selectedFormat]?.overallRating ?? 0) >= minR
+      );
+    }
+    if (query.maxRating) {
+      const maxR = Number(query.maxRating);
+      allProfiles = allProfiles.filter(
+        (p) => (p.ratings[selectedFormat]?.overallRating ?? 0) <= maxR
       );
     }
 

@@ -193,9 +193,14 @@ describe('Data Ingestion Engine (@cricket/data-ingestion)', () => {
 
   describe('Curated Benchmark Cohort Verification', () => {
     it('successfully processes all verified benchmark players through the 4-layer pipeline', () => {
-      expect(VERIFIED_BENCHMARK_PLAYERS.length).toBeGreaterThanOrEqual(15);
+      expect(VERIFIED_BENCHMARK_PLAYERS.length).toBeGreaterThanOrEqual(40);
 
+      const seenIds = new Set<string>();
       for (const rawPlayer of VERIFIED_BENCHMARK_PLAYERS) {
+        // Ensure strictly unique player IDs
+        expect(seenIds.has(rawPlayer.id)).toBe(false);
+        seenIds.add(rawPlayer.id);
+
         const profile = ingestPlayerRecord(rawPlayer);
 
         expect(profile.id).toBe(rawPlayer.id);
@@ -216,6 +221,62 @@ describe('Data Ingestion Engine (@cricket/data-ingestion)', () => {
         expect(profile.attributes.lineAndLength).toBeGreaterThanOrEqual(1);
         expect(profile.attributes.lineAndLength).toBeLessThanOrEqual(99);
       }
+    });
+
+    it('verifies role balance supporting two mutually exclusive 11-player dream XIs', () => {
+      const profiles = VERIFIED_BENCHMARK_PLAYERS.map(ingestPlayerRecord);
+
+      const keepers = profiles.filter((p) => p.isWicketkeeper);
+      const topOrder = profiles.filter((p) => p.primaryRole === 'TOP_ORDER_BATTER');
+      const middleOrder = profiles.filter((p) => p.primaryRole === 'MIDDLE_ORDER_BATTER');
+      const allRounders = profiles.filter(
+        (p) => p.primaryRole === 'BATTING_ALL_ROUNDER' || p.primaryRole === 'BOWLING_ALL_ROUNDER'
+      );
+      const pacers = profiles.filter((p) => p.primaryRole === 'PACE_BOWLER');
+      const spinners = profiles.filter((p) => p.primaryRole === 'SPIN_BOWLER');
+
+      expect(keepers.length).toBeGreaterThanOrEqual(4);
+      expect(topOrder.length).toBeGreaterThanOrEqual(6);
+      expect(middleOrder.length).toBeGreaterThanOrEqual(4);
+      expect(allRounders.length).toBeGreaterThanOrEqual(6);
+      expect(pacers.length).toBeGreaterThanOrEqual(8);
+      expect(spinners.length).toBeGreaterThanOrEqual(5);
+
+      // Construct Squad 1: 11 distinct players
+      const squad1Ids = [
+        topOrder[0].id,
+        topOrder[1].id,
+        topOrder[2].id,
+        middleOrder[0].id,
+        keepers[0].id,
+        allRounders[0].id,
+        allRounders[1].id,
+        pacers[0].id,
+        pacers[1].id,
+        spinners[0].id,
+        spinners[1].id,
+      ];
+      expect(new Set(squad1Ids).size).toBe(11);
+
+      // Construct Squad 2: 11 completely distinct players (zero overlap with Squad 1)
+      const squad2Ids = [
+        topOrder[3].id,
+        topOrder[4].id,
+        topOrder[5].id,
+        middleOrder[1].id,
+        keepers[1].id,
+        allRounders[2].id,
+        allRounders[3].id,
+        pacers[2].id,
+        pacers[3].id,
+        spinners[2].id,
+        spinners[3].id,
+      ];
+      expect(new Set(squad2Ids).size).toBe(11);
+
+      // Verify zero overlap between Squad 1 and Squad 2
+      const overlap = squad1Ids.filter((id) => squad2Ids.includes(id));
+      expect(overlap.length).toBe(0);
     });
 
     it('preserves era-specific ratings for Sir Donald Bradman and Shane Warne', () => {

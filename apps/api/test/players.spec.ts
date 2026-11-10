@@ -51,8 +51,39 @@ describe('Players Module (API)', () => {
 
     it('filters players by historical era (INTERWAR_1919_1939)', async () => {
       const result = await controller.searchPlayers({ era: 'INTERWAR_1919_1939' });
-      expect(result.items.length).toBe(1);
-      expect(result.items[0].fullName).toContain('Bradman');
+      expect(result.items.length).toBeGreaterThanOrEqual(1);
+      const names = result.items.map((p) => p.fullName);
+      expect(names.some((n) => n.includes('Bradman'))).toBe(true);
+    });
+
+    it('filters players by batting hand (LEFT_HAND)', async () => {
+      const result = await controller.searchPlayers({ battingHand: 'LEFT_HAND' });
+      expect(result.items.length).toBeGreaterThanOrEqual(5);
+      for (const p of result.items) {
+        expect(p.battingHand).toBe('LEFT_HAND');
+      }
+    });
+
+    it('filters players by bowling style (RIGHT_ARM_FAST)', async () => {
+      const result = await controller.searchPlayers({ bowlingStyle: 'RIGHT_ARM_FAST' });
+      expect(result.items.length).toBeGreaterThanOrEqual(3);
+      for (const p of result.items) {
+        expect(p.bowlingStyle).toBe('RIGHT_ARM_FAST');
+      }
+    });
+
+    it('filters players by active/retired career status', async () => {
+      const activeResult = await controller.searchPlayers({ isActive: true });
+      expect(activeResult.items.length).toBeGreaterThanOrEqual(5);
+      for (const p of activeResult.items) {
+        expect(p.isActive).toBe(true);
+      }
+
+      const retiredResult = await controller.searchPlayers({ isActive: false });
+      expect(retiredResult.items.length).toBeGreaterThanOrEqual(5);
+      for (const p of retiredResult.items) {
+        expect(p.isActive).toBe(false);
+      }
     });
 
     it('filters by nationality (India)', async () => {
