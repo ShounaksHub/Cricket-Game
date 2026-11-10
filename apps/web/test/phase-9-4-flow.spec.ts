@@ -6,8 +6,8 @@ import {
   DeterministicPRNG,
   getRulesetForFormat,
   type MatchSimulationConfig,
-  type PlayerSquadContext,
 } from '@cricket/simulation-engine';
+import type { PlayerSquadContext } from '@cricket/shared-types';
 import { VERIFIED_BENCHMARK_PLAYERS, ingestPlayerRecord } from '@cricket/data-ingestion';
 
 describe('Phase 9.4: User-Controlled Team Management & Match Flow', () => {

@@ -30,8 +30,10 @@ import {
 } from 'lucide-react';
 import {
   SUPPORTED_NATIONAL_TEAMS,
+  SUPPORTED_IPL_TEAMS,
   buildNationalLineup,
   buildWorldXILineup,
+  buildIPLLineup,
 } from '@/lib/national-teams';
 import { getAuthoritativePlayerImage } from '@/lib/player-image-resolver';
 import {
@@ -230,9 +232,13 @@ export default function MatchSimulationPage() {
   const [aiDifficulty, setAiDifficulty] = useState<AIDifficulty>('MEDIUM');
 
   // --- Nation & World XI Match Modes ---
-  const [teamMode, setTeamMode] = useState<'ONE_TEAM_PER_NATION' | 'ONE_PLAYER_PER_NATION' | 'CUSTOM_DREAM_TEAM'>('ONE_TEAM_PER_NATION');
+  const [teamMode, setTeamMode] = useState<
+    'ONE_TEAM_PER_NATION' | 'IPL_TEAMS' | 'ONE_PLAYER_PER_NATION' | 'CUSTOM_DREAM_TEAM'
+  >('ONE_TEAM_PER_NATION');
   const [userNation, setUserNation] = useState<string>('India');
   const [aiNation, setAiNation] = useState<string>('Australia');
+  const [userIPLTeam, setUserIPLTeam] = useState<string>('CSK');
+  const [aiIPLTeam, setAiIPLTeam] = useState<string>('MI');
   const [savedSquads, setSavedSquads] = useState<any[]>([]);
   const [selectedSquadId, setSelectedSquadId] = useState<string>('');
 
@@ -629,8 +635,16 @@ export default function MatchSimulationPage() {
 
     let lineup1: DreamTeamPlayerSlotInput[] = [];
     let customName = userTeamName;
+    let customTeam2: { id: string; name: string; lineup: DreamTeamPlayerSlotInput[] } | null = null;
 
-    if (teamMode === 'ONE_TEAM_PER_NATION') {
+    if (teamMode === 'IPL_TEAMS') {
+      const res1 = buildIPLLineup(userIPLTeam, all, format);
+      lineup1 = res1.lineup;
+      customName = res1.teamName;
+
+      const res2 = buildIPLLineup(aiIPLTeam, all, format);
+      customTeam2 = { id: 'ai-team', name: res2.teamName, lineup: res2.lineup };
+    } else if (teamMode === 'ONE_TEAM_PER_NATION') {
       const res = buildNationalLineup(userNation, all, format);
       lineup1 = res.lineup;
       customName = res.teamName;
@@ -673,18 +687,20 @@ export default function MatchSimulationPage() {
       }
     }
 
-    // Team 2: Dynamically generated AI Opponent tailored to pitch & difficulty (0 overlap)
+    // Team 2: Dynamically generated AI Opponent tailored to pitch & difficulty (or authentic IPL opponent)
     const seed = BigInt(seedInput || '987654321');
-    const aiResult = generateAIOpponentTeam(profiles, {
-      userLineup: lineup1,
-      difficulty: aiDifficulty,
-      pitchType: selectedPitch,
-      format,
-      seed,
-      uniqueNationRule: teamMode === 'ONE_PLAYER_PER_NATION',
-      targetNation: teamMode === 'ONE_TEAM_PER_NATION' ? aiNation : undefined,
-      excludedNations: teamMode === 'ONE_TEAM_PER_NATION' ? [userNation] : undefined,
-    });
+    const aiResult = customTeam2
+      ? { name: customTeam2.name, lineup: customTeam2.lineup }
+      : generateAIOpponentTeam(profiles, {
+          userLineup: lineup1,
+          difficulty: aiDifficulty,
+          pitchType: selectedPitch,
+          format,
+          seed,
+          uniqueNationRule: teamMode === 'ONE_PLAYER_PER_NATION',
+          targetNation: teamMode === 'ONE_TEAM_PER_NATION' ? aiNation : undefined,
+          excludedNations: teamMode === 'ONE_TEAM_PER_NATION' ? [userNation] : undefined,
+        });
 
     return {
       team1: { id: 'user-team', name: customName, lineup: lineup1 },
@@ -1306,10 +1322,11 @@ export default function MatchSimulationPage() {
                 </button>
               </div>
 
-              {/* 3 Roster Modes */}
-              <div className="grid grid-cols-3 gap-2">
+              {/* 4 Roster Modes: National, IPL Franchises, World XI, Custom Dream XI */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {[
                   { id: 'ONE_TEAM_PER_NATION', label: '1 Team / Nation', desc: 'Authentic Rivalry', icon: 'flag' },
+                  { id: 'IPL_TEAMS', label: 'IPL Franchises', desc: '2026 Squads', icon: 'local_fire_department' },
                   { id: 'ONE_PLAYER_PER_NATION', label: 'World XI', desc: '1 Player / Nation', icon: 'public' },
                   { id: 'CUSTOM_DREAM_TEAM', label: 'Custom Dream XI', desc: 'Saved Lineup', icon: 'shield' },
                 ].map((m) => {
@@ -1320,7 +1337,12 @@ export default function MatchSimulationPage() {
                       type="button"
                       onClick={() => {
                         setTeamMode(m.id as any);
-                        if (m.id === 'ONE_TEAM_PER_NATION') {
+                        if (m.id === 'IPL_TEAMS') {
+                          const uTeam = SUPPORTED_IPL_TEAMS.find((t) => t.id === userIPLTeam) || SUPPORTED_IPL_TEAMS[0];
+                          const aTeam = SUPPORTED_IPL_TEAMS.find((t) => t.id === aiIPLTeam) || SUPPORTED_IPL_TEAMS[1];
+                          setUserTeamName(uTeam.name);
+                          setAiTeamName(aTeam.name);
+                        } else if (m.id === 'ONE_TEAM_PER_NATION') {
                           setUserTeamName(`${userNation} All-Time XI`);
                           setAiTeamName(`${aiNation} All-Time XI`);
                         } else if (m.id === 'ONE_PLAYER_PER_NATION') {
@@ -1394,6 +1416,110 @@ export default function MatchSimulationPage() {
                       </select>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* IPL 2026 Franchises Selector */}
+              {teamMode === 'IPL_TEAMS' && (
+                <div className="p-3 rounded-lg bg-surface-recessed border border-border-hairline space-y-3 mt-1">
+                  <div className="flex items-center justify-between text-xs text-primary font-label-caps">
+                    <div className="flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[16px] text-tertiary">
+                        local_fire_department
+                      </span>
+                      <span className="text-tertiary font-bold">2026 IPL SQUADS &amp; FRANCHISES</span>
+                    </div>
+                    <span className="text-[10px] text-text-subdued">Authentic 11-Player Playing XIs</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[11px] text-text-subdued block mb-1 font-label-caps uppercase">
+                        YOUR IPL TEAM:
+                      </label>
+                      <select
+                        value={userIPLTeam}
+                        onChange={(e) => {
+                          const newTeamId = e.target.value;
+                          setUserIPLTeam(newTeamId);
+                          const chosen = SUPPORTED_IPL_TEAMS.find((t) => t.id === newTeamId);
+                          if (chosen) {
+                            setUserTeamName(chosen.name);
+                          }
+                          if (newTeamId === aiIPLTeam) {
+                            const available = SUPPORTED_IPL_TEAMS.find((t) => t.id !== newTeamId);
+                            if (available) {
+                              setAiIPLTeam(available.id);
+                              setAiTeamName(available.name);
+                            }
+                          }
+                        }}
+                        className="w-full bg-surface-elevated border border-border-hairline text-text-chalk p-2 rounded text-body-sm focus:outline-none cursor-pointer"
+                      >
+                        {SUPPORTED_IPL_TEAMS.map((t) => (
+                          <option key={t.id} value={t.id} disabled={t.id === aiIPLTeam}>
+                            {t.shortName} • {t.name} (Capt: {t.captainName})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] text-text-subdued block mb-1 font-label-caps uppercase">
+                        AI OPPONENT IPL TEAM:
+                      </label>
+                      <select
+                        value={aiIPLTeam}
+                        onChange={(e) => {
+                          const newTeamId = e.target.value;
+                          setAiIPLTeam(newTeamId);
+                          const chosen = SUPPORTED_IPL_TEAMS.find((t) => t.id === newTeamId);
+                          if (chosen) {
+                            setAiTeamName(chosen.name);
+                          }
+                        }}
+                        className="w-full bg-surface-elevated border border-border-hairline text-text-chalk p-2 rounded text-body-sm focus:outline-none cursor-pointer"
+                      >
+                        {SUPPORTED_IPL_TEAMS.map((t) => (
+                          <option key={t.id} value={t.id} disabled={t.id === userIPLTeam}>
+                            {t.shortName} • {t.name} (Capt: {t.captainName})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Active Matchup Card Strip */}
+                  {(() => {
+                    const uMeta = SUPPORTED_IPL_TEAMS.find((t) => t.id === userIPLTeam);
+                    const aMeta = SUPPORTED_IPL_TEAMS.find((t) => t.id === aiIPLTeam);
+                    if (!uMeta || !aMeta) return null;
+                    return (
+                      <div className="pt-2 border-t border-border-hairline flex flex-wrap items-center justify-between text-[11px] font-mono gap-2">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="w-2.5 h-2.5 rounded-full"
+                            style={{ backgroundColor: uMeta.primaryColor }}
+                          />
+                          <span className="text-text-chalk font-bold">{uMeta.name}</span>
+                          <span className="text-text-subdued">
+                            (WK: {uMeta.wicketkeeperName})
+                          </span>
+                        </div>
+                        <span className="text-secondary font-bold">VS</span>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="w-2.5 h-2.5 rounded-full"
+                            style={{ backgroundColor: aMeta.primaryColor }}
+                          />
+                          <span className="text-text-chalk font-bold">{aMeta.name}</span>
+                          <span className="text-text-subdued">
+                            (Capt: {aMeta.captainName})
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
 
