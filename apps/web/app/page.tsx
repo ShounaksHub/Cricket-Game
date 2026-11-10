@@ -38,13 +38,29 @@ export default function HomeScreen() {
     oversStr: string;
     targetStr?: string;
     ballsThisOver: string[];
+    isChasing?: boolean;
+    equationStr?: string;
+  } | null>(null);
+  const [recentCompletedMatch, setRecentCompletedMatch] = useState<{
+    format: MatchFormat;
+    resultSummary: string;
+    team1Name: string;
+    team1Score: string;
+    team2Name: string;
+    team2Score: string;
+    potm?: {
+      name: string;
+      team: string;
+      points?: number;
+      summary?: string;
+    } | null;
   } | null>(null);
   const [selectedUpcomingFeature, setSelectedUpcomingFeature] = useState<PlannedFeature | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Load genuine career metrics from cricket_match_history
+    // Load genuine career metrics & most recent completed match from cricket_match_history
     try {
       const rawHistory = localStorage.getItem('cricket_match_history');
       if (rawHistory) {
@@ -66,6 +82,20 @@ export default function HomeScreen() {
             totalWins: wins,
             winPercentage: ((wins / history.length) * 100).toFixed(1),
           });
+
+          // Most recent completed match
+          const latest = history[0];
+          if (latest) {
+            setRecentCompletedMatch({
+              format: latest.format || 'T20',
+              resultSummary: latest.resultSummary || 'Match Finished',
+              team1Name: latest.team1Name || 'Your XI',
+              team1Score: latest.team1Score || '-',
+              team2Name: latest.team2Name || 'Opponent XI',
+              team2Score: latest.team2Score || '-',
+              potm: latest.potm || null,
+            });
+          }
         }
       }
     } catch {}
@@ -92,31 +122,64 @@ export default function HomeScreen() {
       // Fallback to default benchmark
     }
 
-    // Load active match session from localStorage
+    // Load active match session from cricket_active_match_session or legacy cricket_active_match
     try {
-      const rawMatch = localStorage.getItem('cricket_active_match');
-      if (rawMatch) {
-        const parsed = JSON.parse(rawMatch);
-        if (parsed?.matchState) {
-          const inn = parsed.matchState.innings?.[parsed.matchState.currentInningsIndex];
-          if (inn) {
-            const balls = inn.deliveries?.slice(-6).map((d: any) => {
-              if (d.outcome === 'WICKET') return 'W';
-              if (d.runsBatter === 6) return '6';
-              if (d.runsBatter === 4) return '4';
-              if (d.runsBatter === 0) return '•';
-              return String(d.runsTotal);
-            }) || ['1', '4', 'W', '6', '●'];
+      const rawSession = localStorage.getItem('cricket_active_match_session');
+      if (rawSession) {
+        const session = JSON.parse(rawSession);
+        if (session && session.visibleEvents && Array.isArray(session.visibleEvents)) {
+          const events = session.visibleEvents;
+          const lastEvent = events[events.length - 1];
+          const runs = lastEvent?.scorecardDelta?.totalRuns ?? 0;
+          const wickets = lastEvent?.scorecardDelta?.totalWickets ?? 0;
+          const completedOvers = Math.floor(events.length / 6);
+          const ballsInOver = events.length % 6;
+          const oversStr = `${completedOvers}.${ballsInOver}`;
+          const balls = events.slice(-6).map((e: any) => {
+            if (e.outcome === 'WICKET') return 'W';
+            if (e.outcome === 'SIX') return '6';
+            if (e.outcome === 'FOUR') return '4';
+            if (e.outcome === 'DOT') return '•';
+            return String(e.runsBat + (e.extras?.wides || 0) + (e.extras?.noBalls || 0));
+          });
 
-            setActiveMatch({
-              format: parsed.format || 'T20',
-              userTeamName: parsed.matchState.config?.teamA?.name || 'IND',
-              aiTeamName: parsed.matchState.config?.teamB?.name || 'AUS',
-              scoreStr: `${inn.runs}/${inn.wickets}`,
-              oversStr: `${Math.floor(inn.ballsBowled / 6)}.${inn.ballsBowled % 6}`,
-              targetStr: inn.target ? `TARGET ${inn.target} RUNS` : undefined,
-              ballsThisOver: balls.length > 0 ? balls : ['1', '4', 'W', '6', '●'],
-            });
+          setActiveMatch({
+            format: session.format || 'T20',
+            userTeamName: session.userTeamName || 'YOUR XI',
+            aiTeamName: session.aiTeamName || 'OPPONENT XI',
+            scoreStr: `${runs}/${wickets}`,
+            oversStr,
+            targetStr: undefined,
+            ballsThisOver: balls.length > 0 ? balls : ['•', '•', '•', '•', '•', '•'],
+            isChasing: false,
+          });
+        }
+      } else {
+        const rawMatch = localStorage.getItem('cricket_active_match');
+        if (rawMatch) {
+          const parsed = JSON.parse(rawMatch);
+          if (parsed?.matchState) {
+            const inn = parsed.matchState.innings?.[parsed.matchState.currentInningsIndex];
+            if (inn) {
+              const balls = inn.deliveries?.slice(-6).map((d: any) => {
+                if (d.outcome === 'WICKET') return 'W';
+                if (d.runsBatter === 6) return '6';
+                if (d.runsBatter === 4) return '4';
+                if (d.runsBatter === 0) return '•';
+                return String(d.runsTotal);
+              }) || ['1', '4', 'W', '6', '●'];
+
+              setActiveMatch({
+                format: parsed.format || 'T20',
+                userTeamName: parsed.matchState.config?.teamA?.name || 'IND',
+                aiTeamName: parsed.matchState.config?.teamB?.name || 'AUS',
+                scoreStr: `${inn.runs}/${inn.wickets}`,
+                oversStr: `${Math.floor(inn.ballsBowled / 6)}.${inn.ballsBowled % 6}`,
+                targetStr: inn.target ? `TARGET ${inn.target} RUNS` : undefined,
+                ballsThisOver: balls.length > 0 ? balls : ['1', '4', 'W', '6', '●'],
+                isChasing: !!inn.target,
+              });
+            }
           }
         }
       }
@@ -405,28 +468,30 @@ export default function HomeScreen() {
             <div className="absolute top-0 right-0 w-36 h-36 bg-warning-amber/10 rounded-full blur-2xl pointer-events-none group-hover:bg-warning-amber/20 transition-all" />
             <div>
               <div className="flex items-center justify-between w-full mb-space-md">
-                <span className="font-label-caps text-label-caps px-2.5 py-1 rounded bg-wicket-red-container text-on-error uppercase tracking-wider font-extrabold flex items-center gap-1.5 animate-pulse">
-                  <span className="w-1.5 h-1.5 rounded-full bg-wicket-red" />
-                  MATCH IN PROGRESS
+                <span className={`font-label-caps text-label-caps px-2.5 py-1 rounded uppercase tracking-wider font-extrabold flex items-center gap-1.5 ${
+                  activeMatch ? 'bg-wicket-red-container text-on-error animate-pulse' : 'bg-surface-container text-text-subdued'
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${activeMatch ? 'bg-wicket-red' : 'bg-text-subdued'}`} />
+                  {activeMatch ? 'MATCH IN PROGRESS' : 'READY FOR KICKOFF'}
                 </span>
                 <span className="font-label-caps text-label-caps text-text-chalk px-2 py-0.5 rounded bg-surface-recessed font-mono">
-                  {activeMatch ? `${activeMatch.format} LEAGUE` : 'T20 SUPER LEAGUE'}
+                  {activeMatch ? `${activeMatch.format} LEAGUE` : 'QUICK SIMULATOR'}
                 </span>
               </div>
 
               {/* Fixture Header */}
               <div className="flex items-center justify-between mb-space-sm">
-                <div className="flex items-center gap-space-xs">
-                  <span className="font-headline-md text-title-md text-text-chalk font-extrabold">
-                    {activeMatch ? activeMatch.userTeamName : 'IND'}
+                <div className="flex items-center gap-space-xs truncate">
+                  <span className="font-headline-md text-title-md text-text-chalk font-extrabold truncate max-w-[130px]">
+                    {activeMatch ? activeMatch.userTeamName : (savedTeam?.name || 'YOUR XI')}
                   </span>
                   <span className="font-label-caps text-label-caps text-text-subdued font-bold">vs</span>
-                  <span className="font-headline-md text-title-md text-text-slate font-extrabold">
-                    {activeMatch ? activeMatch.aiTeamName : 'AUS'}
+                  <span className="font-headline-md text-title-md text-text-slate font-extrabold truncate max-w-[130px]">
+                    {activeMatch ? activeMatch.aiTeamName : 'AI WORLD XI'}
                   </span>
                 </div>
-                <span className="font-label-caps text-label-caps text-secondary-fixed bg-surface-container px-2 py-0.5 rounded">
-                  CHASING TARGET
+                <span className="font-label-caps text-label-caps text-secondary-fixed bg-surface-container px-2 py-0.5 rounded shrink-0">
+                  {activeMatch?.isChasing ? 'CHASING TARGET' : activeMatch ? '1ST INNINGS' : 'NEW DERBY'}
                 </span>
               </div>
 
@@ -434,23 +499,27 @@ export default function HomeScreen() {
               <div className="bg-surface-recessed p-space-md rounded-lg mb-space-md flex flex-col gap-space-xs">
                 <div className="flex items-baseline justify-between">
                   <span className="font-scoreboard-xl text-scoreboard-xl text-text-chalk leading-none tracking-tight">
-                    {activeMatch ? activeMatch.scoreStr : '142'}<span className="text-wicket-red font-headline-lg">{activeMatch ? '' : '/3'}</span>
+                    {activeMatch ? activeMatch.scoreStr : '0/0'}
                   </span>
                   <span className="font-scoreboard-md text-scoreboard-md text-text-slate">
-                    {activeMatch ? activeMatch.oversStr : '16.2'}{' '}
-                    <span className="font-label-caps text-label-caps text-text-subdued font-normal">/ 20 OV</span>
+                    {activeMatch ? activeMatch.oversStr : '0.0'}{' '}
+                    <span className="font-label-caps text-label-caps text-text-subdued font-normal">
+                      / {activeMatch ? (activeMatch.format === 'T10' ? '10' : activeMatch.format === 'ODI' ? '50' : '20') : '20'} OV
+                    </span>
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-body-sm text-text-subdued pt-1">
                   <span className="font-label-caps text-label-caps text-warning-amber">
-                    {activeMatch?.targetStr || 'TARGET 178 RUNS'}
+                    {activeMatch?.targetStr || 'STANDARD MATCHPLAY'}
                   </span>
-                  <span className="font-label-caps text-label-caps text-primary">NEED 36 RUNS IN 22 BALLS</span>
+                  <span className="font-label-caps text-label-caps text-primary">
+                    {activeMatch ? 'BALLISTICS READY' : 'CLICK TO LAUNCH'}
+                  </span>
                 </div>
                 {/* Over Ball Feed */}
                 <div className="flex items-center gap-1.5 pt-2">
                   <span className="font-label-caps text-[10px] text-text-subdued uppercase">THIS OVER:</span>
-                  {(activeMatch?.ballsThisOver || ['1', '4', 'W', '6', '●']).map((b, idx) => (
+                  {(activeMatch?.ballsThisOver || ['•', '•', '•', '•', '•', '•']).map((b, idx) => (
                     <span
                       key={idx}
                       className={`w-5 h-5 rounded-full flex items-center justify-center font-label-caps text-[10px] font-bold ${
@@ -458,8 +527,10 @@ export default function HomeScreen() {
                           ? 'bg-wicket-red-container text-error font-extrabold'
                           : b === '6'
                           ? 'bg-primary-container text-on-primary-container font-extrabold shadow-sm'
-                          : b === '●'
-                          ? 'bg-surface-elevated animate-pulse text-primary'
+                          : b === '4'
+                          ? 'bg-primary/20 text-primary font-bold'
+                          : b === '•' || b === '●'
+                          ? 'bg-surface-elevated text-text-subdued'
                           : 'bg-surface-container text-text-chalk'
                       }`}
                     >
@@ -471,11 +542,11 @@ export default function HomeScreen() {
             </div>
 
             <Link
-              href="/match?resume=true"
+              href={activeMatch ? '/match?resume=true' : '/match'}
               className="w-full py-2.5 px-space-md bg-warning-amber text-surface-container-lowest font-headline-md text-body-bold uppercase tracking-wider rounded shadow-[0_4px_16px_rgba(245,158,11,0.25)] hover:shadow-[0_4px_24px_rgba(245,158,11,0.4)] transition-all flex items-center justify-center gap-space-xs font-bold"
             >
               <span className="material-symbols-outlined text-[18px]">sports</span>
-              <span>RESUME MATCH</span>
+              <span>{activeMatch ? 'RESUME MATCH' : 'START LIVE MATCH'}</span>
             </Link>
           </div>
 
@@ -486,57 +557,84 @@ export default function HomeScreen() {
               <div className="flex items-center justify-between w-full mb-space-md">
                 <span className="font-label-caps text-label-caps px-2.5 py-1 rounded bg-surface-container text-primary uppercase tracking-wider font-extrabold flex items-center gap-1">
                   <span className="material-symbols-outlined text-[14px] text-primary">trophy</span>
-                  COMPLETED MATCH
+                  {recentCompletedMatch ? 'COMPLETED MATCH' : 'MATCH VAULT'}
                 </span>
                 <span className="font-label-caps text-label-caps text-text-subdued px-2 py-0.5 rounded bg-surface-recessed font-mono">
-                  ODI 50 OVERS
+                  {recentCompletedMatch ? `${recentCompletedMatch.format} DERBY` : 'ARCHIVE READY'}
                 </span>
               </div>
               <div className="flex flex-col mb-space-sm">
                 <span className="font-label-caps text-label-caps text-secondary-fixed uppercase tracking-widest font-extrabold mb-1">
-                  VICTORY BY 24 RUNS
+                  {recentCompletedMatch ? recentCompletedMatch.resultSummary : 'NO PAST MATCHES YET'}
                 </span>
                 <div className="flex items-center justify-between">
-                  <span className="font-headline-md text-title-md text-text-chalk">YOUR XI</span>
+                  <span className="font-headline-md text-title-md text-text-chalk truncate max-w-[170px]">
+                    {recentCompletedMatch ? recentCompletedMatch.team1Name : 'YOUR SQUAD'}
+                  </span>
                   <span className="font-scoreboard-md text-scoreboard-md text-text-chalk">
-                    312/7 <span className="text-body-sm text-text-subdued font-normal">(50.0)</span>
+                    {recentCompletedMatch ? recentCompletedMatch.team1Score : '-'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-text-slate">
-                  <span className="font-headline-md text-title-md text-text-slate">ENGLAND XI</span>
+                  <span className="font-headline-md text-title-md text-text-slate truncate max-w-[170px]">
+                    {recentCompletedMatch ? recentCompletedMatch.team2Name : 'OPPONENT'}
+                  </span>
                   <span className="font-scoreboard-md text-scoreboard-md text-text-slate">
-                    288 <span className="text-body-sm text-text-subdued font-normal">(48.2)</span>
+                    {recentCompletedMatch ? recentCompletedMatch.team2Score : '-'}
                   </span>
                 </div>
               </div>
 
               {/* Player of the Match Spotlight */}
-              <div className="bg-surface-recessed p-space-sm rounded-lg mb-space-md flex items-center gap-space-sm">
-                <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center flex-shrink-0">
-                  <span className="material-symbols-outlined text-[20px] text-tertiary">star</span>
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-label-caps text-[10px] text-tertiary uppercase tracking-wider font-bold">
-                      PLAYER OF MATCH
-                    </span>
-                    <span className="w-1 h-1 rounded-full bg-text-subdued" />
-                    <span className="font-label-caps text-[10px] text-text-subdued">BATTER</span>
+              {recentCompletedMatch?.potm ? (
+                <div className="bg-surface-recessed p-space-sm rounded-lg mb-space-md flex items-center gap-space-sm">
+                  <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center flex-shrink-0">
+                    <span className="material-symbols-outlined text-[20px] text-tertiary">star</span>
                   </div>
-                  <span className="font-body-bold text-body-bold text-text-chalk truncate">
-                    V. Kohli <span className="font-scoreboard-md text-body-sm text-secondary">89* (68)</span> &amp; 1 CTH
-                  </span>
+                  <div className="flex flex-col min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-label-caps text-[10px] text-tertiary uppercase tracking-wider font-bold">
+                        PLAYER OF MATCH
+                      </span>
+                      <span className="w-1 h-1 rounded-full bg-text-subdued" />
+                      <span className="font-label-caps text-[10px] text-text-subdued">
+                        {recentCompletedMatch.potm.team}
+                      </span>
+                    </div>
+                    <span className="font-body-bold text-body-bold text-text-chalk truncate">
+                      {recentCompletedMatch.potm.name}
+                      {recentCompletedMatch.potm.summary ? (
+                        <span className="font-body-sm text-text-slate font-normal ml-1">
+                          • {recentCompletedMatch.potm.summary}
+                        </span>
+                      ) : null}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="bg-surface-recessed p-space-sm rounded-lg mb-space-md flex items-center gap-space-sm">
+                  <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center flex-shrink-0">
+                    <span className="material-symbols-outlined text-[20px] text-primary">sports_cricket</span>
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <div className="text-[10px] font-mono text-primary uppercase font-bold tracking-wider">
+                      HISTORICAL REPLAYS
+                    </div>
+                    <span className="font-body-sm text-text-slate">
+                      Matches played will be archived with full telemetry &amp; POTM awards.
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-space-sm">
               <Link
-                href="/match?stage=completed"
+                href="/my-cricket"
                 className="flex-1 py-2.5 px-space-md bg-surface-container hover:bg-surface-bright text-text-chalk font-label-caps text-label-caps uppercase tracking-wider rounded transition-colors flex items-center justify-center gap-space-xs"
               >
                 <span className="material-symbols-outlined text-[16px]">analytics</span>
-                <span>FULL SCORECARD</span>
+                <span>{recentCompletedMatch ? 'FULL SCORECARD' : 'VIEW MATCH HISTORY'}</span>
               </Link>
               <Link
                 href="/my-cricket"
