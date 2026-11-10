@@ -168,8 +168,11 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       });
     };
 
-    if (wasPlaying && hasEnteredArena && !isMuted) {
-      audio.play().catch(() => {
+    if ((wasPlaying || hasEnteredArena) && !isMuted) {
+      audio.play().then(() => {
+        setIsPlaying(true);
+      }).catch((err) => {
+        console.warn('Playback error playing track:', track.title, err);
         setIsPlaying(false);
       });
     }
