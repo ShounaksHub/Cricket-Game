@@ -16,6 +16,17 @@ export default function HomeScreen() {
     playerCount: number;
     synergy: number;
   } | null>(null);
+  const [careerStats, setCareerStats] = useState<{
+    totalRuns: number;
+    totalMatches: number;
+    totalWins: number;
+    winPercentage: string;
+  }>({
+    totalRuns: 0,
+    totalMatches: 0,
+    totalWins: 0,
+    winPercentage: '0.0',
+  });
   const [activeMatch, setActiveMatch] = useState<{
     format: MatchFormat;
     userTeamName: string;
@@ -29,6 +40,32 @@ export default function HomeScreen() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
+    // Load genuine career metrics from cricket_match_history
+    try {
+      const rawHistory = localStorage.getItem('cricket_match_history');
+      if (rawHistory) {
+        const history = JSON.parse(rawHistory);
+        if (Array.isArray(history) && history.length > 0) {
+          let runs = 0;
+          let wins = 0;
+          for (const m of history) {
+            const sum = (m.resultSummary || '').toLowerCase();
+            if (sum.includes('won by') || sum.includes('victory')) wins++;
+            const mRuns = (m.team1Score || '').match(/^(\d+)/);
+            if (mRuns) runs += parseInt(mRuns[1], 10);
+            const mRuns2 = (m.team2Score || '').match(/^(\d+)/);
+            if (mRuns2) runs += parseInt(mRuns2[1], 10);
+          }
+          setCareerStats({
+            totalRuns: runs,
+            totalMatches: history.length,
+            totalWins: wins,
+            winPercentage: ((wins / history.length) * 100).toFixed(1),
+          });
+        }
+      }
+    } catch {}
+
     // Load saved custom dream team from localStorage
     try {
       const rawSquads = localStorage.getItem('cricket_dream_teams');
@@ -39,7 +76,7 @@ export default function HomeScreen() {
           const cap = team.players?.find((p: any) => p.isCaptain);
           const vc = team.players?.find((p: any) => p.isViceCaptain);
           setSavedTeam({
-            name: team.name || 'THUNDERBOLTS XI',
+            name: team.teamName || team.name || 'My Dream XI',
             captainName: cap?.name || 'V. Kohli',
             vcName: vc?.name || 'J. Bumrah',
             playerCount: team.players?.length || 11,
@@ -222,21 +259,28 @@ export default function HomeScreen() {
         <div className="relative z-10 w-full pt-space-md flex flex-wrap items-center justify-between gap-space-md">
           <div className="flex items-center gap-space-xl">
             <div className="flex flex-col">
-              <span className="font-label-caps text-label-caps text-text-subdued uppercase">GLOBAL CAREER RUNS</span>
+              <span className="font-label-caps text-label-caps text-text-subdued uppercase">RECORDED CAREER RUNS</span>
               <span className="font-scoreboard-md text-scoreboard-md text-text-chalk">
-                14,892 <span className="font-label-caps text-label-caps text-primary">+342 TODAY</span>
+                {careerStats.totalRuns.toLocaleString()}{' '}
+                <span className="font-label-caps text-label-caps text-primary">
+                  {careerStats.totalMatches > 0 ? `(${careerStats.totalMatches} FIXTURES)` : 'LOCAL BENCHMARK'}
+                </span>
               </span>
             </div>
             <div className="flex flex-col">
-              <span className="font-label-caps text-label-caps text-text-subdued uppercase">WIN PERCENTAGE</span>
+              <span className="font-label-caps text-label-caps text-text-subdued uppercase">WIN RATIO</span>
               <span className="font-scoreboard-md text-scoreboard-md text-secondary">
-                74.8% <span className="font-label-caps text-label-caps text-text-slate">(48/64 WINS)</span>
+                {careerStats.winPercentage}%{' '}
+                <span className="font-label-caps text-label-caps text-text-slate">
+                  ({careerStats.totalWins}/{careerStats.totalMatches} WINS)
+                </span>
               </span>
             </div>
             <div className="hidden sm:flex flex-col">
-              <span className="font-label-caps text-label-caps text-text-subdued uppercase">TROPHY CABINET</span>
+              <span className="font-label-caps text-label-caps text-text-subdued uppercase">ROSTER VAULT</span>
               <span className="font-scoreboard-md text-scoreboard-md text-tertiary">
-                11 CUPS <span className="font-label-caps text-label-caps text-tertiary-fixed-dim">TIER 1 ELITE</span>
+                1,144 PLAYERS{' '}
+                <span className="font-label-caps text-label-caps text-tertiary-fixed-dim">100% AUDITED</span>
               </span>
             </div>
           </div>
@@ -293,7 +337,7 @@ export default function HomeScreen() {
                 </div>
                 <div className="flex flex-col min-w-0">
                   <span className="font-headline-md text-headline-md text-text-chalk tracking-tight truncate group-hover:text-primary transition-colors">
-                    {savedTeam ? savedTeam.name : 'THUNDERBOLTS XI'}
+                    {savedTeam ? savedTeam.name : 'MY DREAM XI'}
                   </span>
                   <span className="font-body-sm text-body-sm text-text-slate">
                     Captain:{' '}

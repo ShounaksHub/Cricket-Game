@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { getAuthoritativePlayerImage } from '@/lib/player-image-resolver';
 import { useRouter } from 'next/navigation';
 import type {
   MatchFormat,
@@ -36,34 +37,23 @@ function getCountryFlag(country: string): string {
   return '🏏';
 }
 
-function getPlayerPortrait(id: string, index: number): string {
-  const portraitMap: Record<string, string> = {
-    'p-sachin-tendulkar': '/assets/stitch/asset-028.png',
-    'p-wasim-akram': '/assets/stitch/asset-029.png',
-    'p-brian-lara': '/assets/stitch/asset-030.png',
-    'p-glenn-mcgrath': '/assets/stitch/asset-031.png',
-    'p-jacques-kallis': '/assets/stitch/asset-032.png',
-    'p-muttiah-muralitharan': '/assets/stitch/asset-033.png',
-    'p-rohit-sharma': '/assets/stitch/asset-004.png',
-    'p-virat-kohli': '/assets/stitch/asset-005.png',
-    'p-steve-smith': '/assets/stitch/asset-006.png',
-    'p-joe-root': '/assets/stitch/asset-007.png',
-    'p-babar-azam': '/assets/stitch/asset-008.png',
-    'p-ms-dhoni': '/assets/stitch/asset-009.png',
-    'p-hardik-pandya': '/assets/stitch/asset-010.png',
-    'p-rashid-khan': '/assets/stitch/asset-011.png',
-    'p-pat-cummins': '/assets/stitch/asset-012.png',
-    'p-jasprit-bumrah': '/assets/stitch/asset-013.png',
-    'p-shaheen-afridi': '/assets/stitch/asset-014.png',
-  };
-  if (portraitMap[id]) return portraitMap[id];
-  const assetNums = [
-    '004', '005', '006', '007', '008', '009', '010', '011', '012', '013', '014',
-    '016', '017', '018', '019', '020', '021', '022', '023', '024', '025', '026',
-    '027', '028', '029', '030', '031', '032', '033', '034', '035', '036', '037', '038'
-  ];
-  const num = assetNums[Math.abs(index) % assetNums.length];
-  return `/assets/stitch/asset-${num}.png`;
+function getPlayerPortrait(playerOrId: any, index: number = 0): string {
+  if (typeof playerOrId === 'object' && playerOrId !== null) {
+    return getAuthoritativePlayerImage(
+      playerOrId.id,
+      playerOrId.fullName || playerOrId.displayName,
+      playerOrId.primaryRole,
+      playerOrId.primaryNationality
+    );
+  }
+  const idStr = String(playerOrId || '');
+  const found = VERIFIED_BENCHMARK_PLAYERS.find((p) => p.id === idStr);
+  return getAuthoritativePlayerImage(
+    idStr,
+    found?.fullName || found?.displayName,
+    found?.primaryRole,
+    found?.primaryNationality
+  );
 }
 
 const ITEMS_PER_PAGE = 8;
@@ -520,7 +510,7 @@ export default function PlayerCataloguePage() {
                   const ovr = player.ratings[selectedFormat]?.overallRating ?? 75;
                   const batRating = player.ratings[selectedFormat]?.battingRating ?? 50;
                   const bowlRating = player.ratings[selectedFormat]?.bowlingRating ?? 50;
-                  const portrait = getPlayerPortrait(player.id, idx + (currentPage - 1) * ITEMS_PER_PAGE);
+                  const portrait = getPlayerPortrait(player, idx + (currentPage - 1) * ITEMS_PER_PAGE);
                   const flag = getCountryFlag(player.primaryNationality);
                   const careerSpan = `${player.careerDebutYear}-${player.careerRetirementYear ? String(player.careerRetirementYear).slice(-2) : 'Pres'}`;
 
@@ -705,7 +695,7 @@ export default function PlayerCataloguePage() {
                         <img
                           alt={activePlayer.displayName}
                           className="w-28 h-28 sm:w-32 sm:h-32 rounded-xl object-cover bg-surface-recessed shadow-lg"
-                          src={getPlayerPortrait(activePlayer.id, 0)}
+                          src={getPlayerPortrait(activePlayer, 0)}
                           onError={(e) => {
                             e.currentTarget.src = '/assets/stitch/asset-004.png';
                           }}

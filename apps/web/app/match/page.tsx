@@ -33,6 +33,7 @@ import {
   buildNationalLineup,
   buildWorldXILineup,
 } from '@/lib/national-teams';
+import { getAuthoritativePlayerImage } from '@/lib/player-image-resolver';
 import type {
   MatchFormat,
   DreamTeamPlayerSlotInput,
@@ -206,10 +207,28 @@ export default function MatchSimulationPage() {
   const [teamMode, setTeamMode] = useState<'ONE_TEAM_PER_NATION' | 'ONE_PLAYER_PER_NATION' | 'CUSTOM_DREAM_TEAM'>('ONE_TEAM_PER_NATION');
   const [userNation, setUserNation] = useState<string>('India');
   const [aiNation, setAiNation] = useState<string>('Australia');
+  const [savedSquads, setSavedSquads] = useState<any[]>([]);
+  const [selectedSquadId, setSelectedSquadId] = useState<string>('');
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     try {
+      // Load saved user dream squads
+      try {
+        const rawTeams = localStorage.getItem('cricket_dream_teams');
+        if (rawTeams) {
+          const parsedTeams = JSON.parse(rawTeams);
+          if (Array.isArray(parsedTeams) && parsedTeams.length > 0) {
+            setSavedSquads(parsedTeams);
+            const activeTeam = parsedTeams[0];
+            setSelectedSquadId(activeTeam.id);
+            if (activeTeam.teamName) {
+              setUserTeamName(activeTeam.teamName);
+            }
+          }
+        }
+      } catch {}
+
       const stored = localStorage.getItem('cricket_active_user_team');
       if (stored) {
         const parsed = JSON.parse(stored);
@@ -582,7 +601,12 @@ export default function MatchSimulationPage() {
       lineup1 = res.lineup;
       customName = 'User World XI (1 Per Nation)';
     } else {
-      if (typeof window !== 'undefined') {
+      // Check selected saved squad from state or localStorage
+      const foundSquad = savedSquads.find((s) => s.id === selectedSquadId) || savedSquads[0];
+      if (foundSquad && Array.isArray(foundSquad.lineup) && foundSquad.lineup.length === 11) {
+        lineup1 = foundSquad.lineup;
+        if (foundSquad.teamName) customName = foundSquad.teamName;
+      } else if (typeof window !== 'undefined') {
         try {
           const stored = localStorage.getItem('cricket_active_user_team');
           if (stored) {
@@ -854,33 +878,10 @@ export default function MatchSimulationPage() {
   }
 
   function getPlayerPortrait(id?: string, index: number = 0): string {
-    const portraitMap: Record<string, string> = {
-      'p-rohit-sharma': '/assets/stitch/asset-004.png',
-      'p-virat-kohli': '/assets/stitch/asset-005.png',
-      'p-steve-smith': '/assets/stitch/asset-006.png',
-      'p-joe-root': '/assets/stitch/asset-007.png',
-      'p-babar-azam': '/assets/stitch/asset-008.png',
-      'p-ms-dhoni': '/assets/stitch/asset-009.png',
-      'p-hardik-pandya': '/assets/stitch/asset-010.png',
-      'p-rashid-khan': '/assets/stitch/asset-011.png',
-      'p-pat-cummins': '/assets/stitch/asset-012.png',
-      'p-jasprit-bumrah': '/assets/stitch/asset-013.png',
-      'p-shaheen-afridi': '/assets/stitch/asset-014.png',
-      'p-sachin-tendulkar': '/assets/stitch/asset-028.png',
-      'p-wasim-akram': '/assets/stitch/asset-029.png',
-      'p-brian-lara': '/assets/stitch/asset-030.png',
-      'p-glenn-mcgrath': '/assets/stitch/asset-031.png',
-      'p-jacques-kallis': '/assets/stitch/asset-032.png',
-      'p-muttiah-muralitharan': '/assets/stitch/asset-033.png',
-    };
-    if (id && portraitMap[id]) return portraitMap[id];
-    const assetNums = [
-      '004', '005', '006', '007', '008', '009', '010', '011', '012', '013', '014',
-      '016', '017', '018', '019', '020', '021', '022', '023', '024', '025', '026',
-      '027', '028', '029', '030', '031', '032', '033', '034', '035', '036', '037', '038'
-    ];
-    const num = assetNums[Math.abs(index) % assetNums.length];
-    return `/assets/stitch/asset-${num}.png`;
+    const p = id ? (simulationResult?.finalState.config.playerProfiles instanceof Map
+      ? simulationResult.finalState.config.playerProfiles.get(id)
+      : (simulationResult?.finalState.config.playerProfiles as any)?.[id]) : undefined;
+    return getAuthoritativePlayerImage(id, p?.fullName || p?.displayName, p?.primaryRole, p?.primaryNationality);
   }
 
   function getCountryFlag(country: string): string {
@@ -1269,6 +1270,54 @@ export default function MatchSimulationPage() {
                 })}
               </div>
 
+              {/* Custom Dream XI Squad Selector */}
+              {teamMode === 'CUSTOM_DREAM_TEAM' && (
+                <div className="p-3 rounded-lg bg-surface-recessed border border-border-hairline space-y-3 mt-1">
+                  <div className="flex items-center justify-between text-xs text-secondary font-label-caps">
+                    <span>✓ YOUR VERIFIED DREAM XI SQUADS</span>
+                    <Link href="/dream-teams" className="text-primary hover:underline text-[10px]">
+                      + Build / Edit Squads
+                    </Link>
+                  </div>
+                  {savedSquads.length === 0 ? (
+                    <div className="text-center py-2 text-text-subdued text-xs">
+                      No saved squads found. (Using default balanced XI or{' '}
+                      <Link href="/dream-teams" className="text-primary underline">
+                        create one now
+                      </Link>
+                      )
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="text-[11px] text-text-subdued block mb-1 font-label-caps uppercase">
+                        SELECT ACTIVE SQUAD:
+                      </label>
+                      <select
+                        value={selectedSquadId}
+                        onChange={(e) => {
+                          const sqId = e.target.value;
+                          setSelectedSquadId(sqId);
+                          const chosen = savedSquads.find((s) => s.id === sqId);
+                          if (chosen) {
+                            setUserTeamName(chosen.teamName);
+                            if (typeof window !== 'undefined') {
+                              localStorage.setItem('cricket_active_user_team', JSON.stringify(chosen));
+                            }
+                          }
+                        }}
+                        className="w-full bg-surface-elevated border border-border-hairline text-text-chalk p-2 rounded text-body-sm focus:outline-none cursor-pointer"
+                      >
+                        {savedSquads.map((sq) => (
+                          <option key={sq.id} value={sq.id}>
+                            {sq.teamName} ({sq.lineup?.length || 11} Players - {sq.format || 'ALL'})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* National Selectors */}
               {teamMode === 'ONE_TEAM_PER_NATION' && (
                 <div className="p-3 rounded-lg bg-surface-recessed border border-border-hairline space-y-3 mt-1">
@@ -1522,29 +1571,39 @@ export default function MatchSimulationPage() {
                 </div>
               </div>
 
-              <div className="relative my-space-md flex flex-col items-center">
-                <div className="relative w-44 h-52 rounded-xl overflow-hidden shadow-2xl bg-surface-container border border-border-hairline">
-                  <img
-                    className="w-full h-full object-cover"
-                    alt={userTeamName}
-                    src="/assets/stitch/asset-004.png"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-surface-card via-transparent to-transparent" />
-                  <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-tertiary text-on-tertiary px-space-xs py-0.5 rounded font-label-caps text-label-caps font-black shadow-[0_0_12px_rgba(233,195,73,0.5)]">
-                    <span className="material-symbols-outlined text-[14px]">military_tech</span> CAPTAIN
-                  </div>
-                </div>
+              {(() => {
+                const squads = prepareSimulationSquads();
+                const capSlot = squads.team1.lineup.find((s) => s.isCaptain) || squads.team1.lineup[0];
+                const capProfile = capSlot ? squads.profiles.get(capSlot.playerId) : undefined;
+                const capName = capProfile?.fullName || capProfile?.displayName || 'Team Captain';
+                const capRole = capProfile?.primaryRole?.replace(/_/g, ' ') || 'Squad Leader';
+                const capImg = getAuthoritativePlayerImage(capSlot?.playerId, capName, capProfile?.primaryRole, capProfile?.primaryNationality);
+                return (
+                  <div className="relative my-space-md flex flex-col items-center">
+                    <div className="relative w-44 h-52 rounded-xl overflow-hidden shadow-2xl bg-surface-container border border-border-hairline">
+                      <img
+                        className="w-full h-full object-cover"
+                        alt={capName}
+                        src={capImg}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-surface-card via-transparent to-transparent" />
+                      <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-tertiary text-on-tertiary px-space-xs py-0.5 rounded font-label-caps text-label-caps font-black shadow-[0_0_12px_rgba(233,195,73,0.5)]">
+                        <span className="material-symbols-outlined text-[14px]">military_tech</span> CAPTAIN
+                      </div>
+                    </div>
 
-                <div className="text-center mt-space-sm">
-                  <span className="font-label-caps text-label-caps text-primary tracking-widest uppercase">
-                    {userTeamName}
-                  </span>
-                  <h2 className="font-headline-lg text-headline-md text-text-chalk tracking-tight leading-none mt-0.5 uppercase">
-                    ROHIT SHARMA
-                  </h2>
-                  <span className="font-body-sm text-body-sm text-text-subdued">Opening Master • Toss Caller</span>
-                </div>
-              </div>
+                    <div className="text-center mt-space-sm">
+                      <span className="font-label-caps text-label-caps text-primary tracking-widest uppercase">
+                        {userTeamName}
+                      </span>
+                      <h2 className="font-headline-lg text-headline-md text-text-chalk tracking-tight leading-none mt-0.5 uppercase">
+                        {capName}
+                      </h2>
+                      <span className="font-body-sm text-body-sm text-text-subdued">{capRole} • Toss Caller</span>
+                    </div>
+                  </div>
+                );
+              })()}
 
               <div className="grid grid-cols-3 gap-space-xs bg-surface-recessed p-space-xs rounded-lg text-center border border-border-hairline">
                 <div className="flex flex-col py-1">
@@ -1708,29 +1767,39 @@ export default function MatchSimulationPage() {
                 </div>
               </div>
 
-              <div className="relative my-space-md flex flex-col items-center">
-                <div className="relative w-44 h-52 rounded-xl overflow-hidden shadow-2xl bg-surface-container border border-border-hairline">
-                  <img
-                    className="w-full h-full object-cover"
-                    alt={aiTeamName}
-                    src="/assets/stitch/asset-012.png"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-surface-card via-transparent to-transparent" />
-                  <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-surface-elevated text-text-chalk px-space-xs py-0.5 rounded font-label-caps text-label-caps font-black border border-border-hairline">
-                    <span className="material-symbols-outlined text-[14px]">military_tech</span> CAPTAIN
-                  </div>
-                </div>
+              {(() => {
+                const squads = prepareSimulationSquads();
+                const capSlot = squads.team2.lineup.find((s) => s.isCaptain) || squads.team2.lineup[0];
+                const capProfile = capSlot ? squads.profiles.get(capSlot.playerId) : undefined;
+                const capName = capProfile?.fullName || capProfile?.displayName || 'Opponent Captain';
+                const capRole = capProfile?.primaryRole?.replace(/_/g, ' ') || 'Opponent Leader';
+                const capImg = getAuthoritativePlayerImage(capSlot?.playerId, capName, capProfile?.primaryRole, capProfile?.primaryNationality);
+                return (
+                  <div className="relative my-space-md flex flex-col items-center">
+                    <div className="relative w-44 h-52 rounded-xl overflow-hidden shadow-2xl bg-surface-container border border-border-hairline">
+                      <img
+                        className="w-full h-full object-cover"
+                        alt={capName}
+                        src={capImg}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-surface-card via-transparent to-transparent" />
+                      <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-surface-elevated text-text-chalk px-space-xs py-0.5 rounded font-label-caps text-label-caps font-black border border-border-hairline">
+                        <span className="material-symbols-outlined text-[14px]">military_tech</span> CAPTAIN
+                      </div>
+                    </div>
 
-                <div className="text-center mt-space-sm">
-                  <span className="font-label-caps text-label-caps text-telemetry-blue tracking-widest uppercase">
-                    {aiTeamName}
-                  </span>
-                  <h2 className="font-headline-lg text-headline-md text-text-chalk tracking-tight leading-none mt-0.5 uppercase">
-                    PAT CUMMINS
-                  </h2>
-                  <span className="font-body-sm text-body-sm text-text-subdued">Pace Leader • World Champion</span>
-                </div>
-              </div>
+                    <div className="text-center mt-space-sm">
+                      <span className="font-label-caps text-label-caps text-telemetry-blue tracking-widest uppercase">
+                        {aiTeamName}
+                      </span>
+                      <h2 className="font-headline-lg text-headline-md text-text-chalk tracking-tight leading-none mt-0.5 uppercase">
+                        {capName}
+                      </h2>
+                      <span className="font-body-sm text-body-sm text-text-subdued">{capRole} • Challenging Captain</span>
+                    </div>
+                  </div>
+                );
+              })()}
 
               <div className="grid grid-cols-3 gap-space-xs bg-surface-recessed p-space-xs rounded-lg text-center border border-border-hairline">
                 <div className="flex flex-col py-1">

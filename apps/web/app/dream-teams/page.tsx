@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { getAuthoritativePlayerImage } from '@/lib/player-image-resolver';
 import { useRouter } from 'next/navigation';
 import {
   SUPPORTED_NATIONAL_TEAMS,
@@ -71,38 +72,29 @@ function getCountryFlag(country: string): string {
 }
 
 // Map player ID to local asset portrait with consistent fallbacks
-function getPlayerPortrait(id: string, index: number): string {
-  const portraitMap: Record<string, string> = {
-    'p-rohit-sharma': '/assets/stitch/asset-004.png',
-    'p-virat-kohli': '/assets/stitch/asset-005.png',
-    'p-steve-smith': '/assets/stitch/asset-006.png',
-    'p-joe-root': '/assets/stitch/asset-007.png',
-    'p-babar-azam': '/assets/stitch/asset-008.png',
-    'p-ms-dhoni': '/assets/stitch/asset-009.png',
-    'p-hardik-pandya': '/assets/stitch/asset-010.png',
-    'p-rashid-khan': '/assets/stitch/asset-011.png',
-    'p-pat-cummins': '/assets/stitch/asset-012.png',
-    'p-jasprit-bumrah': '/assets/stitch/asset-013.png',
-    'p-shaheen-afridi': '/assets/stitch/asset-014.png',
-    'p-sachin-tendulkar': '/assets/stitch/asset-028.png',
-    'p-glenn-mcgrath': '/assets/stitch/asset-031.png',
-    'p-jacques-kallis': '/assets/stitch/asset-032.png',
-    'p-muttiah-muralitharan': '/assets/stitch/asset-033.png',
-  };
-  if (portraitMap[id]) return portraitMap[id];
-  const assetNums = [
-    '004', '005', '006', '007', '008', '009', '010', '011', '012', '013', '014',
-    '016', '017', '018', '019', '020', '021', '022', '023', '024', '025', '026',
-    '027', '028', '029', '030', '031', '032', '033', '034', '035', '036', '037', '038'
-  ];
-  const num = assetNums[Math.abs(index) % assetNums.length];
-  return `/assets/stitch/asset-${num}.png`;
+function getPlayerPortrait(playerOrId: any, index: number = 0): string {
+  if (typeof playerOrId === 'object' && playerOrId !== null) {
+    return getAuthoritativePlayerImage(
+      playerOrId.id,
+      playerOrId.fullName || playerOrId.displayName,
+      playerOrId.primaryRole,
+      playerOrId.primaryNationality
+    );
+  }
+  const idStr = String(playerOrId || '');
+  const found = VERIFIED_BENCHMARK_PLAYERS.find((p) => p.id === idStr);
+  return getAuthoritativePlayerImage(
+    idStr,
+    found?.fullName || found?.displayName,
+    found?.primaryRole,
+    found?.primaryNationality
+  );
 }
 
 export default function DreamXIBuilderPage() {
   const router = useRouter();
   const [selectedFormat, setSelectedFormat] = useState<MatchFormat>('T20');
-  const [teamName, setTeamName] = useState<string>('THUNDERBOLTS XI');
+  const [teamName, setTeamName] = useState<string>('My Dream XI');
   const [selectedSlots, setSelectedSlots] = useState<SelectedSlot[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [roleFilter, setRoleFilter] = useState<'ALL' | 'BATTER' | 'WK' | 'ALL-ROUNDER' | 'BOWLER'>('ALL');
@@ -153,7 +145,7 @@ export default function DreamXIBuilderPage() {
         const teams: SavedTeam[] = JSON.parse(stored);
         if (teams.length > 0) {
           const t = teams[0];
-          setTeamName(t.teamName || 'THUNDERBOLTS XI');
+          setTeamName(t.teamName || 'My Dream XI');
           setSelectedFormat(t.format || 'T20');
           setSelectedSlots(t.lineup || []);
           return;
@@ -380,7 +372,7 @@ export default function DreamXIBuilderPage() {
     const isReady = validationResult.isValid && selectedSlots.length === 11 && nationConflicts.length === 0;
     const newTeam: SavedTeam = {
       id: `team-${Date.now()}`,
-      teamName: teamName.trim() || 'THUNDERBOLTS XI',
+      teamName: teamName.trim() || 'My Dream XI',
       format: selectedFormat,
       status: isReady ? 'MATCH_READY' : 'DRAFT',
       lineup: selectedSlots,
@@ -391,6 +383,7 @@ export default function DreamXIBuilderPage() {
       let list: SavedTeam[] = stored ? JSON.parse(stored) : [];
       list = [newTeam, ...list.filter((t) => t.teamName !== newTeam.teamName)];
       localStorage.setItem(LOCAL_STORAGE_TEAMS_KEY, JSON.stringify(list));
+      localStorage.setItem('cricket_active_user_team', JSON.stringify(newTeam));
       setSaveSuccessMsg('Squad locked & saved to Local Storage!');
       setTimeout(() => setSaveSuccessMsg(null), 3000);
     } catch {
@@ -556,7 +549,7 @@ export default function DreamXIBuilderPage() {
               const isSelected = selectedPlayerIdSet.has(player.id);
               const roleCat = getStitchRoleCategory(player.primaryRole);
               const flag = getCountryFlag(player.primaryNationality);
-              const portrait = getPlayerPortrait(player.id, idx);
+              const portrait = getPlayerPortrait(player, idx);
               const ovr = player.ratings[selectedFormat]?.overallRating ?? 75;
               const batAvg = player.formatStats[selectedFormat]?.battingAverage ?? 0;
               const batSr = player.formatStats[selectedFormat]?.strikeRate ?? 120;
