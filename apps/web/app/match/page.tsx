@@ -48,6 +48,7 @@ import {
   stepDelivery,
   resolveAITacticalAction,
   DeterministicPRNG,
+  getRulesetForFormat,
   type StadiumSpec,
   type MatchSimulationConfig,
   type MatchSimulationResult,
@@ -183,6 +184,7 @@ export default function MatchSimulationPage() {
   const [showReplayModal, setShowReplayModal] = useState<boolean>(false);
 
   // --- Tactical Controls for Next Ball ---
+  const [serverOnline, setServerOnline] = useState<boolean | null>(null);
   const [userIntent, setUserIntent] = useState<BatterIntent>('BALANCED');
   const [userLength, setUserLength] = useState<BowlingLength>('GOOD_LENGTH');
   const [userLine, setUserLine] = useState<BowlingLine>('OUTSIDE_OFF');
@@ -227,7 +229,12 @@ export default function MatchSimulationPage() {
     } catch {
       // Ignore
     }
-  }, []);
+
+    // Ping API server to establish server authority status
+    fetch(`${apiUrl}/stadiums`)
+      .then((r) => setServerOnline(r.ok))
+      .catch(() => setServerOnline(false));
+  }, [apiUrl]);
 
   function saveActiveSession(
     currentState: MatchState,
@@ -352,7 +359,7 @@ export default function MatchSimulationPage() {
       seed,
       versions: {
         simulationVersion: 'sim-1.0.0',
-        rulesetVersion: 'rules-t20-icc-2026.1',
+        rulesetVersion: getRulesetForFormat(activeSession.format).rulesetVersion,
         ratingVersion: 'rate-1.0.0',
       },
       stadiumId: activeSession.selectedStadiumId,
@@ -442,7 +449,7 @@ export default function MatchSimulationPage() {
       seed,
       versions: {
         simulationVersion: 'sim-1.0.0',
-        rulesetVersion: 'rules-t20-icc-2026.1',
+        rulesetVersion: getRulesetForFormat(record.format).rulesetVersion,
         ratingVersion: 'rate-1.0.0',
       },
       stadiumId: record.stadiumName.toLowerCase().includes('melbourne') ? 'stadium-mcg' : 'stadium-lords',
@@ -671,7 +678,7 @@ export default function MatchSimulationPage() {
       seed,
       versions: {
         simulationVersion: 'sim-1.0.0',
-        rulesetVersion: 'rules-t20-icc-2026.1',
+        rulesetVersion: getRulesetForFormat(format).rulesetVersion,
         ratingVersion: 'rate-1.0.0',
       },
       stadiumId: selectedStadiumId,
@@ -843,13 +850,24 @@ export default function MatchSimulationPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-sm md:text-base font-bold tracking-tight text-[#F8F9FA]">
-                  T20 MATCH SIMULATION ENGINE
+                  CRICKET MATCH SIMULATION ENGINE
                 </h1>
                 <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-[#18202A] text-[#D4AF37] border border-[#D4AF37]/30">
-                  SplitMix64 • Phase 4
+                  SplitMix64 • {format}
                 </span>
+                {serverOnline === true ? (
+                  <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-mono uppercase bg-emerald-950/70 text-emerald-400 border border-emerald-500/40">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    ONLINE (SERVER PERSISTED)
+                  </span>
+                ) : (
+                  <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-mono uppercase bg-amber-950/70 text-amber-400 border border-amber-500/40" title="Simulations are run deterministically in-browser and cached in your local vault.">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                    LOCAL PRACTICE MODE (OFFLINE / VAULT)
+                  </span>
+                )}
               </div>
-              <p className="text-[11px] text-[#8A94A6]">Deterministic Multi-Format Match Simulator</p>
+              <p className="text-[11px] text-[#8A94A6]">Deterministic Multi-Format Match Simulator • {getRulesetForFormat(format).rulesetVersion}</p>
             </div>
           </div>
 
@@ -2085,7 +2103,7 @@ export default function MatchSimulationPage() {
               </div>
 
               <div className="flex justify-between items-center text-[10px] text-[#8A94A6] font-mono border-t border-[#222A36] pt-3">
-                <span>sim-1.0.0 • rules-t20-icc-2026.1 • rate-1.0.0</span>
+                <span>sim-1.0.0 • {getRulesetForFormat(format).rulesetVersion} • rate-1.0.0</span>
                 <button
                   onClick={() => setShowReplayModal(false)}
                   className="px-3 py-1.5 rounded bg-[#18202A] hover:bg-[#202936] text-[#F8F9FA] font-sans font-medium transition"

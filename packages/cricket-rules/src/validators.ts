@@ -151,3 +151,65 @@ export function validatePlayingXI(
     errors,
   };
 }
+
+/**
+ * Validates fielding placement under MCC Law 28.4 (Protection of Batter / Bodyline Prevention).
+ * - MCC Law 28.4.1: Maximum of 2 fielders permitted behind square leg at the instant of delivery.
+ * - MCC Law 28.4.2: Maximum of 5 fielders permitted on the leg side in total.
+ * If violated, delivery must be called a No-Ball (MCC Law 28.4.3).
+ */
+export function validateFieldingRestrictions(fielders: readonly {
+  readonly isLegSide: boolean;
+  readonly isBehindSquareLeg: boolean;
+}[]): { readonly isValid: boolean; readonly reason?: string } {
+  const legSideCount = fielders.filter((f) => f.isLegSide).length;
+  if (legSideCount > 5) {
+    return {
+      isValid: false,
+      reason: `MCC Law 28.4.2 violation: ${legSideCount} fielders on leg side (maximum 5 permitted).`,
+    };
+  }
+
+  const behindSquareLegCount = fielders.filter((f) => f.isBehindSquareLeg).length;
+  if (behindSquareLegCount > 2) {
+    return {
+      isValid: false,
+      reason: `MCC Law 28.4.1 violation: ${behindSquareLegCount} fielders behind square leg (maximum 2 permitted).`,
+    };
+  }
+
+  return { isValid: true };
+}
+
+/**
+ * Calculates runs resulting from overthrows under MCC Law 19.8.
+ * When the ball crosses the boundary from an overthrow, the runs scored shall be:
+ * - The boundary allowance (typically 4 runs), PLUS
+ * - Any completed physical runs if the batters had crossed at the instant of the throw.
+ */
+export function calculateOverthrowRuns(
+  completedPhysicalRuns: number,
+  boundaryCrossed: boolean,
+): number {
+  if (!boundaryCrossed) {
+    return completedPhysicalRuns;
+  }
+  return completedPhysicalRuns + 4;
+}
+
+/**
+ * Evaluates wide ball calling under ICC Clause 22.1 with batter lateral shuffle calibration.
+ * If the batter moves across toward the off side prior to delivery release, the wide line
+ * moves with the batter, preventing deliveries that would have been outside the original line
+ * but remain within normal reach from being unfairly called Wide.
+ */
+export function isLateralWide(
+  ballPassingOffWidthCm: number,
+  batterLateralShiftCm: number,
+  standardOffWideWidthCm: number = 75,
+): boolean {
+  // Dynamic wide line adjusts based on batter lateral shift, bounded by return crease
+  const effectiveWideBoundaryCm = Math.min(89, standardOffWideWidthCm + Math.max(0, batterLateralShiftCm));
+  return ballPassingOffWidthCm > effectiveWideBoundaryCm;
+}
+

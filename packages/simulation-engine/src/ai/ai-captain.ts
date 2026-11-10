@@ -238,11 +238,55 @@ export function resolveAITacticalAction(
     fieldPreset = 'BALANCED_RING';
   }
 
+  // 4. Resolve Tactical Captaincy Decisions (New Ball, Declaration, Follow-On)
+  let takeNewBall: boolean | undefined = undefined;
+  if (isTest && state.isNewBallAvailable) {
+    // If pacers are operating or ball is excessively worn, claim the new cherry
+    if (!isSpinner || state.ballWearIndex >= 0.8) {
+      takeNewBall = true;
+    } else {
+      // Delay taking new ball if spinners are getting grip
+      takeNewBall = false;
+    }
+  }
+
+  let declareInnings: boolean | undefined = undefined;
+  if (isTest && currentInnings.inningsNumber === 3) {
+    const inn1 = state.innings[0];
+    const inn2 = state.innings[1];
+    if (inn1 && inn2 && !state.isFollowOnEnforced) {
+      const overallLead = (inn1.totalRuns + currentInnings.totalRuns) - inn2.totalRuns;
+      if (overallLead >= 400 || (overallLead >= 320 && currentInnings.totalWickets >= 6)) {
+        declareInnings = true;
+      }
+    }
+  }
+
+  let enforceFollowOn: boolean | undefined = undefined;
+  if (isTest && state.isFollowOnEligible) {
+    const inn1 = state.innings[0];
+    const inn2 = state.innings[1];
+    if (inn1 && inn2) {
+      const deficit = inn1.totalRuns - inn2.totalRuns;
+      // Enforce if lead is commanding (250+), or rest bowlers if long previous innings
+      if (deficit >= 250) {
+        enforceFollowOn = true;
+      } else if (inn2.completedOvers >= 90) {
+        enforceFollowOn = false; // Give bowling attack rest
+      } else {
+        enforceFollowOn = true;
+      }
+    }
+  }
+
   return {
     batterIntent,
     bowlerLine,
     bowlerLength,
     bowlerVariation,
     fieldPreset,
+    takeNewBall,
+    declareInnings,
+    enforceFollowOn,
   };
 }

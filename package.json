@@ -19,5 +19,8 @@
     "typescript": "^5.7.3",
     "vitest": "^3.0.7"
   },
+  "prisma": {
+    "schema": "database/prisma/schema.prisma"
+  },
   "packageManager": "pnpm@12.18.0"
 }

@@ -249,6 +249,8 @@ export function calculateOutcomeLogits(input: OutcomeCalculationInput): OutcomeL
     ballWearIndex: context.ballWearIndex,
     bowlerStyle: bowler.bowlingStyle,
     isPowerplay: context.isPowerplay,
+    format: context.format,
+    currentSessionNumber: context.currentSessionNumber,
   });
   for (const [outcomeKey, delta] of Object.entries(envDeltas)) {
     if (delta !== undefined) {

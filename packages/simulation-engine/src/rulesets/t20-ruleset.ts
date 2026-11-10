@@ -7,6 +7,30 @@ export interface PowerplayConfig {
   readonly p3EndOver?: number;
 }
 
+export interface TestSessionSchedule {
+  readonly sessionNumber: number;
+  readonly sessionName: string;
+  readonly scheduledDurationMinutes: number;
+  readonly scheduledMinimumOvers: number;
+  readonly intervalAfterSession?: {
+    readonly intervalName: string;
+    readonly durationMinutes: number;
+  };
+}
+
+export interface TestScheduleConfig {
+  readonly scheduledDays: number;
+  readonly scheduledDailyOvers: number;
+  readonly sessionsPerDay: number;
+  readonly sessions: readonly TestSessionSchedule[];
+  readonly followOnDeficit: number;
+  readonly newBallOverThreshold: number;
+  readonly allowDeclarations: boolean;
+  readonly allowEnforceFollowOn: boolean;
+  readonly finalDayLastHourMinOvers: number;
+  readonly permittedAdditionalTimeMinutes: number;
+}
+
 export interface RulesetInterface {
   readonly format: MatchFormat;
   readonly rulesetVersion: string;
@@ -15,9 +39,16 @@ export interface RulesetInterface {
   readonly legalBallsPerOver: number;
   readonly freeHitAfterNoBall: boolean;
   readonly powerplay: PowerplayConfig;
+  readonly followOnDeficitThreshold?: number;
+  readonly newBallOverThreshold?: number;
+  readonly testScheduleConfig?: TestScheduleConfig;
 
   maxFieldersOutsideCircle(currentOver: number): number;
   getMaxFieldersOutsideRing(currentOver: number): number;
+  maxFieldersBehindSquareLeg(): number;
+  maxFieldersOnLegSide(): number;
+  isStopClockEnforced(): boolean;
+  stopClockLimitSeconds(): number;
   isPowerplayActive(currentOver: number): boolean;
   isPowerplayOver(currentOver: number): boolean;
   canBowlerBowlOver(
@@ -40,6 +71,25 @@ export class T20Ruleset implements RulesetInterface {
   readonly legalBallsPerOver: number = 6;
   readonly freeHitAfterNoBall: boolean = true;
   readonly powerplay: PowerplayConfig = { p1EndOver: 6 };
+  readonly followOnDeficitThreshold?: number;
+  readonly newBallOverThreshold?: number;
+  readonly testScheduleConfig?: TestScheduleConfig;
+
+  maxFieldersBehindSquareLeg(): number {
+    return 2; // MCC Law 28.4
+  }
+
+  maxFieldersOnLegSide(): number {
+    return 5; // MCC Law 28.4.2
+  }
+
+  isStopClockEnforced(): boolean {
+    return true; // ICC Clause 41.9 Stop Clock
+  }
+
+  stopClockLimitSeconds(): number {
+    return 60;
+  }
 
   /**
    * Field restrictions:
@@ -116,7 +166,7 @@ export function getRulesetForFormat(format: MatchFormat): RulesetInterface {
     case 'T10':
       return new (class extends T20Ruleset {
         override readonly format: MatchFormat = 'T10';
-        override readonly rulesetVersion = 'rules-t10-2026.1';
+        override readonly rulesetVersion = 'rules-t10-icc-2026.1';
         override readonly maxOversPerInnings = 10;
         override readonly maxOversPerBowler = 2;
         override readonly powerplay = { p1EndOver: 3 };
@@ -135,16 +185,112 @@ export function getRulesetForFormat(format: MatchFormat): RulesetInterface {
         }
       })();
     case 'TEST_RED_BALL':
-    case 'TEST_PINK_BALL':
       return new (class extends T20Ruleset {
-        override readonly format: MatchFormat = format;
+        override readonly format: MatchFormat = 'TEST_RED_BALL';
         override readonly rulesetVersion = 'rules-test-icc-2026.1';
         override readonly maxOversPerInnings = 9999;
         override readonly maxOversPerBowler = 9999;
         override readonly freeHitAfterNoBall = false;
         override readonly powerplay = { p1EndOver: 0 };
+        override readonly followOnDeficitThreshold = 200;
+        override readonly newBallOverThreshold = 80;
+        override readonly testScheduleConfig: TestScheduleConfig = {
+          scheduledDays: 5,
+          scheduledDailyOvers: 90,
+          sessionsPerDay: 3,
+          sessions: [
+            {
+              sessionNumber: 1,
+              sessionName: 'Morning',
+              scheduledDurationMinutes: 120,
+              scheduledMinimumOvers: 30,
+              intervalAfterSession: { intervalName: 'Lunch', durationMinutes: 40 },
+            },
+            {
+              sessionNumber: 2,
+              sessionName: 'Afternoon',
+              scheduledDurationMinutes: 120,
+              scheduledMinimumOvers: 30,
+              intervalAfterSession: { intervalName: 'Tea', durationMinutes: 20 },
+            },
+            {
+              sessionNumber: 3,
+              sessionName: 'Evening',
+              scheduledDurationMinutes: 120,
+              scheduledMinimumOvers: 30,
+            },
+          ],
+          followOnDeficit: 200,
+          newBallOverThreshold: 80,
+          allowDeclarations: true,
+          allowEnforceFollowOn: true,
+          finalDayLastHourMinOvers: 15,
+          permittedAdditionalTimeMinutes: 30,
+        };
+        override isStopClockEnforced(): boolean {
+          return false; // Stop clock is limited-overs only
+        }
         override maxFieldersOutsideCircle(): number {
-          return 9; // No circle restriction in Test
+          return 9; // Unrestricted circle in Test
+        }
+        override isPowerplayActive(): boolean {
+          return false;
+        }
+        override isInningsOver(inn: InningsState): boolean {
+          if (inn.totalWickets >= 10) return true;
+          if (inn.isDeclared) return true;
+          if (inn.targetRuns && inn.totalRuns >= inn.targetRuns) return true;
+          return false;
+        }
+      })();
+    case 'TEST_PINK_BALL':
+      return new (class extends T20Ruleset {
+        override readonly format: MatchFormat = 'TEST_PINK_BALL';
+        override readonly rulesetVersion = 'rules-test-pink-ball-icc-2026.1';
+        override readonly maxOversPerInnings = 9999;
+        override readonly maxOversPerBowler = 9999;
+        override readonly freeHitAfterNoBall = false;
+        override readonly powerplay = { p1EndOver: 0 };
+        override readonly followOnDeficitThreshold = 200;
+        override readonly newBallOverThreshold = 80;
+        override readonly testScheduleConfig: TestScheduleConfig = {
+          scheduledDays: 5,
+          scheduledDailyOvers: 90,
+          sessionsPerDay: 3,
+          sessions: [
+            {
+              sessionNumber: 1,
+              sessionName: 'Afternoon',
+              scheduledDurationMinutes: 120,
+              scheduledMinimumOvers: 30,
+              intervalAfterSession: { intervalName: 'Tea', durationMinutes: 20 },
+            },
+            {
+              sessionNumber: 2,
+              sessionName: 'Twilight',
+              scheduledDurationMinutes: 120,
+              scheduledMinimumOvers: 30,
+              intervalAfterSession: { intervalName: 'Dinner', durationMinutes: 40 },
+            },
+            {
+              sessionNumber: 3,
+              sessionName: 'Night',
+              scheduledDurationMinutes: 120,
+              scheduledMinimumOvers: 30,
+            },
+          ],
+          followOnDeficit: 200,
+          newBallOverThreshold: 80,
+          allowDeclarations: true,
+          allowEnforceFollowOn: true,
+          finalDayLastHourMinOvers: 15,
+          permittedAdditionalTimeMinutes: 30,
+        };
+        override isStopClockEnforced(): boolean {
+          return false;
+        }
+        override maxFieldersOutsideCircle(): number {
+          return 9;
         }
         override isPowerplayActive(): boolean {
           return false;

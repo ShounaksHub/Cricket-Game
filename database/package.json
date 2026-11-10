@@ -10,8 +10,11 @@
       "default": "./dist/index.js"
     }
   },
+  "prisma": {
+    "schema": "prisma/schema.prisma"
+  },
   "scripts": {
-    "build": "tsc --build",
+    "build": "prisma generate && tsc --build",
     "clean": "rimraf dist",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

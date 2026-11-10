@@ -123,8 +123,14 @@ export function createInitialMatchState(config: MatchSimulationConfig): MatchSta
     currentDayNumber: isTest ? 1 : undefined,
     currentSessionNumber: isTest ? 1 : undefined,
     sessionOversBowled: isTest ? 0 : undefined,
+    sessionElapsedMinutes: isTest ? 0 : undefined,
+    isAdditionalTimeActive: false,
+    isNewBallAvailable: false,
+    isFollowOnEligible: false,
     oversSinceNewBall: isTest ? 0 : undefined,
     isFollowOnEnforced: isTest ? false : undefined,
+    stopClockSeconds: isTest ? undefined : 60,
+    stopClockWarnings: 0,
   };
 }
 

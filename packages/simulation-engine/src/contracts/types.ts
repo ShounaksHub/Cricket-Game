@@ -73,6 +73,9 @@ export interface TacticalDeliveryAction {
   readonly bowlerLength: BowlingLength;
   readonly bowlerVariation: BowlingVariation;
   readonly fieldPreset: FieldPreset;
+  readonly takeNewBall?: boolean;
+  readonly declareInnings?: boolean;
+  readonly enforceFollowOn?: boolean;
 }
 
 export interface Trajectory2D {
@@ -220,8 +223,14 @@ export interface MatchState {
   readonly currentDayNumber?: number; // 1 to 5 (Test)
   readonly currentSessionNumber?: number; // 1 to 3 (Test)
   readonly sessionOversBowled?: number; // 0 to 30 (Test)
+  readonly sessionElapsedMinutes?: number; // Playing time in current session
+  readonly isAdditionalTimeActive?: boolean; // Permitted 30 mins additional time when 9 wickets down (ICC 16.2.2)
   readonly oversSinceNewBall?: number; // 0 to 80+ (Test)
-  readonly isFollowOnEnforced?: boolean;
+  readonly isNewBallAvailable?: boolean; // True when oversSinceNewBall >= 80
+  readonly isFollowOnEligible?: boolean; // True when 1st innings deficit >= 200
+  readonly isFollowOnEnforced?: boolean; // True only if captain elected to enforce
+  readonly stopClockSeconds?: number; // October 2026 Stop Clock timer (ICC 41.9)
+  readonly stopClockWarnings?: number; // October 2026 Stop Clock warning counter
   readonly result?: {
     readonly winningTeamId?: string;
     readonly marginRuns?: number;

@@ -7,6 +7,9 @@ import {
   isBowlerQuotaReached,
   isFollowOnEligible,
   validatePlayingXI,
+  validateFieldingRestrictions,
+  calculateOverthrowRuns,
+  isLateralWide,
 } from '../src/validators.js';
 import { STANDARD_RULESETS, PITCH_DIMENSIONS } from '../src/constants.js';
 
@@ -114,5 +117,48 @@ describe('Cricket Rules Engine: Quota, Follow-On & Squad Validation', () => {
     const invalidResult = validatePlayingXI(noKeeperLineup, 5);
     expect(invalidResult.isValid).toBe(false);
     expect(invalidResult.errors[0]).toContain('wicketkeeper');
+  });
+
+  it('should enforce MCC Law 28.4 fielding restrictions (max 2 behind square leg, max 5 leg side)', () => {
+    // Valid field
+    const legalField = [
+      { isLegSide: true, isBehindSquareLeg: true },
+      { isLegSide: true, isBehindSquareLeg: true },
+      { isLegSide: true, isBehindSquareLeg: false },
+      { isLegSide: true, isBehindSquareLeg: false },
+      { isLegSide: false, isBehindSquareLeg: false },
+    ];
+    expect(validateFieldingRestrictions(legalField).isValid).toBe(true);
+
+    // Violates MCC 28.4.1 (3 behind square leg)
+    const illegalBehindSquare = [
+      { isLegSide: true, isBehindSquareLeg: true },
+      { isLegSide: true, isBehindSquareLeg: true },
+      { isLegSide: true, isBehindSquareLeg: true },
+    ];
+    const resA = validateFieldingRestrictions(illegalBehindSquare);
+    expect(resA.isValid).toBe(false);
+    expect(resA.reason).toContain('MCC Law 28.4.1');
+
+    // Violates MCC 28.4.2 (6 on leg side)
+    const illegalLegSide = Array.from({ length: 6 }, () => ({
+      isLegSide: true,
+      isBehindSquareLeg: false,
+    }));
+    const resB = validateFieldingRestrictions(illegalLegSide);
+    expect(resB.isValid).toBe(false);
+    expect(resB.reason).toContain('MCC Law 28.4.2');
+  });
+
+  it('should compute overthrow boundary runs under MCC Law 19.8', () => {
+    expect(calculateOverthrowRuns(1, true)).toBe(5);
+    expect(calculateOverthrowRuns(2, true)).toBe(6);
+    expect(calculateOverthrowRuns(2, false)).toBe(2);
+  });
+
+  it('should evaluate lateral shuffle wide line under ICC Clause 22.1', () => {
+    expect(isLateralWide(78, 0)).toBe(true); // Normal wide
+    expect(isLateralWide(78, 15)).toBe(false); // Batter shuffled off, delivery within reach
+    expect(isLateralWide(95, 15)).toBe(true); // Exceeds return crease limit
   });
 });

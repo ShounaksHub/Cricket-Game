@@ -13,6 +13,7 @@
     "sourceMap": true,
     "isolatedModules": true,
     "resolveJsonModule": true,
-    "composite": false
+    "composite": false,
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
   }
 }

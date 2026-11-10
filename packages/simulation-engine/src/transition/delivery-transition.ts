@@ -134,6 +134,7 @@ export function stepDelivery(
     fieldersOutsideRing: ruleset.getMaxFieldersOutsideRing(
       currentInnings.completedOvers,
     ),
+    currentSessionNumber: state.currentSessionNumber ?? 1,
   };
 
   // 4. Execute Delivery Pipeline and Resolve Dismissal
@@ -411,6 +412,10 @@ export function stepDelivery(
   };
 
   // 13. Innings Completion Evaluation
+  const format = state.config.format;
+  const isLimitedOvers = format === 'T10' || format === 'T20' || format === 'ODI';
+  const isTest = format === 'TEST_RED_BALL' || format === 'TEST_PINK_BALL';
+
   const isAllOut = newTotalWickets >= 10;
   const isOverLimit = ruleset.isOverLimitReached(
     nextCompletedOvers,
@@ -419,8 +424,10 @@ export function stepDelivery(
   const isTargetOverhauled =
     currentInnings.targetRuns !== undefined &&
     newTotalRuns >= currentInnings.targetRuns;
+  const isDeclared =
+    (isTest && action?.declareInnings === true) || Boolean(currentInnings.isDeclared);
 
-  const isInningsDone = isAllOut || isOverLimit || isTargetOverhauled || currentInnings.isDeclared;
+  const isInningsDone = isAllOut || isOverLimit || isTargetOverhauled || isDeclared;
 
   // Free Hit State Transition (ICC Men's T20I Playing Conditions Clause 21.19):
   // 1. A No-Ball always creates a Free Hit for the next delivery.
@@ -447,6 +454,7 @@ export function stepDelivery(
     nonStrikerPlayerId: nextNonStrikerId,
     currentBowlerPlayerId: nextBowlerId,
     isCompleted: isInningsDone,
+    isDeclared,
     isFreeHit: nextIsFreeHit,
     batters: battersMap,
     bowlers: bowlersMap,
@@ -462,27 +470,51 @@ export function stepDelivery(
 
   let nextInningsIndex = inningsIndex;
 
-  const format = state.config.format;
-  const isLimitedOvers = format === 'T10' || format === 'T20' || format === 'ODI';
-  const isTest = format === 'TEST_RED_BALL' || format === 'TEST_PINK_BALL';
-
   let currentDay = state.currentDayNumber ?? (isTest ? 1 : undefined);
   let currentSession = state.currentSessionNumber ?? (isTest ? 1 : undefined);
   let sessionOvers = state.sessionOversBowled ?? (isTest ? 0 : undefined);
   let oversSinceNewBall = state.oversSinceNewBall ?? (isTest ? 0 : undefined);
   let isFollowOnEnforced = state.isFollowOnEnforced ?? false;
+  let isFollowOnEligible = state.isFollowOnEligible ?? false;
+  let sessionElapsedMinutes = state.sessionElapsedMinutes ?? (isTest ? 0 : undefined);
+  let isAdditionalTimeActive = state.isAdditionalTimeActive ?? false;
+  let isNewBallAvailable = state.isNewBallAvailable ?? false;
+  let stopClockSeconds = state.stopClockSeconds ?? (isLimitedOvers ? 60 : undefined);
+  let stopClockWarnings = state.stopClockWarnings ?? 0;
 
-  if (isOverComplete && isTest) {
-    sessionOvers = (sessionOvers ?? 0) + 1;
-    oversSinceNewBall = (oversSinceNewBall ?? 0) + 1;
-    if (sessionOvers >= 30) {
-      sessionOvers = 0;
-      currentSession = (currentSession ?? 1) + 1;
-      if (currentSession > 3) {
-        currentSession = 1;
-        currentDay = (currentDay ?? 1) + 1;
+  if (isOverComplete) {
+    if (isTest) {
+      sessionOvers = (sessionOvers ?? 0) + 1;
+      oversSinceNewBall = (oversSinceNewBall ?? 0) + 1;
+      sessionElapsedMinutes = (sessionElapsedMinutes ?? 0) + 4; // ~15 overs per hour
+
+      // Permitted additional time (ICC Clause 16.2.2):
+      // If 9 wickets down at scheduled end of session/day, play may be extended up to 30 mins
+      const isNineWicketsDown = newTotalWickets === 9;
+      if (sessionOvers >= 30 && isNineWicketsDown && !isAdditionalTimeActive) {
+        isAdditionalTimeActive = true;
       }
+
+      const sessionMaxOvers = isAdditionalTimeActive ? 38 : 30;
+      if (sessionOvers >= sessionMaxOvers || (!isNineWicketsDown && isAdditionalTimeActive)) {
+        sessionOvers = 0;
+        sessionElapsedMinutes = 0;
+        isAdditionalTimeActive = false;
+        currentSession = (currentSession ?? 1) + 1;
+        if (currentSession > 3) {
+          currentSession = 1;
+          currentDay = (currentDay ?? 1) + 1;
+        }
+      }
+    } else if (isLimitedOvers && ruleset.isStopClockEnforced()) {
+      // Reset 60-second stop clock between overs (ICC 41.9)
+      stopClockSeconds = ruleset.stopClockLimitSeconds();
     }
+  }
+
+  // Check New Ball eligibility (ICC Test Clause 4.3: Available after 80 overs)
+  if (isTest && (oversSinceNewBall ?? 0) >= 80) {
+    isNewBallAvailable = true;
   }
 
   // 15. Pitch & Ball Wear Progression
@@ -493,10 +525,11 @@ export function stepDelivery(
   let nextBallWear = Math.min(1.0, state.ballWearIndex + ballWearDelta);
   const nextPitchWear = Math.min(1.0, state.pitchWearIndex + pitchWearDelta);
 
-  if (isTest && (oversSinceNewBall ?? 0) >= 80) {
-    // New ball taken after 80 overs in Test cricket!
+  // New ball claimed by fielding captain (optional tactical action)
+  if (isTest && isNewBallAvailable && action?.takeNewBall === true) {
     oversSinceNewBall = 0;
     nextBallWear = 0.05;
+    isNewBallAvailable = false;
   }
 
   if (isInningsDone) {
@@ -573,21 +606,46 @@ export function stepDelivery(
 
         // If Team 2 is behind by 200+ runs, follow-on is eligible
         if (deficit >= 200) {
-          isFollowOnEnforced = true;
-          // Team 2 bats again in Innings 3
-          const innings3 = createInitialInningsState(
-            3,
-            state.config.team2.id,
-            state.config.team1.id,
-            state.config.team2.lineup as any,
-            state.config.team1.lineup as any,
-          );
-          updatedInningsArray.push({
-            ...innings3,
-            isFollowOn: true,
-            leadOrDeficit: -deficit,
-          });
+          isFollowOnEligible = true;
+          // Follow-on is captain's OPTIONAL decision:
+          const shouldEnforce =
+            action?.enforceFollowOn !== undefined
+              ? action.enforceFollowOn
+              : (deficit >= 240 || inn2.completedOvers < 90);
+
+          if (shouldEnforce) {
+            isFollowOnEnforced = true;
+            // Team 2 bats again in Innings 3
+            const innings3 = createInitialInningsState(
+              3,
+              state.config.team2.id,
+              state.config.team1.id,
+              state.config.team2.lineup as any,
+              state.config.team1.lineup as any,
+            );
+            updatedInningsArray.push({
+              ...innings3,
+              isFollowOn: true,
+              leadOrDeficit: -deficit,
+            });
+          } else {
+            isFollowOnEnforced = false;
+            // Captain opted not to enforce follow-on: Team 1 bats again in Innings 3
+            const innings3 = createInitialInningsState(
+              3,
+              state.config.team1.id,
+              state.config.team2.id,
+              state.config.team1.lineup as any,
+              state.config.team2.lineup as any,
+            );
+            updatedInningsArray.push({
+              ...innings3,
+              isFollowOn: false,
+              leadOrDeficit: deficit,
+            });
+          }
         } else {
+          isFollowOnEligible = false;
           isFollowOnEnforced = false;
           // Standard: Team 1 bats again in Innings 3
           const innings3 = createInitialInningsState(
@@ -599,12 +657,14 @@ export function stepDelivery(
           );
           updatedInningsArray.push({
             ...innings3,
+            isFollowOn: false,
             leadOrDeficit: deficit,
           });
         }
         nextInningsIndex = 2;
         oversSinceNewBall = 0;
         nextBallWear = 0.05;
+        isNewBallAvailable = false;
       } else if (currentInnings.inningsNumber === 3) {
         // Test Innings 3 Concluded
         const inn1 = updatedInningsArray[0];
@@ -735,8 +795,14 @@ export function stepDelivery(
     currentDayNumber: currentDay,
     currentSessionNumber: currentSession,
     sessionOversBowled: sessionOvers,
+    sessionElapsedMinutes,
+    isAdditionalTimeActive,
+    isNewBallAvailable,
+    isFollowOnEligible,
     oversSinceNewBall,
     isFollowOnEnforced,
+    stopClockSeconds,
+    stopClockWarnings,
     result,
   };
 

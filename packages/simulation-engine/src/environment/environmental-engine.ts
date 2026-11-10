@@ -12,6 +12,8 @@ export interface EnvironmentalImpactInput {
   readonly ballWearIndex: number; // 0.0 to 1.0
   readonly bowlerStyle: BowlingStyle;
   readonly isPowerplay: boolean;
+  readonly format?: MatchFormat;
+  readonly currentSessionNumber?: number; // 1: Afternoon/Morning, 2: Twilight/Afternoon, 3: Night/Evening
 }
 
 /**
@@ -30,6 +32,8 @@ export function calculateEnvironmentalDeltas(
     ballWearIndex,
     bowlerStyle,
     isPowerplay,
+    format,
+    currentSessionNumber,
   } = input;
 
   const deltas: Partial<Record<DeliveryOutcome, number>> = {};
@@ -81,7 +85,49 @@ export function calculateEnvironmentalDeltas(
     }
   }
 
-  // 3. Pitch Dynamics
+  // 3. Pink Ball Aerodynamics & Lighting Model (Day/Night Test)
+  if (format === 'TEST_PINK_BALL') {
+    const session = currentSessionNumber ?? 1;
+    if (session === 1) {
+      // Session 1: Afternoon / Daylight
+      // Extra polyurethane coating protects shine; enhanced early swing/seam
+      if (isPace && ballWearIndex < 0.4) {
+        addDelta('DOT', 0.15);
+        addDelta('WICKET', 0.12);
+        addDelta('FOUR', -0.1);
+      }
+    } else if (session === 2) {
+      // Session 2: Twilight (Purkinje Effect & Rapid Thermal Cooling)
+      // Natural daylight drops, floodlights take over, contrast dips, ball swings pronouncedly
+      if (isPace) {
+        addDelta('WICKET', 0.38);
+        addDelta('DOT', 0.28);
+        addDelta('FOUR', -0.25);
+        addDelta('SIX', -0.2);
+      } else if (isSpin) {
+        addDelta('DOT', 0.15);
+        addDelta('WICKET', 0.1);
+      }
+    } else if (session === 3) {
+      // Session 3: Night under floodlights & Outfield Dew
+      if (isSpin) {
+        // Spinners struggle with wet pink ball & dew
+        addDelta('WICKET', -0.45);
+        addDelta('FOUR', 0.3);
+        addDelta('RUN_1', 0.15);
+      }
+      if (isPace) {
+        // Wet seam can cause errant deliveries, but harsh shadows cause misjudged leaves
+        addDelta('WIDE', 0.25);
+        if (ballWearIndex > 0.4) {
+          addDelta('WICKET', 0.18);
+          addDelta('DOT', 0.15);
+        }
+      }
+    }
+  }
+
+  // 4. Pitch Dynamics
   switch (pitchType) {
     case 'GREEN':
       if (isPace && ballWearIndex < 0.6) {

@@ -495,6 +495,37 @@ describe('Data Ingestion Engine (@cricket/data-ingestion)', () => {
       expect(hick.ratings.TEST_RED_BALL?.battingRating).toBeGreaterThanOrEqual(75);
     });
   });
+
+  describe('Workspace Cross-Package Resolution: @cricket/player-ratings', () => {
+    it('successfully imports and executes rating calculations from @cricket/player-ratings', async () => {
+      const playerRatings = await import('@cricket/player-ratings');
+      expect(playerRatings.calculateFormatRating).toBeDefined();
+      expect(playerRatings.calculatePlayerAttributes).toBeDefined();
+      expect(playerRatings.computeEraMetrics).toBeDefined();
+
+      const attributes = playerRatings.calculatePlayerAttributes({
+        primaryRole: 'TOP_ORDER_BATTER',
+        battingHand: 'RIGHT_HAND',
+        bowlingStyle: 'RIGHT_ARM_OFF_BREAK',
+        isWicketkeeper: false,
+        historicalEra: 'CONTEMPORARY_2021_PRESENT',
+        formatStats: {},
+        eraMetrics: {},
+      });
+
+      expect(attributes.timing).toBeGreaterThan(0);
+
+      const rating = playerRatings.calculateFormatRating({
+        format: 'T20',
+        primaryRole: 'TOP_ORDER_BATTER',
+        attributes,
+      });
+
+      expect(rating.overallRating).toBeGreaterThanOrEqual(10);
+      expect(rating.overallRating).toBeLessThanOrEqual(100);
+      expect(rating.confidenceTier).toBeDefined();
+    });
+  });
 });
 
 

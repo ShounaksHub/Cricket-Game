@@ -8,6 +8,9 @@ build/
 .next/
 out/
 .turbo/
+.cache/
+*.tsbuildinfo
+*.tsbuildinfo*
 
 # Environment variables & secrets (Safeguard 9)
 .env

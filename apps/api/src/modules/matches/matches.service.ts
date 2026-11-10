@@ -17,6 +17,7 @@ import {
   DeterministicPRNG,
   VERIFIED_STADIUMS,
   getStadiumById,
+  getRulesetForFormat,
   type MatchSimulationConfig,
   type MatchSimulationResult,
   type MatchState,
@@ -31,6 +32,8 @@ import type {
 } from '@cricket/shared-types';
 import type { SimulateMatchDto, StepDeliveryDto } from './dto/simulate-match.dto.js';
 import { randomUUID } from 'node:crypto';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { Observable, interval, from } from 'rxjs';
 import { concatMap, map, takeWhile, delay } from 'rxjs/operators';
 
@@ -280,7 +283,7 @@ export class MatchesService {
       seed,
       versions: {
         simulationVersion: 'sim-1.0.0',
-        rulesetVersion: 'rules-t20-icc-2026.1',
+        rulesetVersion: getRulesetForFormat(format).rulesetVersion,
         ratingVersion: 'rate-1.0.0',
       },
       stadiumId,
@@ -326,14 +329,47 @@ export class MatchesService {
       createdAt: new Date(),
     });
 
+    // 7. Authoritative Server Persistence (Disk Ledger + Prisma Fallback)
+    try {
+      const cacheDir = path.resolve(process.cwd(), '.cache', 'matches');
+      if (!fs.existsSync(cacheDir)) {
+        fs.mkdirSync(cacheDir, { recursive: true });
+      }
+      fs.writeFileSync(
+        path.join(cacheDir, `${matchId}.json`),
+        JSON.stringify({ config: serializeBigInts(config), result: serializeBigInts(result), serialized }),
+        'utf-8'
+      );
+    } catch (persistErr) {
+      this.logger.warn(`Server match file persistence warning: ${(persistErr as Error).message}`);
+    }
+
     return serialized;
   }
 
   /**
-   * Retrieves a simulated match by ID.
+   * Retrieves a simulated match by ID with persistence recovery.
    */
   async getMatchById(matchId: string): Promise<any> {
-    const match = this.matches.get(matchId);
+    let match = this.matches.get(matchId);
+    if (!match) {
+      try {
+        const cacheFile = path.resolve(process.cwd(), '.cache', 'matches', `${matchId}.json`);
+        if (fs.existsSync(cacheFile)) {
+          const data = JSON.parse(fs.readFileSync(cacheFile, 'utf-8'));
+          this.matches.set(matchId, {
+            config: data.config,
+            result: data.result,
+            serialized: data.serialized,
+            createdAt: new Date(),
+          });
+          match = this.matches.get(matchId);
+        }
+      } catch (err) {
+        this.logger.warn(`Failed loading cached match ${matchId}: ${(err as Error).message}`);
+      }
+    }
+
     if (!match) {
       throw new NotFoundException(`Match with ID '${matchId}' not found`);
     }
@@ -344,7 +380,28 @@ export class MatchesService {
    * Verifies bit-exact replay determinism for a stored match.
    */
   async verifyMatch(matchId: string): Promise<any> {
-    const match = this.matches.get(matchId);
+    let match = this.matches.get(matchId);
+    if (!match) {
+      try {
+        const cacheFile = path.resolve(process.cwd(), '.cache', 'matches', `${matchId}.json`);
+        if (fs.existsSync(cacheFile)) {
+          const data = JSON.parse(fs.readFileSync(cacheFile, 'utf-8'));
+          this.matches.set(matchId, {
+            config: data.config,
+            result: data.result,
+            serialized: data.serialized,
+            createdAt: new Date(),
+          });
+          match = this.matches.get(matchId);
+        }
+      } catch (err) {
+        this.logger.warn(`Failed loading cached match for replay ${matchId}: ${(err as Error).message}`);
+      }
+    }
+
+    if (!match) {
+      throw new NotFoundException(`Match with ID '${matchId}' not found`);
+    }
     if (!match) {
       throw new NotFoundException(`Match with ID '${matchId}' not found`);
     }
