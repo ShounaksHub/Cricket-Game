@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { validateDreamTeamSquad } from '@cricket/cricket-rules';
 import {
   createInitialMatchState,
   stepDelivery,
@@ -226,5 +227,73 @@ describe('End-to-End Match Gameplay Integration Tests (P6.4 to P6.10)', () => {
     expect(potm?.playerId).toBeDefined();
     expect(potm?.impactPoints).toBeGreaterThan(0);
     expect(potm?.performanceSummary).toBeDefined();
+  });
+
+  it('Gate P7.6: Simulates full match between Domestic Specialists Dream XI and AI Opponent with zero overlap', () => {
+    // Select domestic specialists from expanded 1,000+ database
+    const jaffer = allPlayers.find((p) => p.fullName === 'Wasim Jaffer')!;
+    const cox = allPlayers.find((p) => p.fullName === 'Jamie Cox')!;
+    const hick = allPlayers.find((p) => p.fullName === 'Graeme Hick')!;
+    const muzumdar = allPlayers.find((p) => p.fullName === 'Amol Muzumdar')!;
+    const jackson = allPlayers.find((p) => p.fullName === 'Sheldon Jackson')!;
+    const higgins = allPlayers.find((p) => p.fullName === 'Ryan Higgins')!;
+    const saxena = allPlayers.find((p) => p.fullName === 'Jalaj Saxena')!;
+    const unadkat = allPlayers.find((p) => p.fullName === 'Jaydev Unadkat')!;
+    const mckay = allPlayers.find((p) => p.fullName === 'Clint McKay')!;
+    const goel = allPlayers.find((p) => p.fullName === 'Rajinder Goel')!;
+    const dinda = allPlayers.find((p) => p.fullName === 'Ashok Dinda')!;
+
+    const domesticSquad: DreamTeamPlayerSlotInput[] = [
+      { playerId: jaffer.id, battingOrder: 1, isCaptain: false, isDesignatedWicketkeeper: false },
+      { playerId: cox.id, battingOrder: 2, isCaptain: false, isDesignatedWicketkeeper: false },
+      { playerId: hick.id, battingOrder: 3, isCaptain: false, isDesignatedWicketkeeper: false },
+      { playerId: muzumdar.id, battingOrder: 4, isCaptain: false, isDesignatedWicketkeeper: false },
+      { playerId: jackson.id, battingOrder: 5, isCaptain: false, isDesignatedWicketkeeper: true },
+      { playerId: higgins.id, battingOrder: 6, isCaptain: false, isDesignatedWicketkeeper: false, bowlingPriority: 4 },
+      { playerId: saxena.id, battingOrder: 7, isCaptain: false, isDesignatedWicketkeeper: false, bowlingPriority: 3 },
+      { playerId: unadkat.id, battingOrder: 8, isCaptain: true, isDesignatedWicketkeeper: false, bowlingPriority: 1 },
+      { playerId: mckay.id, battingOrder: 9, isCaptain: false, isDesignatedWicketkeeper: false, bowlingPriority: 2 },
+      { playerId: goel.id, battingOrder: 10, isCaptain: false, isDesignatedWicketkeeper: false, bowlingPriority: 2 },
+      { playerId: dinda.id, battingOrder: 11, isCaptain: false, isDesignatedWicketkeeper: false, bowlingPriority: 1 },
+    ];
+
+    expect(domesticSquad).toHaveLength(11);
+
+    // Validate squad readiness
+    const validation = validateDreamTeamSquad('T20', domesticSquad, profilesMap, {
+      requireMatchReady: true,
+    });
+    expect(validation.isMatchReady).toBe(true);
+    expect(validation.errors).toHaveLength(0);
+
+    // Generate AI Opponent Team against Domestic XI
+    const aiOpponent = generateAIOpponentTeam(profilesMap, {
+      userLineup: domesticSquad,
+      difficulty: 'HARD',
+      pitchType: 'GREEN',
+      format: 'T20',
+      seed: 888999111n,
+    });
+
+    expect(aiOpponent.lineup).toHaveLength(11);
+
+    // Assert strictly ZERO player overlap between teams
+    const domesticIds = new Set(domesticSquad.map((s) => s.playerId));
+    const aiIds = aiOpponent.lineup.map((s) => s.playerId);
+    const overlapping = aiIds.filter((id) => domesticIds.has(id));
+    expect(overlapping).toHaveLength(0);
+
+    // Run full match simulation
+    const matchConfig = createTestMatchConfig(
+      { id: 'domestic-xi', name: 'Domestic Legends XI', lineup: domesticSquad },
+      { id: 'ai-opponent-xi', name: aiOpponent.name, lineup: aiOpponent.lineup },
+    );
+
+    const simResult = simulateFullMatch(matchConfig);
+    expect(simResult.finalState.status).toBe('COMPLETED');
+    expect(simResult.finalState.innings.length).toBeGreaterThanOrEqual(1);
+
+    const scorecard = reconcileMatchScorecard(simResult.finalState);
+    expect(scorecard.innings[0].totalRuns).toBeGreaterThan(0);
   });
 });

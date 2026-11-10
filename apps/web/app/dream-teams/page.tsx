@@ -29,6 +29,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import type {
+  CareerCategory,
   MatchFormat,
   PlayerProfile,
   PrimaryRole,
@@ -63,6 +64,13 @@ const ROLE_OPTIONS: Array<{ id: PrimaryRole | 'ALL'; label: string }> = [
   { id: 'BOWLING_ALL_ROUNDER', label: 'Bowling All-Rounder' },
   { id: 'PACE_BOWLER', label: 'Pace Bowler' },
   { id: 'SPIN_BOWLER', label: 'Spin Bowler' },
+];
+
+const CATEGORY_OPTIONS: Array<{ id: CareerCategory | 'ALL'; label: string }> = [
+  { id: 'ALL', label: 'All Tiers' },
+  { id: 'INTERNATIONAL', label: 'International' },
+  { id: 'DOMESTIC_ONLY', label: 'Domestic' },
+  { id: 'HISTORICAL_LEGEND', label: 'Legends' },
 ];
 
 interface SelectedSlot {
@@ -175,6 +183,9 @@ export default function DreamTeamBuilderPage() {
   // 4. Catalogue Filter State
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedRole, setSelectedRole] = useState<PrimaryRole | 'ALL'>('ALL');
+  const [selectedCategory, setSelectedCategory] = useState<CareerCategory | 'ALL'>('ALL');
+  const [selectedCountry, setSelectedCountry] = useState<string>('ALL');
+  const [displayLimit, setDisplayLimit] = useState<number>(60);
 
   // Hydrate from localStorage on client mount
   useEffect(() => {
@@ -288,14 +299,21 @@ export default function DreamTeamBuilderPage() {
         const matchName = p.fullName.toLowerCase().includes(q) || p.displayName.toLowerCase().includes(q);
         const matchNat = p.primaryNationality.toLowerCase().includes(q);
         const matchRole = p.primaryRole.toLowerCase().includes(q);
-        if (!matchName && !matchNat && !matchRole) return false;
+        const matchComp = p.competitions?.some((c) => c.toLowerCase().includes(q));
+        if (!matchName && !matchNat && !matchRole && !matchComp) return false;
       }
       if (selectedRole !== 'ALL' && p.primaryRole !== selectedRole) {
         return false;
       }
+      if (selectedCategory !== 'ALL' && p.careerCategory !== selectedCategory) {
+        return false;
+      }
+      if (selectedCountry !== 'ALL' && p.primaryNationality !== selectedCountry) {
+        return false;
+      }
       return true;
     });
-  }, [allPlayers, searchQuery, selectedRole]);
+  }, [allPlayers, searchQuery, selectedRole, selectedCategory, selectedCountry]);
 
   // Helpers
   const isPlayerInSquad = (playerId: string) => lineup.some((s) => s.playerId === playerId);
@@ -812,9 +830,45 @@ export default function DreamTeamBuilderPage() {
             ))}
           </div>
 
+          {/* Category & Country Filter Bar */}
+          <div className="flex flex-col sm:flex-row items-center gap-2">
+            <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto">
+              {CATEGORY_OPTIONS.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`px-2 py-0.5 rounded text-[10px] whitespace-nowrap transition-colors ${
+                    selectedCategory === cat.id
+                      ? 'bg-sky-500 text-white font-bold'
+                      : 'bg-[#181B20] text-[#9CA3AF] hover:text-[#F8F9FA] border border-[#2E3440]'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="w-full sm:flex-1">
+              <select
+                value={selectedCountry}
+                onChange={(e) => setSelectedCountry(e.target.value)}
+                className="w-full bg-[#181B20] border border-[#2E3440] rounded-lg px-2 py-1 text-[11px] text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
+              >
+                <option value="ALL">All Nations ({allPlayers.length})</option>
+                {Array.from(new Set(allPlayers.map((p) => p.primaryNationality)))
+                  .sort()
+                  .map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          </div>
+
           {/* Scrollable Player List */}
           <div className="flex flex-col gap-2 max-h-[620px] overflow-y-auto pr-1">
-            {filteredPlayers.map((player) => {
+            {filteredPlayers.slice(0, displayLimit).map((player) => {
               const inSquad = isPlayerInSquad(player.id);
               const slot = getPlayerSquadSlot(player.id);
               const fmtRating = player.ratings[format] || player.ratings.T20;
@@ -847,6 +901,19 @@ export default function DreamTeamBuilderPage() {
                             WK
                           </span>
                         )}
+                        {player.careerCategory === 'DOMESTIC_ONLY' ? (
+                          <span className="text-[9px] bg-amber-950/60 text-amber-400 px-1 rounded border border-amber-700/50">
+                            DOM
+                          </span>
+                        ) : player.careerCategory === 'HISTORICAL_LEGEND' ? (
+                          <span className="text-[9px] bg-purple-950/60 text-purple-300 px-1 rounded border border-purple-700/50">
+                            LEG
+                          </span>
+                        ) : (
+                          <span className="text-[9px] bg-sky-950/60 text-sky-300 px-1 rounded border border-sky-700/50">
+                            INT
+                          </span>
+                        )}
                         <span className="text-xs font-mono font-bold text-[#D4AF37]">
                           OVR {overall}
                         </span>
@@ -855,6 +922,12 @@ export default function DreamTeamBuilderPage() {
                         <span>{player.primaryNationality}</span>
                         <span>&middot;</span>
                         <span className="capitalize">{player.primaryRole.replace(/_/g, ' ').toLowerCase()}</span>
+                        {player.competitions && player.competitions.length > 0 && (
+                          <>
+                            <span>&middot;</span>
+                            <span className="text-[10px] text-slate-400">{player.competitions[0]}</span>
+                          </>
+                        )}
                       </div>
                       {/* Sub-ratings */}
                       <div className="flex items-center gap-2 text-[10px] text-[#9CA3AF] mt-0.5">
@@ -887,6 +960,15 @@ export default function DreamTeamBuilderPage() {
                 </div>
               );
             })}
+
+            {filteredPlayers.length > displayLimit && (
+              <button
+                onClick={() => setDisplayLimit((prev) => prev + 60)}
+                className="w-full py-2 bg-[#181B20] hover:bg-[#252C3B] text-xs font-semibold text-[#D4AF37] border border-[#2E3440] rounded-lg transition mt-1"
+              >
+                Show More Cricketers ({filteredPlayers.length - displayLimit} remaining)
+              </button>
+            )}
           </div>
         </section>
 
