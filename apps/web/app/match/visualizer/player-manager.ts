@@ -99,6 +99,8 @@ export function getFieldPresetPositions(
       x,
       y,
       isBoundary: pos.isBoundary,
+      angleDeg: angle,
+      distM: pos.distM,
     };
   });
 }
@@ -148,9 +150,11 @@ export class PlayerManager {
     this.renderKeyPlayers();
   }
 
-  updateFielders(preset: FieldPreset): void {
+  updateFielders(preset: FieldPreset, customPositions?: FielderPosition[]): void {
     this.fieldersContainer.removeChildren();
-    const positions = getFieldPresetPositions(preset, this.isLeftHand, this.isSpin);
+    const positions = customPositions && customPositions.length === 9
+      ? customPositions
+      : getFieldPresetPositions(preset, this.isLeftHand, this.isSpin);
 
     for (const pos of positions) {
       const fg = new Graphics();

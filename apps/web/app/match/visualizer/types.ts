@@ -20,6 +20,8 @@ export interface FielderPosition {
   readonly x: number; // meters from pitch center
   readonly y: number; // meters from pitch center
   readonly isBoundary: boolean;
+  readonly angleDeg?: number;
+  readonly distM?: number;
 }
 
 export type AnimationPhase =

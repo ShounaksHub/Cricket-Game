@@ -160,6 +160,7 @@ export function stepDelivery(
     bowlerStyle: bowlerProfile.bowlingStyle,
     bowlingTeamLineup: bowlingTeam.lineup,
     fieldPreset: action.fieldPreset,
+    customFieldPositions: action.customFieldPositions,
     prng,
   });
 
@@ -411,6 +412,48 @@ export function stepDelivery(
   }
   const sequenceNumber = totalPriorEvents + currentInnings.events.length + 1;
 
+  // Calculate realistic delivery speed based on bowler's style, ratings and pace strategy
+  let baseSpeedKmh = 132;
+  const isSpinner = bowlerProfile.bowlingStyle.includes('BREAK') ||
+    bowlerProfile.bowlingStyle.includes('SPIN') ||
+    bowlerProfile.bowlingStyle.includes('ORTHODOX');
+  const isExpressFast = bowlerProfile.bowlingStyle.includes('FAST') && !bowlerProfile.bowlingStyle.includes('MEDIUM');
+
+  if (isSpinner) {
+    baseSpeedKmh = 84 + (prng.nextFloat() * 12);
+  } else if (isExpressFast) {
+    baseSpeedKmh = 138 + (prng.nextFloat() * 12);
+  } else {
+    // Medium / Fast-Medium
+    baseSpeedKmh = 124 + (prng.nextFloat() * 14);
+  }
+
+  if (action.bowlingPaceStrategy) {
+    switch (action.bowlingPaceStrategy) {
+      case 'FULL_PACE':
+        baseSpeedKmh += isSpinner ? 3 : 5;
+        break;
+      case 'EFFORT_BALL':
+        baseSpeedKmh += isSpinner ? 4 : 7;
+        break;
+      case 'CONTROLLED':
+        baseSpeedKmh -= isSpinner ? 2 : 4;
+        break;
+      case 'VARIATION_FOCUS':
+        baseSpeedKmh -= isSpinner ? 5 : 8;
+        break;
+      case 'CONSERVE':
+        baseSpeedKmh -= isSpinner ? 4 : 9;
+        break;
+    }
+  }
+
+  if (action.bowlerVariation === 'SLOWER_BALL') {
+    baseSpeedKmh -= isSpinner ? 8 : 18;
+  }
+
+  const deliverySpeedKmh = Math.round(baseSpeedKmh * 10) / 10;
+
   const event: DeliveryEvent = {
     sequenceNumber,
     inningsNumber: currentInnings.inningsNumber,
@@ -426,6 +469,7 @@ export function stepDelivery(
     dismissal: resolution.dismissal,
     trajectory,
     commentary,
+    deliverySpeedKmh,
     scorecardDelta: {
       totalRuns: newTotalRuns,
       totalWickets: newTotalWickets,

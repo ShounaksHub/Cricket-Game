@@ -1,12 +1,23 @@
 import type { ExtraType, TossDecision } from './enums.js';
 
+export interface CustomFielderPositionDto {
+  readonly id: string;
+  readonly roleName: string;
+  readonly angleDegrees: number;
+  readonly distanceMeters: number;
+  readonly isBoundary: boolean;
+  readonly isSlipsOrGully?: boolean;
+  readonly isLegSide?: boolean;
+}
+
 export interface TacticalDeliveryAction {
   readonly batterIntent: 'DEFEND' | 'ROTATE_STRIKE' | 'BALANCED' | 'AGGRESSIVE' | 'MAXIMUM_POWER';
   readonly batterTargetZone?: 'OFF_SIDE' | 'LEG_SIDE' | 'V_STRAIGHT';
   readonly bowlerLine: 'OUTSIDE_OFF' | 'STUMPS' | 'DOWN_LEG';
   readonly bowlerLength: 'YORKER' | 'FULL' | 'GOOD_LENGTH' | 'BACK_OF_LENGTH' | 'SHORT';
   readonly bowlerVariation: 'STOCK' | 'SLOWER_BALL' | 'BOUNCER' | 'GOOGLY' | 'ARM_BALL';
-  readonly fieldPreset: 'ATTACKING' | 'BALANCED' | 'BOUNDARY_DEFENSE' | 'SPIN_CHOKE';
+  readonly fieldPreset: 'ATTACKING' | 'BALANCED' | 'BOUNDARY_DEFENSE' | 'SPIN_CHOKE' | 'CUSTOM';
+  readonly customFieldPositions?: readonly CustomFielderPositionDto[];
 }
 
 export interface TossAction {

@@ -29,6 +29,8 @@ export interface CricketVisualizerCanvasProps {
   readonly activeEvent?: DeliveryEvent | null;
   readonly isPlaying: boolean;
   readonly playSpeed: number; // ms per ball
+  readonly customFieldPositions?: any[];
+  readonly currentFieldPreset?: FieldPreset;
   readonly onPlayPauseToggle: () => void;
   readonly onStepNextBall: () => void;
   readonly onSkipOver: () => void;
@@ -40,6 +42,8 @@ export function CricketVisualizerCanvas({
   activeEvent,
   isPlaying,
   playSpeed,
+  customFieldPositions,
+  currentFieldPreset,
   onPlayPauseToggle,
   onStepNextBall,
   onSkipOver,
@@ -140,6 +144,16 @@ export function CricketVisualizerCanvas({
       visualizerRef.current.playDelivery(activeEvent);
     }
   }, [activeEvent, isInitialized]);
+
+  // Update fielders whenever currentFieldPreset or customFieldPositions changes
+  useEffect(() => {
+    if (visualizerRef.current && isInitialized) {
+      visualizerRef.current.setFieldPreset(
+        currentFieldPreset || 'BALANCED_RING',
+        customFieldPositions,
+      );
+    }
+  }, [currentFieldPreset, customFieldPositions, isInitialized]);
 
   // Compute Recent Deliveries Strip (last 6 balls)
   const recentEvents = currentInnings?.events.slice(-6) ?? [];

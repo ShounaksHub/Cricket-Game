@@ -79,7 +79,18 @@ export type FieldPreset =
   | 'ATTACKING_CLOSE_CATCHERS'
   | 'BALANCED_RING'
   | 'DEATH_BOUNDARY_DEFENSE'
-  | 'SPIN_CHOKE';
+  | 'SPIN_CHOKE'
+  | 'CUSTOM';
+
+export interface CustomFielderPosition {
+  readonly id: string;
+  readonly roleName: string;
+  readonly angleDegrees: number; // 0 to 360 relative to striker
+  readonly distanceMeters: number; // 0 to boundary radius
+  readonly isBoundary: boolean;
+  readonly isSlipsOrGully?: boolean;
+  readonly isLegSide?: boolean;
+}
 
 export interface TacticalDeliveryAction {
   readonly batterIntent: BatterIntent;
@@ -87,6 +98,7 @@ export interface TacticalDeliveryAction {
   readonly bowlerLength: BowlingLength;
   readonly bowlerVariation: BowlingVariation;
   readonly fieldPreset: FieldPreset;
+  readonly customFieldPositions?: readonly CustomFielderPosition[];
   readonly bowlingPaceStrategy?: BowlingPaceStrategy;
   readonly bowlingIntent?: BowlingIntent;
   readonly nextBowlerPlayerId?: string;
@@ -134,6 +146,7 @@ export interface DeliveryEvent {
   readonly dismissal?: DeliveryDismissal;
   readonly trajectory?: Trajectory2D;
   readonly commentary: string;
+  readonly deliverySpeedKmh?: number;
   readonly scorecardDelta: {
     readonly totalRuns: number;
     readonly totalWickets: number;

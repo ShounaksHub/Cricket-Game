@@ -1,5 +1,6 @@
 import type { BowlingStyle, DreamTeamPlayerSlotInput } from '@cricket/shared-types';
 import type {
+  CustomFielderPosition,
   DeliveryDismissal,
   DeliveryExtras,
   DeliveryOutcome,
@@ -20,6 +21,7 @@ export interface DismissalResolutionInput {
   readonly bowlerStyle: BowlingStyle;
   readonly bowlingTeamLineup: readonly DreamTeamPlayerSlotInput[];
   readonly fieldPreset: FieldPreset;
+  readonly customFieldPositions?: readonly CustomFielderPosition[];
   readonly prng: DeterministicPRNG;
 }
 

@@ -34,6 +34,11 @@ import {
   buildWorldXILineup,
 } from '@/lib/national-teams';
 import { getAuthoritativePlayerImage } from '@/lib/player-image-resolver';
+import {
+  InteractiveFieldEditor,
+  CANONICAL_FIELD_PRESETS,
+  type InteractiveFielder,
+} from '@/components/InteractiveFieldEditor';
 import type {
   MatchFormat,
   DreamTeamPlayerSlotInput,
@@ -64,6 +69,7 @@ import {
   type BowlingPaceStrategy,
   type BowlingIntent,
   type FieldPreset,
+  type CustomFielderPosition,
   type TacticalDeliveryAction,
   type ReplayVerificationReport,
   generateAIOpponentTeam,
@@ -127,6 +133,11 @@ export interface ActiveMatchSession {
   visibleEvents: DeliveryEvent[];
   initialStateHash: string;
   savedAt: string;
+  userIntent?: BatterIntent;
+  userPaceStrategy?: BowlingPaceStrategy;
+  userBowlingIntent?: BowlingIntent;
+  userField?: FieldPreset;
+  customFielders?: InteractiveFielder[];
 }
 
 export interface ArchivedMatchRecord {
@@ -203,6 +214,16 @@ export default function MatchSimulationPage() {
   const [userPaceStrategy, setUserPaceStrategy] = useState<BowlingPaceStrategy>('FULL_PACE');
   const [userBowlingIntent, setUserBowlingIntent] = useState<BowlingIntent>('ATTACKING');
   const [userNominatedBowlerId, setUserNominatedBowlerId] = useState<string>('');
+  const [customFielders, setCustomFielders] = useState<InteractiveFielder[]>(() => {
+    return CANONICAL_FIELD_PRESETS.BALANCED_RING.positions.map((pos, idx) => ({
+      id: `fielder-${idx + 1}`,
+      name: pos.role,
+      role: pos.role,
+      angleDeg: pos.angleDeg,
+      distM: pos.distM,
+      isBoundary: pos.isBoundary,
+    }));
+  });
   const [isAIOptimized, setIsAIOptimized] = useState<boolean>(false);
   const [userTeamName, setUserTeamName] = useState<string>('User Dream XI');
   const [aiTeamName, setAiTeamName] = useState<string>('AI World XI');
@@ -293,6 +314,11 @@ export default function MatchSimulationPage() {
         visibleEvents: events,
         initialStateHash: simulationResult?.initialStateHash || '',
         savedAt: new Date().toISOString(),
+        userIntent,
+        userPaceStrategy,
+        userBowlingIntent,
+        userField,
+        customFielders,
       };
       localStorage.setItem('cricket_active_match_session', JSON.stringify(session));
     } catch (err) {
@@ -425,6 +451,13 @@ export default function MatchSimulationPage() {
     setLiveState(currentLiveState);
     setVisibleEvents(activeSession.visibleEvents);
     setCurrentEventIndex(activeSession.currentEventIndex);
+    if (activeSession.userIntent) setUserIntent(activeSession.userIntent);
+    if (activeSession.userPaceStrategy) setUserPaceStrategy(activeSession.userPaceStrategy);
+    if (activeSession.userBowlingIntent) setUserBowlingIntent(activeSession.userBowlingIntent);
+    if (activeSession.userField) setUserField(activeSession.userField);
+    if (activeSession.customFielders && activeSession.customFielders.length === 9) {
+      setCustomFielders(activeSession.customFielders);
+    }
     setActiveSession(null);
     setPhase(currentLiveState.status === 'COMPLETED' ? 'COMPLETED' : 'LIVE');
     setIsPlaying(false);
@@ -766,12 +799,26 @@ export default function MatchSimulationPage() {
     // The fundamental principle: The USER manages their own Dream XI. The OPPONENT is managed entirely by CPU AI.
     // When user's team is batting: User controls batter intent; CPU controls bowler line/length/variation/field.
     // When user's team is bowling: User controls bowling pace, line, length, variation, intent, field & bowler; CPU controls batter intent.
+    // Prepare custom fielder coordinates if user is bowling and has configured field
+    const mappedCustomField: CustomFielderPosition[] = isUserBowling && customFielders.length === 9
+      ? customFielders.map((f) => ({
+          id: f.id,
+          roleName: f.role,
+          angleDegrees: f.angleDeg,
+          distanceMeters: f.distM,
+          isBoundary: f.isBoundary,
+          isSlipsOrGully: f.role.toLowerCase().includes('slip') || f.role.toLowerCase().includes('gully'),
+          isLegSide: f.angleDeg > 180 && f.angleDeg < 360,
+        }))
+      : [];
+
     const action: TacticalDeliveryAction = {
       batterIntent: isUserBatting ? userIntent : aiAction.batterIntent,
       bowlerLength: isUserBowling ? userLength : aiAction.bowlerLength,
       bowlerLine: isUserBowling ? userLine : aiAction.bowlerLine,
       bowlerVariation: isUserBowling ? userVariation : aiAction.bowlerVariation,
       fieldPreset: isUserBowling ? userField : aiAction.fieldPreset,
+      customFieldPositions: isUserBowling && mappedCustomField.length > 0 ? mappedCustomField : undefined,
       bowlingPaceStrategy: isUserBowling ? userPaceStrategy : aiAction.bowlingPaceStrategy,
       bowlingIntent: isUserBowling ? userBowlingIntent : aiAction.bowlingIntent,
       nextBowlerPlayerId: isUserBowling && userNominatedBowlerId ? userNominatedBowlerId : undefined,
@@ -933,6 +980,16 @@ export default function MatchSimulationPage() {
   const strikerName = getPlayerDisplayName(strikerId || '');
   const nonStrikerName = getPlayerDisplayName(nonStrikerId || '');
   const bowlerName = getPlayerDisplayName(bowlerId || '');
+
+  // Current active bowler profile and style determination
+  const currentActiveBowler = liveState && bowlerId
+    ? liveState.config.playerProfiles.get(bowlerId)
+    : undefined;
+  const currentActiveBowlerIsSpin = currentActiveBowler
+    ? currentActiveBowler.bowlingStyle.includes('BREAK') ||
+      currentActiveBowler.bowlingStyle.includes('SPIN') ||
+      currentActiveBowler.bowlingStyle.includes('ORTHODOX')
+    : false;
 
   // Calculate live win probability
   const liveWinProb = targetRuns !== undefined
@@ -2149,6 +2206,20 @@ export default function MatchSimulationPage() {
                     activeEvent={currentEvent}
                     isPlaying={isPlaying}
                     playSpeed={playSpeed}
+                    currentFieldPreset={userField}
+                    customFieldPositions={customFielders.map((f) => {
+                      const rad = ((f.angleDeg - 90) * Math.PI) / 180;
+                      return {
+                        id: f.id,
+                        name: f.role,
+                        role: f.role,
+                        x: Math.cos(rad) * f.distM,
+                        y: 8.84 - Math.sin(rad) * f.distM,
+                        isBoundary: f.isBoundary,
+                        angleDeg: f.angleDeg,
+                        distM: f.distM,
+                      };
+                    })}
                     onPlayPauseToggle={() => setIsPlaying(!isPlaying)}
                     onStepNextBall={stepToNextDelivery}
                     onSkipOver={handleSimulateOver}
@@ -2410,17 +2481,28 @@ export default function MatchSimulationPage() {
 
                   <div className="grid grid-cols-2 gap-2 text-body-sm">
                     <div>
-                      <label className="text-[10px] font-label-caps text-text-subdued uppercase block mb-0.5">VARIATION</label>
+                      <label className="text-[10px] font-label-caps text-text-subdued uppercase block mb-0.5">
+                        VARIATION {currentActiveBowler ? (currentActiveBowlerIsSpin ? '(SPIN)' : '(PACE)') : ''}
+                      </label>
                       <select
                         value={userVariation}
                         onChange={(e) => setUserVariation(e.target.value as BowlingVariation)}
                         className="w-full bg-surface-recessed border border-border-hairline text-text-chalk p-1.5 rounded text-[11px] font-label-caps focus:outline-none cursor-pointer"
                       >
                         <option value="STOCK">Stock Delivery</option>
-                        <option value="SLOWER_BALL">Slower Ball</option>
-                        <option value="CUTTER">Off/Leg Cutter</option>
-                        <option value="BOUNCER">Bouncer</option>
-                        <option value="GOOGLY">Googly / Arm Ball</option>
+                        {currentActiveBowlerIsSpin ? (
+                          <>
+                            <option value="GOOGLY">Googly / Wrong-Un</option>
+                            <option value="ARM_BALL">Arm Ball / Drifter</option>
+                            <option value="FLIPPER">Flipper / Top-Spinner</option>
+                          </>
+                        ) : (
+                          <>
+                            <option value="SLOWER_BALL">Deceptive Slower Ball</option>
+                            <option value="CUTTER">Off/Leg Cutter</option>
+                            <option value="BOUNCER">Bouncer / Short Ball</option>
+                          </>
+                        )}
                       </select>
                     </div>
 
@@ -2428,13 +2510,29 @@ export default function MatchSimulationPage() {
                       <label className="text-[10px] font-label-caps text-text-subdued uppercase block mb-0.5">FIELDING PRESET</label>
                       <select
                         value={userField}
-                        onChange={(e) => setUserField(e.target.value as FieldPreset)}
+                        onChange={(e) => {
+                          const newPreset = e.target.value as FieldPreset;
+                          setUserField(newPreset);
+                          if (newPreset !== 'CUSTOM' && CANONICAL_FIELD_PRESETS[newPreset]) {
+                            setCustomFielders(
+                              CANONICAL_FIELD_PRESETS[newPreset].positions.map((pos, idx) => ({
+                                id: `fielder-${idx + 1}`,
+                                name: pos.role,
+                                role: pos.role,
+                                angleDeg: pos.angleDeg,
+                                distM: pos.distM,
+                                isBoundary: pos.isBoundary,
+                              })),
+                            );
+                          }
+                        }}
                         className="w-full bg-surface-recessed border border-border-hairline text-text-chalk p-1.5 rounded text-[11px] font-label-caps focus:outline-none cursor-pointer"
                       >
                         <option value="BALANCED_RING">Balanced Ring</option>
                         <option value="ATTACKING_CLOSE_CATCHERS">Close Catchers</option>
                         <option value="DEATH_BOUNDARY_DEFENSE">Boundary Defense</option>
                         <option value="SPIN_CHOKE">Spin Choke</option>
+                        <option value="CUSTOM">Custom Placement</option>
                       </select>
                     </div>
                   </div>
@@ -2449,6 +2547,58 @@ export default function MatchSimulationPage() {
                       <span className="text-text-slate">{strikerName}:</span>
                       <span className="text-tertiary">Balanced Stance • Reading Field Preset</span>
                     </div>
+                  </div>
+
+                  {/* Interactive Manual Field Placement Editor */}
+                  <div className="mt-2">
+                    <InteractiveFieldEditor
+                      currentPreset={userField}
+                      fielders={customFielders}
+                      isUserBowling={isUserBowling}
+                      onPresetSelect={(p) => {
+                        setUserField(p);
+                        if (CANONICAL_FIELD_PRESETS[p]) {
+                          setCustomFielders(
+                            CANONICAL_FIELD_PRESETS[p].positions.map((pos, idx) => ({
+                              id: `fielder-${idx + 1}`,
+                              name: pos.role,
+                              role: pos.role,
+                              angleDeg: pos.angleDeg,
+                              distM: pos.distM,
+                              isBoundary: pos.isBoundary,
+                            })),
+                          );
+                        }
+                      }}
+                      onFielderMove={(fielderId, newAngleDeg, newDistM) => {
+                        setUserField('CUSTOM');
+                        setCustomFielders((prev) =>
+                          prev.map((f) =>
+                            f.id === fielderId
+                              ? {
+                                  ...f,
+                                  angleDeg: newAngleDeg,
+                                  distM: newDistM,
+                                  isBoundary: newDistM >= 55,
+                                }
+                              : f,
+                          ),
+                        );
+                      }}
+                      onResetPreset={() => {
+                        setUserField('BALANCED_RING');
+                        setCustomFielders(
+                          CANONICAL_FIELD_PRESETS.BALANCED_RING.positions.map((pos, idx) => ({
+                            id: `fielder-${idx + 1}`,
+                            name: pos.role,
+                            role: pos.role,
+                            angleDeg: pos.angleDeg,
+                            distM: pos.distM,
+                            isBoundary: pos.isBoundary,
+                          })),
+                        );
+                      }}
+                    />
                   </div>
                 </div>
               )}

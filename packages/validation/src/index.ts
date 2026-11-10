@@ -94,6 +94,16 @@ export const CreateMatchSchema = z.object({
     .optional(),
 });
 
+export const CustomFielderPositionSchema = z.object({
+  id: z.string(),
+  roleName: z.string(),
+  angleDegrees: z.number().min(0).max(360),
+  distanceMeters: z.number().min(0).max(120),
+  isBoundary: z.boolean(),
+  isSlipsOrGully: z.boolean().optional(),
+  isLegSide: z.boolean().optional(),
+});
+
 export const TacticalDeliveryActionSchema = z.object({
   batterIntent: z.enum([
     'DEFEND',
@@ -106,7 +116,8 @@ export const TacticalDeliveryActionSchema = z.object({
   bowlerLine: z.enum(['OUTSIDE_OFF', 'STUMPS', 'DOWN_LEG']),
   bowlerLength: z.enum(['YORKER', 'FULL', 'GOOD_LENGTH', 'BACK_OF_LENGTH', 'SHORT']),
   bowlerVariation: z.enum(['STOCK', 'SLOWER_BALL', 'BOUNCER', 'GOOGLY', 'ARM_BALL']),
-  fieldPreset: z.enum(['ATTACKING', 'BALANCED', 'BOUNDARY_DEFENSE', 'SPIN_CHOKE']),
+  fieldPreset: z.enum(['ATTACKING', 'BALANCED', 'BOUNDARY_DEFENSE', 'SPIN_CHOKE', 'CUSTOM']),
+  customFieldPositions: z.array(CustomFielderPositionSchema).optional(),
 });
 
 export const TossActionSchema = z.object({

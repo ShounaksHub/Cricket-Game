@@ -66,32 +66,70 @@ export function calculateOutcomeLogits(input: OutcomeCalculationInput): OutcomeL
     logits.DOT -= 0.3;
   }
 
-  // 4. Field Presets
-  switch (tactics.fieldPreset) {
-    case 'ATTACKING_CLOSE_CATCHERS':
-      logits.WICKET += 0.3;
-      logits.DOT += 0.2;
-      logits.FOUR += 0.25;
-      logits.RUN_1 += 0.15;
-      break;
+  // 4. Field Presets & Custom Field Positions
+  if (tactics.customFieldPositions && tactics.customFieldPositions.length > 0) {
+    // Dynamic calculation from user's manual field arrangement
+    const slipsOrClose = tactics.customFieldPositions.filter(
+      (f) => f.isSlipsOrGully || f.distanceMeters <= 18,
+    ).length;
+    const boundaryFielders = tactics.customFieldPositions.filter(
+      (f) => f.isBoundary || f.distanceMeters >= 55,
+    ).length;
+    const ringFielders = tactics.customFieldPositions.filter(
+      (f) => f.distanceMeters > 18 && f.distanceMeters < 55,
+    ).length;
 
-    case 'DEATH_BOUNDARY_DEFENSE':
-      logits.FOUR -= 0.35;
-      logits.SIX -= 0.25;
-      logits.RUN_1 += 0.35;
-      logits.RUN_2 += 0.15;
-      break;
+    // Slips & Close catchers increase edge dismissals and dots, but concede boundaries
+    if (slipsOrClose >= 3) {
+      logits.WICKET += 0.1 * slipsOrClose;
+      logits.DOT += 0.05 * slipsOrClose;
+      logits.FOUR += 0.08 * slipsOrClose;
+    } else if (slipsOrClose >= 1) {
+      logits.WICKET += 0.08;
+    }
 
-    case 'SPIN_CHOKE':
+    // Boundary protection suppresses 4s & 6s, but concedes easy singles/twos
+    if (boundaryFielders >= 4) {
+      logits.FOUR -= 0.08 * boundaryFielders;
+      logits.SIX -= 0.05 * boundaryFielders;
+      logits.RUN_1 += 0.08 * boundaryFielders;
+      logits.RUN_2 += 0.04 * boundaryFielders;
+    }
+
+    // Ring fielders choke singles
+    if (ringFielders >= 6) {
       logits.RUN_1 -= 0.3;
-      logits.RUN_2 -= 0.4;
-      logits.DOT += 0.35;
-      logits.SIX += 0.15;
-      break;
+      logits.RUN_2 -= 0.2;
+      logits.DOT += 0.3;
+    }
+  } else {
+    switch (tactics.fieldPreset) {
+      case 'ATTACKING_CLOSE_CATCHERS':
+        logits.WICKET += 0.3;
+        logits.DOT += 0.2;
+        logits.FOUR += 0.25;
+        logits.RUN_1 += 0.15;
+        break;
 
-    case 'BALANCED_RING':
-      // Neutral
-      break;
+      case 'DEATH_BOUNDARY_DEFENSE':
+        logits.FOUR -= 0.35;
+        logits.SIX -= 0.25;
+        logits.RUN_1 += 0.35;
+        logits.RUN_2 += 0.15;
+        break;
+
+      case 'SPIN_CHOKE':
+        logits.RUN_1 -= 0.3;
+        logits.RUN_2 -= 0.4;
+        logits.DOT += 0.35;
+        logits.SIX += 0.15;
+        break;
+
+      case 'BALANCED_RING':
+      default:
+        // Neutral
+        break;
+    }
   }
 
   // 5. Bowler Line & Length Tactics

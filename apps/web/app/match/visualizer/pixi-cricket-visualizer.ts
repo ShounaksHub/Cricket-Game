@@ -100,9 +100,9 @@ export class PixiCricketVisualizer {
     this.playbackSpeed = Math.max(0.25, Math.min(4.0, multiplier));
   }
 
-  setFieldPreset(preset: FieldPreset): void {
+  setFieldPreset(preset: FieldPreset, customPositions?: any[]): void {
     if (this.playerManager) {
-      this.playerManager.updateFielders(preset);
+      this.playerManager.updateFielders(preset, customPositions);
     }
   }
 
