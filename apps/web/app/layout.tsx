@@ -4,6 +4,8 @@ import './globals.css';
 import { StitchHeader } from '../components/StitchHeader';
 import { StitchFooter } from '../components/StitchFooter';
 import { WelcomeModal } from '../components/WelcomeModal';
+import { EnterArenaSplash } from '../components/EnterArenaSplash';
+import { AudioProvider } from '../context/AudioContext';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -86,12 +88,15 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-surface font-body-base text-body-base text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container flex flex-col">
-        <StitchHeader />
-        <main className="w-full pt-20 bg-surface min-h-[calc(100vh-80px)] flex flex-col flex-1">
-          {children}
-        </main>
-        <StitchFooter />
-        <WelcomeModal />
+        <AudioProvider>
+          <EnterArenaSplash />
+          <StitchHeader />
+          <main className="w-full pt-20 bg-surface min-h-[calc(100vh-80px)] flex flex-col flex-1">
+            {children}
+          </main>
+          <StitchFooter />
+          <WelcomeModal />
+        </AudioProvider>
       </body>
     </html>
   );

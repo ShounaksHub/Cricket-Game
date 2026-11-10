@@ -4,11 +4,11 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { CricketDreamXILogo } from './CricketDreamXILogo';
+import { HeaderAudioControls } from './HeaderAudioControls';
 
 export function StitchHeader() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isAudioMuted, setIsAudioMuted] = useState(false);
 
   const navItems = [
     { label: 'HOME', href: '/', pathMatch: (p: string) => p === '/' },
@@ -86,25 +86,15 @@ export function StitchHeader() {
           <button
             aria-label="Rules & Regulations"
             title="Rules & Match Regulations"
-            className="p-space-xs rounded-lg text-text-slate hover:text-text-chalk hover:bg-surface-elevated transition-all flex items-center justify-center"
+            className="p-space-xs rounded-lg text-text-slate hover:text-text-chalk hover:bg-surface-elevated transition-all flex items-center justify-center cursor-pointer"
             type="button"
             onClick={openRules}
           >
             <span className="material-symbols-outlined text-[20px]">help</span>
           </button>
 
-          {/* Audio Settings Toggle */}
-          <button
-            aria-label="Audio Settings"
-            title={isAudioMuted ? 'Unmute Audio' : 'Mute Audio'}
-            className="p-space-xs rounded-lg text-text-slate hover:text-text-chalk hover:bg-surface-elevated transition-all flex items-center justify-center"
-            type="button"
-            onClick={() => setIsAudioMuted(!isAudioMuted)}
-          >
-            <span className="material-symbols-outlined text-[20px]">
-              {isAudioMuted ? 'volume_off' : 'volume_up'}
-            </span>
-          </button>
+          {/* Interactive Stadium Audio Controls & Track Menu */}
+          <HeaderAudioControls />
 
           {/* Captain Profile Pill */}
           <Link
