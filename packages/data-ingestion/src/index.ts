@@ -5,3 +5,5 @@ export * from './cricsheet-parser.js';
 export * from './wikidata-parser.js';
 export * from './ingestion-pipeline.js';
 export * from './curated-seed-data.js';
+export * from './data/index.js';
+

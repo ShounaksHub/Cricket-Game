@@ -10,6 +10,8 @@ import {
   parseCricsheetMatch,
   resolvePlayerIdentity,
   VERIFIED_BENCHMARK_PLAYERS,
+  COHORT_INTERNATIONAL_CONTEMPORARY,
+  COHORT_INTERNATIONAL_LEGENDS,
 } from '../src/index.js';
 import type { CricsheetMatchJson } from '../src/index.js';
 
@@ -342,6 +344,49 @@ describe('Data Ingestion Engine (@cricket/data-ingestion)', () => {
       expect(profile.competitions).toContain('Ranji Trophy');
       expect(profile.competitions).toContain('IPL');
     });
+
+    it('Gate P7.2: verifies international contemporary and historical legend cohorts (570+ players, zero duplicates)', () => {
+      expect(COHORT_INTERNATIONAL_CONTEMPORARY.length).toBeGreaterThanOrEqual(300);
+      expect(COHORT_INTERNATIONAL_LEGENDS.length).toBeGreaterThanOrEqual(250);
+
+      const internationalCombined = [
+        ...COHORT_INTERNATIONAL_CONTEMPORARY,
+        ...COHORT_INTERNATIONAL_LEGENDS,
+      ];
+
+      expect(internationalCombined.length).toBeGreaterThanOrEqual(570);
+
+      const audit = detectDuplicatePlayers(internationalCombined);
+      expect(audit.hasDuplicates).toBe(false);
+      expect(audit.duplicateIdCount).toBe(0);
+      expect(audit.duplicateCount).toBe(0);
+      expect(audit.issues).toHaveLength(0);
+
+      // Verify representations across ICC Full & Associate Members
+      const countries = new Set(internationalCombined.map((p) => p.primaryNationality));
+      expect(countries.size).toBeGreaterThanOrEqual(15);
+      expect(countries.has('India')).toBe(true);
+      expect(countries.has('Australia')).toBe(true);
+      expect(countries.has('England')).toBe(true);
+      expect(countries.has('South Africa')).toBe(true);
+      expect(countries.has('Pakistan')).toBe(true);
+      expect(countries.has('New Zealand')).toBe(true);
+      expect(countries.has('West Indies')).toBe(true);
+      expect(countries.has('Sri Lanka')).toBe(true);
+      expect(countries.has('Bangladesh')).toBe(true);
+      expect(countries.has('Afghanistan')).toBe(true);
+      expect(countries.has('Zimbabwe')).toBe(true);
+      expect(countries.has('Ireland')).toBe(true);
+      expect(countries.has('Netherlands')).toBe(true);
+      expect(countries.has('Scotland')).toBe(true);
+
+      // Verify UUID format for all players (RFC 4122 36 characters)
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      for (const p of internationalCombined) {
+        expect(p.id).toMatch(uuidRegex);
+      }
+    });
   });
 });
+
 
