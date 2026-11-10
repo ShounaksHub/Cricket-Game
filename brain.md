@@ -1,9 +1,9 @@
 # Global Cricket Dream Team & Simulation Game — Master Project Brain (`brain.md`)
 
-**Document Version:** 2.0.0  
-**Last Updated:** November 2026  
+**Document Version:** 2.1.0  
+**Last Updated:** November 2026 (Post-Phase 9.3 Engine & UX Overhaul)  
 **System Status:** Production-Ready Single-Project Monorepo (Next.js 15.5.29, NestJS 11, Turborepo 2.3, PixiJS v8.22, Prisma v6, PostgreSQL 16)  
-**Deployment Target:** Unified Vercel Monorepo (`apps/web` + standalone `@cricket/simulation` engine)  
+**Deployment Target:** Unified Vercel Monorepo (`apps/web` + standalone `@cricket/simulation-engine` package)  
 **Active Services & URLs:**
 - **Web App & Game Client:** `http://localhost:3000` (Playable 2D Field, Stitch Design UI, Interactive Rules Modal, Squad Builder)
 - **Backend API:** `http://localhost:4000` (Prisma ORM, SSE Streaming, Replay Auditing, Health Telemetry)
@@ -55,31 +55,31 @@ The project is structured as a pnpm workspace orchestrated by Turborepo 2.3:
 ```
 Cricket-Game (Monorepo Root)
 ├── apps/
-│   ├── web/                     # Next.js 15.5.29 App Router Frontend (Stitch UI + PixiJS v8)
-│   └── api/                     # NestJS 11 Backend (Prisma ORM, SSE, Health, Analytics)
+│   ├── web/                     # @cricket/web — Next.js 15.5.29 App Router Frontend (Stitch UI + PixiJS v8)
+│   └── api/                     # @cricket/api — NestJS 11 Backend (Prisma ORM, SSE, Health, Analytics)
 ├── packages/
-│   ├── simulation/              # Pure TypeScript deterministic physics & simulation engine
-│   ├── player-ratings/          # 5-tier Bayesian ratings & era-calibration engine
-│   ├── data-ingestion/          # Ingestion pipelines for historical ball-by-ball & player metrics
-│   ├── database/                # Prisma ORM schema & client (PostgreSQL 16)
-│   ├── types/                   # Shared TypeScript domain models & DTOs
-│   ├── ui/                      # Shared design tokens & React components
-│   ├── eslint-config/           # Monorepo ESLint configurations
-│   └── typescript-config/       # Base tsconfig presets
-├── design-reference/           # Google Stitch UI reference screens & assets
+│   ├── simulation-engine/       # @cricket/simulation-engine — Pure TS deterministic 10-stage physics engine
+│   ├── cricket-rules/           # @cricket/cricket-rules — ICC law enforcement & format rule sets
+│   ├── player-ratings/          # @cricket/player-ratings — 5-tier Bayesian ratings & era-calibration engine
+│   ├── data-ingestion/          # @cricket/data-ingestion — Ingestion pipelines for historical player metrics
+│   ├── shared-types/            # @cricket/shared-types — Shared TypeScript domain models & DTOs
+│   └── validation/              # @cricket/validation — Squad, roster & match configuration validators
+├── docs/                        # Phase audit reports, architecture notes & verification logs
+├── design-reference/            # Google Stitch UI reference screens & assets
 ├── brain.md                     # Master project architectural context (this document)
-├── PLAYERS_ROSTER.md           # 1,144-player exhaustive database catalogue
-├── pnpm-workspace.yaml         # Workspace definition
-├── turbo.json                  # Turborepo task graph & caching policies
-└── vercel.json                 # Unified single-project Vercel configuration
+├── PLAYERS_ROSTER.md            # 1,144-player exhaustive database catalogue
+├── pnpm-workspace.yaml          # Workspace definition
+├── turbo.json                   # Turborepo task graph & caching policies
+└── vercel.json                  # Unified single-project Vercel configuration
 ```
 
 ### Monorepo Dependency Graph
-- `@cricket/types` is the root contract package consumed by all services.
-- `@cricket/simulation` imports `@cricket/types` and `@cricket/player-ratings`. It has zero browser or Node-specific dependencies, running seamlessly in Node, Vercel Serverless, Web Workers, or client-side React state.
-- `@cricket/database` exposes the Prisma client and migrations for `@cricket/api`.
-- `@cricket/data-ingestion` imports `@cricket/player-ratings` and `@cricket/database`.
-- `apps/web` imports `@cricket/types`, `@cricket/simulation`, and `@cricket/ui`.
+- `@cricket/shared-types` is the root contract package consumed by all services.
+- `@cricket/simulation-engine` imports `@cricket/shared-types`, `@cricket/cricket-rules`, and `@cricket/player-ratings`. It has zero browser or Node-specific dependencies, running seamlessly in Node, Vercel Serverless, Web Workers, or client-side React state.
+- `@cricket/validation` imports `@cricket/shared-types` for squad and match configuration validation.
+- `@cricket/data-ingestion` imports `@cricket/player-ratings` and `@cricket/shared-types`.
+- `@cricket/web` imports `@cricket/shared-types`, `@cricket/simulation-engine`, and `@cricket/validation`.
+- `@cricket/api` imports `@cricket/shared-types`, `@cricket/simulation-engine`, and `@cricket/data-ingestion`.
 
 ---
 
@@ -99,6 +99,8 @@ Cricket-Game (Monorepo Root)
 | **ADR-010** | October 2026 ICC Law Compliance | Accepted | First cricket simulation engine to encode the 60-second Stop Clock rule (Law 41.9), 30-minute extra time allowances (Law 16.2.2), follow-on thresholds (Law 14), and captain declarations (Law 15). |
 | **ADR-011** | Google Stitch Design Language Integration | Accepted | Complete rebuild of frontend screens using Stitch design tokens, high-density telemetry tables, and green-lime pitch aesthetic. |
 | **ADR-012** | Vector-Pure Brand Identity Architecture | Accepted | Replaced raster logos with clean SVG vectors, comprehensive multi-resolution favicons, web app manifest icons, and social Open Graph metadata. |
+| **ADR-013** | Deterministic Vector Avatars & Strict Photo Attribution | Accepted | Mandates that zero unverified photos are claimed as authentic. All 1,144 players resolve to deterministic SVG data URIs based on nationality palettes, role glyphs, and initials. |
+| **ADR-014** | Strict Asymmetric Player Agency & Authoritative Match State | Accepted | The user manages their own Dream XI (batting intent when batting, complete bowling/fielding cockpit when bowling). The opponent is managed autonomously by CPU AI. In-match scoreboards read directly from authoritative state, preventing score summation bugs. |
 
 ---
 
@@ -177,14 +179,15 @@ Running speed, turn efficiency, and throw accuracy dictate run decisions. Direct
 
 ## 5. Multi-Format Engine & October 2026 ICC Laws
 
-The engine fully models 4 premier cricket formats according to modern MCC laws:
+The engine fully models **5 premier cricket formats** according to modern MCC laws and ICC playing conditions (effective October 2026):
 
 | Match Format | Overs / Innings | Powerplays & Field Restrictions | Bowler Max Quota | Ball Type & Pitch Degradation |
 |---|---|---|---|---|
 | **T10 Blitz** | 10 overs (60 balls) | Overs 1–2 (2 outside ring) | 2 overs per bowler | White Kookaburra / Ultra-low wear |
 | **T20 International** | 20 overs (120 balls) | P1: 1–6 (2 out), P2: 7–20 (5 out) | 4 overs per bowler | White Kookaburra / Low wear |
 | **ODI (One Day)** | 50 overs (300 balls) | P1: 1–10 (2 out), P2: 11–40 (4 out), P3: 41–50 (5 out) | 10 overs per bowler | Two White Kookaburras (1 per end) |
-| **Test Match** | Unlimited (Target ~90/day) | Dynamic field placements (slips, gully, bat-pad) | Unlimited | Red Dukes/Kookaburra or Pink Ball Day-Night |
+| **Test Red Ball** | Unlimited (Target ~90/day, session-based) | Dynamic field placements (slips, gully, bat-pad) | Unlimited | Red Dukes / Kookaburra |
+| **Test Pink Ball (Day-Night)** | Unlimited (session-based, mandatory 30-min extra time window) | Dynamic; twilight session dew-rule adjustments | Unlimited | Pink Kookaburra / Night dew degradation |
 
 ### October 2026 ICC Law Enforcements
 
@@ -281,24 +284,26 @@ A responsive, high-contrast modal greets players on entry, detailing:
 
 ## 9. Frontend Reconstruction: Google Stitch Design System
 
-The frontend in `apps/web` has been reconstructed to mirror Google Stitch design specifications across all 8 screens:
+The frontend in `apps/web` has been reconstructed to mirror Google Stitch design specifications across all 8 screens. Key screens and features added through Phases 9.1–9.3 are listed below:
 
 1. **Dashboard / Match Command Center (`/`):**
    - Active match live tickers, high-impact neon green action buttons (`#00e676`), dark obsidian card frames (`#001a10`), and quick-launch tournament carousels.
-2. **Squad & Lineup Selection (`/builder`):**
-   - 11-slot interactive team board with position badges (WK, BAT, ALL, BOWL), nationality quota badges, and live salary/rating cap indicators.
-3. **Live Match Simulator (`/match/[id]`):**
-   - Real-time dual scoreboard header, delivery-by-delivery wagon wheel, live commentary ticker, PixiJS 2D pitch view, and tactical control docks.
-4. **Full Match Scorecard (`/match/[id]/scorecard`):**
+2. **Onboarding / Guest Profile (`/onboarding`):** *(Added Phase 9.1)*
+   - Zero-registration guest play flow. Users create a display name and choose a favourite nation without any account requirement. No pre-populated fake accounts.
+3. **Squad & Lineup Selection (`/builder`):**
+   - 11-slot interactive team board with position badges (WK, BAT, ALL, BOWL), nationality quota badges, and live salary/rating cap indicators. Real cricket players only — zero fabricated identities.
+4. **Live Match Simulator (`/match`):**
+   - Real-time dual scoreboard header reading directly from authoritative `activeInnings.totalRuns` state (Phase 9.3 score-integrity fix). Delivery-by-delivery wagon wheel, live commentary ticker, PixiJS 2D pitch view.
+   - **Asymmetric Tactical Cockpit (Phase 9.3):** When user's team bats → batting intent cockpit (shot selection, running intent, attack/defend). When user's team bowls → full bowling cockpit (next bowler selector, pace strategy, bowling intent, length, line, variation, field presets). CPU manages the opposing team entirely autonomously.
+   - All tactical controls are disabled when match phase is `COMPLETED`.
+5. **Full Match Scorecard (`/match/[id]/scorecard`):**
    - Traditional tabular layout (Batsman, Dismissal, Runs, Balls, 4s, 6s, SR; Bowler, Overs, Maidens, Runs, Wickets, Economy), extras breakdown, and Fall of Wickets (FOW) charts.
-5. **Player Catalogue & Deep Stats (`/players`):**
-   - Searchable, filterable directory of all 1,144 players with era filters, skill radar charts, and Bayesian rating badges.
-6. **Pitch & Conditions Configurator (`/conditions`):**
+6. **Player Catalogue & Deep Stats (`/players`):**
+   - Searchable, filterable directory of all 1,144 players with era filters, skill radar charts, and Bayesian rating badges. All 1,144 players resolve to deterministic SVG avatars — zero unverified portrait photos (Phase 9.1/9.2 identity repair).
+7. **Pitch & Conditions Configurator (`/conditions`):**
    - Interactive sliders for grass cover, soil moisture, crack density, cloud cover, temperature, and day/night schedule.
-7. **Tournament & Series Hub (`/tournaments`):**
+8. **Tournament & Series Hub (`/tournaments`):**
    - Knockout brackets, round-robin points tables with Net Run Rate (NRR) calculations, and match scheduling.
-8. **Replay & DRS Audit Theater (`/replays`):**
-   - Deterministic ball-by-ball scrub control, UltraEdge snickometer audio-frequency canvas, and ball-tracking Hawk-Eye projection.
 
 ---
 
@@ -376,15 +381,18 @@ All workspace verification commands execute cleanly with 100% passing results:
    ```bash
    pnpm turbo run test
    ```
-   *Result:* 15/15 test suites passed (100% green). Covers:
+   *Result:* 15/15 test suites passed (100% green, 258/258 tests passed). Covers:
    - Ballistics, swing, and spin physics calculations.
-   - 10-stage execution pipeline determinism.
+   - 10-stage execution pipeline determinism across all 5 formats (T10, T20, ODI, Test Red/Pink).
    - DLS target adjustment calculations.
    - Follow-on and declaration state machines.
    - Stop clock 60-second penalty run logic.
    - Bayesian player rating shrinkage validation.
+   - Complete player image resolver & deterministic SVG avatar verification.
+   - End-to-end match gameplay, session resume, and replay determinism.
+   - Phase 9.3 match score integrity, single authoritative state, and asymmetric player agency.
 
-3. **Production Production Build:**
+3. **Production Build:**
    ```bash
    pnpm turbo run build
    ```
@@ -405,16 +413,17 @@ c:\Users\shoun\OneDrive\Desktop\cricket game\
 │   │   └── test/                             # E2E NestJS tests
 │   └── web/                                  # Next.js 15.5.29 Frontend
 │       ├── app/                              # App Router (8 Stitch pages + API routes)
-│       ├── components/                       # Stitch UI components, rules modal, PixiJS canvas
+│       ├── components/                       # Stitch UI components, rules modal, PixiJS canvas, cockpit
 │       ├── hooks/                            # useMatchSimulation, useAudio, useField
 │       └── public/                           # Official SVGs, favicons, PWA icons, OG card
 ├── packages/
+│   ├── cricket-rules/                        # MCC / ICC playing conditions and rulesets
 │   ├── data-ingestion/                       # CSV/JSON historical match ingestion
-│   ├── database/                             # Prisma schema & PostgreSQL client
 │   ├── player-ratings/                       # 5-tier Bayesian rating engine
-│   ├── simulation/                           # Pure deterministic 10-stage simulation engine
-│   ├── types/                                # Universal domain types & DTOs
-│   └── ui/                                   # Shared Tailwind theme & UI primitives
+│   ├── shared-types/                         # Universal domain types & DTOs
+│   ├── simulation-engine/                    # Pure deterministic 10-stage simulation engine
+│   └── validation/                           # Squad & match configuration validators
+├── docs/                                     # Comprehensive audit reports (Phases 1 through 9.3)
 ├── brain.md                                 # Master System Architecture Brain (This document)
 ├── PLAYERS_ROSTER.md                         # 1,144-player exhaustive database catalogue
 ├── package.json                              # Root monorepo dependencies
