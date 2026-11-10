@@ -80,7 +80,7 @@ export class T20Ruleset implements RulesetInterface {
     if (oversBowled >= this.maxOversPerBowler) {
       return {
         allowed: false,
-        reason: `Bowler has already completed maximum quota (${this.maxOversPerBowler} overs) for T20`,
+        reason: `Bowler has already completed maximum quota (${this.maxOversPerBowler} overs) for ${this.format}`,
       };
     }
     return { allowed: true };

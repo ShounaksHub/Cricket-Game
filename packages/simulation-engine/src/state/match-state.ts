@@ -109,6 +109,8 @@ export function createInitialMatchState(config: MatchSimulationConfig): MatchSta
     config.team2.lineup.map((s) => ({ playerId: s.playerId }))
   );
 
+  const isTest = config.format === 'TEST_RED_BALL' || config.format === 'TEST_PINK_BALL';
+
   return {
     config,
     initialStateHash: hash0,
@@ -118,6 +120,11 @@ export function createInitialMatchState(config: MatchSimulationConfig): MatchSta
     pitchWearIndex: 0.0,
     surfaceCracksIndex: 0.0,
     ballWearIndex: 0.0,
+    currentDayNumber: isTest ? 1 : undefined,
+    currentSessionNumber: isTest ? 1 : undefined,
+    sessionOversBowled: isTest ? 0 : undefined,
+    oversSinceNewBall: isTest ? 0 : undefined,
+    isFollowOnEnforced: isTest ? false : undefined,
   };
 }
 

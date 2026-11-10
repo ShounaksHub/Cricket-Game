@@ -206,6 +206,13 @@ export function CricketVisualizerCanvas({
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block" />
             <span>LIVE PIXI 2D BROADCAST</span>
           </div>
+          <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+            {matchState.config.format === 'TEST_PINK_BALL'
+              ? `PINK BALL D/N • DAY ${matchState.currentDayNumber ?? 1} S${matchState.currentSessionNumber ?? 1}`
+              : matchState.config.format === 'TEST_RED_BALL'
+                ? `TEST • DAY ${matchState.currentDayNumber ?? 1} S${matchState.currentSessionNumber ?? 1}`
+                : matchState.config.format}
+          </span>
           <div className="text-xs text-gray-400 font-medium">
             {matchState.config.stadiumId.replace('stadium-', '').toUpperCase()} •{' '}
             {matchState.config.pitchType} PITCH
@@ -250,7 +257,7 @@ export function CricketVisualizerCanvas({
           {/* Batting Team Total & Over */}
           <div className="md:col-span-3 border-r border-gray-800/80 pr-3">
             <div className="text-[11px] font-bold text-emerald-400 uppercase tracking-widest">
-              {currentInnings?.inningsNumber === 1
+              {currentInnings?.battingTeamId === matchState.config.team1.id
                 ? matchState.config.team1.name
                 : matchState.config.team2.name}
             </div>

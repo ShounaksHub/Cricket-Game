@@ -217,10 +217,16 @@ export interface MatchState {
   readonly pitchWearIndex: number; // 0.0 to 1.0
   readonly surfaceCracksIndex: number; // 0.0 to 1.0
   readonly ballWearIndex: number; // 0.0 to 1.0
+  readonly currentDayNumber?: number; // 1 to 5 (Test)
+  readonly currentSessionNumber?: number; // 1 to 3 (Test)
+  readonly sessionOversBowled?: number; // 0 to 30 (Test)
+  readonly oversSinceNewBall?: number; // 0 to 80+ (Test)
+  readonly isFollowOnEnforced?: boolean;
   readonly result?: {
     readonly winningTeamId?: string;
     readonly marginRuns?: number;
     readonly marginWickets?: number;
+    readonly isInningsWin?: boolean;
     readonly isTie: boolean;
     readonly isDraw: boolean;
     readonly summary: string;

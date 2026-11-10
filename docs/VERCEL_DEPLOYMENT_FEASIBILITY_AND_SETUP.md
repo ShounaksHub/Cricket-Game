@@ -288,3 +288,4 @@ If any production anomaly occurs:
    git push origin main
    ```
    Vercel and Railway will automatically redeploy the previous stable state within 60 seconds.
+

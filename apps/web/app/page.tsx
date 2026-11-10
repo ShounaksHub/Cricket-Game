@@ -84,13 +84,13 @@ export default function LandingPage() {
       <section className="max-w-4xl mx-auto text-center mt-12 md:mt-20">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0D4A38]/30 border border-[#0D4A38] text-xs text-[#D4AF37] mb-6">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>PHASE 4: T20 CRICKET MATCH SIMULATION ENGINE LIVE</span>
+          <span>PHASE 8: MULTI-FORMAT ENGINE (T10, T20, ODI, TEST RED & PINK BALL) LIVE</span>
         </div>
         <h2 className="text-4xl md:text-6xl font-serif font-bold tracking-tight text-[#F8F9FA] mb-6 leading-tight">
           Global Cricket Dream Team & Simulation Engine
         </h2>
         <p className="text-lg md:text-xl text-[#9CA3AF] max-w-2xl mx-auto mb-10 leading-relaxed">
-          Assemble cross-era playing XIs, challenge context-aware AI opponents, and experience authoritative multi-format cricket simulations governed by true cricket laws.
+          Assemble cross-era playing XIs from 1,144 verified players, challenge situational AI opponents, and experience authoritative multi-format cricket simulations governed by true MCC laws.
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-4">
@@ -99,14 +99,14 @@ export default function LandingPage() {
             className="px-6 py-3.5 rounded-md bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-[#0E1013] font-bold shadow-lg shadow-[#D4AF37]/20 transition flex items-center gap-2"
           >
             <Trophy className="w-4 h-4 text-[#0E1013]" />
-            <span>Simulate T20 Match (Phase 4)</span>
+            <span>Play Match (All 5 Formats)</span>
           </Link>
           <Link
             href="/dream-teams"
             className="px-6 py-3.5 rounded-md bg-[#0D4A38] hover:bg-[#0D4A38]/90 text-[#F8F9FA] font-medium border border-[#D4AF37]/40 shadow-lg shadow-[#0D4A38]/20 transition flex items-center gap-2"
           >
             <Shield className="w-4 h-4 text-[#D4AF37]" />
-            <span>Build Your Dream Team (Phase 3)</span>
+            <span>Build Your Dream Team (1,144 Players)</span>
           </Link>
           <Link
             href="/players"
@@ -118,14 +118,14 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Supported Formats Grid (Safeguard 2) */}
+      {/* Supported Formats Grid */}
       <section className="max-w-6xl mx-auto mt-20">
         <div className="flex items-center justify-between mb-8 pb-3 border-b border-[#2E3440]/60">
           <h3 className="text-xl font-serif font-bold text-[#F8F9FA] flex items-center gap-2">
             <Globe2 className="w-5 h-5 text-[#D4AF37]" />
             <span>Supported Cricket Formats</span>
           </h3>
-          <span className="text-xs text-[#9CA3AF] uppercase tracking-wider">All 5 Formats Architected</span>
+          <span className="text-xs text-[#9CA3AF] uppercase tracking-wider">All 5 Formats Playable</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -147,13 +147,82 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Strategic Product Roadmap & Future Milestones (Phases 8–11) */}
+      <section className="max-w-6xl mx-auto mt-20">
+        <div className="flex items-center justify-between mb-8 pb-3 border-b border-[#2E3440]/60">
+          <div>
+            <h3 className="text-xl font-serif font-bold text-[#F8F9FA] flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-[#D4AF37]" />
+              <span>Strategic Product Roadmap</span>
+            </h3>
+            <p className="text-xs text-[#9CA3AF] mt-1">Long-term vision: From multi-format foundation to photorealistic 3D cricket simulation</p>
+          </div>
+          <span className="text-xs font-mono px-2.5 py-1 rounded bg-[#0D4A38]/40 text-[#D4AF37] border border-[#D4AF37]/30">
+            Phases 8 – 11
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Phase 8 */}
+          <div className="p-5 rounded-xl bg-gradient-to-b from-[#181B20] to-[#121418] border border-emerald-500/40 relative overflow-hidden">
+            <div className="absolute top-0 right-0 px-2 py-0.5 bg-emerald-500 text-[#0E1013] text-[10px] font-mono font-bold rounded-bl uppercase">
+              Current
+            </div>
+            <div className="text-xs font-mono text-emerald-400 font-bold mb-2">PHASE 8</div>
+            <h4 className="text-base font-bold text-[#F8F9FA] mb-2">Multi-Format Engine & Audit</h4>
+            <p className="text-xs text-[#9CA3AF] leading-relaxed mb-4">
+              Native simulation for T10, T20, ODI, Test Red Ball & Pink Ball. Session tracking, follow-on mechanics, 80-over new ball reset, and comprehensive codebase pre-deployment audit.
+            </p>
+            <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-mono">
+              <CheckCircle2 className="w-3.5 h-3.5" /> Fully Implemented
+            </div>
+          </div>
+
+          {/* Phase 9 */}
+          <div className="p-5 rounded-xl bg-[#181B20] border border-[#2E3440] hover:border-[#D4AF37]/50 transition duration-200">
+            <div className="text-xs font-mono text-[#D4AF37] font-bold mb-2">PHASE 9</div>
+            <h4 className="text-base font-bold text-[#F8F9FA] mb-2">Multiplayer & Live Rooms</h4>
+            <p className="text-xs text-[#9CA3AF] leading-relaxed mb-4">
+              Real-time WebSocket multiplayer matchmaking, peer-to-peer tactical head-to-head battles, spectator lobbies, and synchronized live broadcast rooms.
+            </p>
+            <div className="flex items-center gap-1.5 text-[11px] text-amber-400 font-mono">
+              <Activity className="w-3.5 h-3.5" /> Next Release
+            </div>
+          </div>
+
+          {/* Phase 10 */}
+          <div className="p-5 rounded-xl bg-[#181B20] border border-[#2E3440] hover:border-[#D4AF37]/30 transition duration-200">
+            <div className="text-xs font-mono text-[#9CA3AF] font-bold mb-2">PHASE 10</div>
+            <h4 className="text-base font-bold text-[#F8F9FA] mb-2">Franchise & Career Dynasty</h4>
+            <p className="text-xs text-[#9CA3AF] leading-relaxed mb-4">
+              Multi-season franchise dynasty leagues, IPL-style mega auctions, player salary caps, youth scouting academy, and progressive player rating evolution.
+            </p>
+            <div className="flex items-center gap-1.5 text-[11px] text-[#9CA3AF] font-mono">
+              Planned Architecture
+            </div>
+          </div>
+
+          {/* Phase 11 */}
+          <div className="p-5 rounded-xl bg-[#181B20] border border-[#2E3440] hover:border-[#D4AF37]/30 transition duration-200">
+            <div className="text-xs font-mono text-[#9CA3AF] font-bold mb-2">PHASE 11</div>
+            <h4 className="text-base font-bold text-[#F8F9FA] mb-2">3D Stadiums & Visuals</h4>
+            <p className="text-xs text-[#9CA3AF] leading-relaxed mb-4">
+              WebGPU-accelerated photorealistic 3D stadium geometry, volumetric atmospheric lighting, 3D trajectory ball physics, and multi-angle broadcast replay cameras.
+            </p>
+            <div className="flex items-center gap-1.5 text-[11px] text-[#9CA3AF] font-mono">
+              Future Milestone
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* System Status & Verification Checklist */}
       <section className="max-w-6xl mx-auto mt-16 p-6 rounded-xl bg-[#181B20]/80 border border-[#2E3440]">
         <h4 className="text-base font-bold text-[#F8F9FA] mb-4 flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-          <span>Phase 1 Verification Matrix</span>
+          <span>Pre-Deployment Verification Matrix</span>
         </h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs font-mono">
           <div className="p-3 rounded bg-[#0E1013] border border-[#2E3440]">
             <span className="text-[#9CA3AF] block mb-1">WORKSPACE</span>
             <span className="text-emerald-400">pnpm + Turborepo Monorepo</span>
@@ -165,6 +234,10 @@ export default function LandingPage() {
           <div className="p-3 rounded bg-[#0E1013] border border-[#2E3440]">
             <span className="text-[#9CA3AF] block mb-1">BACKEND RUNTIME</span>
             <span className="text-emerald-400">NestJS 11 (Node 24 LTS)</span>
+          </div>
+          <div className="p-3 rounded bg-[#0E1013] border border-[#2E3440]">
+            <span className="text-[#9CA3AF] block mb-1">PLAYER DATABASE</span>
+            <span className="text-emerald-400">1,144 Verified Records</span>
           </div>
         </div>
       </section>

@@ -51,6 +51,20 @@ export function simulateFullMatch(
     deliveryCount++;
   }
 
+  if (state.status !== 'COMPLETED') {
+    if (config.format === 'TEST_RED_BALL' || config.format === 'TEST_PINK_BALL') {
+      state = {
+        ...state,
+        status: 'COMPLETED',
+        result: {
+          isTie: false,
+          isDraw: true,
+          summary: 'Match drawn (Day 5 overs concluded)',
+        },
+      };
+    }
+  }
+
   const scorecard = reconcileMatchScorecard(state);
 
   return {

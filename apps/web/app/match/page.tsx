@@ -791,14 +791,17 @@ export default function MatchSimulationPage() {
   const oversFormatted = `${Math.floor(legalBalls / 6)}.${legalBalls % 6}`;
   const runRate = legalBalls > 0 ? ((currentRuns / legalBalls) * 6).toFixed(2) : '0.00';
 
-  // Target in 2nd innings
-  const innings1Events = visibleEvents.filter((e) => e.inningsNumber === 1);
-  const inn1Runs = innings1Events.reduce((sum, e) => sum + e.scorecardDelta.totalRuns, 0);
-  const targetRuns = inn1Runs + 1;
-  const runsRemaining = targetRuns - currentRuns;
-  const ballsRemaining = Math.max(0, 120 - legalBalls);
+  // Dynamic format & target metrics
+  const activeInningsNumber = currentEvent?.inningsNumber ?? 1;
+  const isTestFormat = format === 'TEST_RED_BALL' || format === 'TEST_PINK_BALL';
+  const formatMaxOvers = format === 'T10' ? 10 : format === 'ODI' ? 50 : format === 'T20' ? 20 : 9999;
+  const totalInningsBalls = formatMaxOvers * 6;
+  const activeInnings = liveState?.innings[activeInningsNumber - 1];
+  const targetRuns = activeInnings?.targetRuns;
+  const runsRemaining = targetRuns !== undefined ? Math.max(0, targetRuns - currentRuns) : 0;
+  const ballsRemaining = !isTestFormat ? Math.max(0, totalInningsBalls - legalBalls) : 0;
   const reqRunRate =
-    ballsRemaining > 0 && currentEvent?.inningsNumber === 2
+    ballsRemaining > 0 && targetRuns !== undefined
       ? ((runsRemaining / ballsRemaining) * 6).toFixed(2)
       : '0.00';
 
@@ -933,18 +936,18 @@ export default function MatchSimulationPage() {
                 <label className="text-xs font-semibold text-[#8A94A6] uppercase tracking-wider block mb-2">
                   Match Format
                 </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(['T10', 'T20', 'ODI'] as MatchFormat[]).map((fmt) => (
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                  {(['T10', 'T20', 'ODI', 'TEST_RED_BALL', 'TEST_PINK_BALL'] as MatchFormat[]).map((fmt) => (
                     <button
                       key={fmt}
                       onClick={() => setFormat(fmt)}
-                      className={`py-2 px-3 rounded-lg text-xs font-medium border transition ${
+                      className={`py-2 px-2 rounded-lg text-xs font-medium border transition ${
                         format === fmt
                           ? 'bg-[#0D4A38] border-[#D4AF37] text-[#F8F9FA] font-bold'
                           : 'bg-[#181F2A] border-[#252E3E] text-[#8A94A6] hover:bg-[#202938]'
                       }`}
                     >
-                      {fmt}
+                      {fmt === 'TEST_RED_BALL' ? 'Test (Red)' : fmt === 'TEST_PINK_BALL' ? 'Test (Pink)' : fmt}
                     </button>
                   ))}
                 </div>
@@ -1432,27 +1435,19 @@ export default function MatchSimulationPage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="text-lg md:text-xl font-bold text-[#F8F9FA]">
-                      {currentEvent?.inningsNumber === 1
-                        ? simulationResult?.finalState.innings[0].battingTeamId === 'user-team'
-                          ? userTeamName
-                          : aiTeamName
-                        : simulationResult?.finalState.innings[1]?.battingTeamId === 'user-team'
-                          ? userTeamName
-                          : aiTeamName}
+                      {activeInnings?.battingTeamId === 'user-team' ? userTeamName : aiTeamName}
                     </h2>
                     <span className="text-xs font-mono px-2 py-0.5 rounded bg-[#1C2430] text-[#D4AF37] border border-[#D4AF37]/30">
-                      Innings {currentEvent?.inningsNumber ?? 1}
+                      Innings {activeInningsNumber}
                     </span>
+                    {activeInnings?.isFollowOn && (
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                        Follow-On
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-[#8A94A6]">
-                    vs{' '}
-                    {currentEvent?.inningsNumber === 1
-                      ? simulationResult?.finalState.innings[0].bowlingTeamId === 'ai-team'
-                        ? aiTeamName
-                        : userTeamName
-                      : simulationResult?.finalState.innings[1]?.bowlingTeamId === 'ai-team'
-                        ? aiTeamName
-                        : userTeamName}
+                    vs {activeInnings?.bowlingTeamId === 'ai-team' ? aiTeamName : userTeamName}
                   </p>
                 </div>
               </div>
@@ -1464,14 +1459,16 @@ export default function MatchSimulationPage() {
                     {currentRuns}/{currentWickets}
                   </span>
                   <span className="text-sm md:text-lg font-mono text-[#8A94A6] ml-2">
-                    ({oversFormatted} / 20 ov)
+                    {isTestFormat
+                      ? `(${oversFormatted} ov • Day ${liveState?.currentDayNumber ?? 1}, S${liveState?.currentSessionNumber ?? 1})`
+                      : `(${oversFormatted} / ${formatMaxOvers} ov)`}
                   </span>
                 </div>
                 <div className="text-right">
                   <div className="text-xs text-[#8A94A6]">Current RR</div>
                   <div className="text-base font-mono font-bold text-emerald-400">{runRate}</div>
                 </div>
-                {currentEvent?.inningsNumber === 2 && (
+                {targetRuns !== undefined && (
                   <div className="text-right pl-3 border-l border-[#222A36]">
                     <div className="text-xs text-[#8A94A6]">Req RR</div>
                     <div className="text-base font-mono font-bold text-amber-400">{reqRunRate}</div>
@@ -1490,15 +1487,29 @@ export default function MatchSimulationPage() {
                 <span>Pitch: {selectedPitch}</span>
                 <span>•</span>
                 <span>Dew: {Math.round(dewFactor * 100)}%</span>
+                {isTestFormat && liveState?.oversSinceNewBall !== undefined && (
+                  <>
+                    <span>•</span>
+                    <span className="font-mono text-cyan-400">
+                      Ball: {liveState.oversSinceNewBall}/80 ov
+                    </span>
+                  </>
+                )}
               </div>
 
               <div>
-                {currentEvent?.inningsNumber === 2 ? (
+                {targetRuns !== undefined ? (
                   <span className="font-semibold text-amber-300">
-                    Need {runsRemaining} runs from {ballsRemaining} balls to win
+                    Need {runsRemaining} runs to win {ballsRemaining > 0 ? `from ${ballsRemaining} balls` : ''}
+                  </span>
+                ) : isTestFormat ? (
+                  <span>
+                    Innings {activeInningsNumber} in progress • Day {liveState?.currentDayNumber ?? 1}
                   </span>
                 ) : (
-                  <span>First Innings in progress • Projected: {Math.round(parseFloat(runRate) * 20)}</span>
+                  <span>
+                    First Innings in progress • Projected: {Math.round(parseFloat(runRate) * formatMaxOvers)}
+                  </span>
                 )}
               </div>
             </div>

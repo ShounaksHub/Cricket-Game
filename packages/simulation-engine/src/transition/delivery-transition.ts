@@ -349,6 +349,7 @@ export function stepDelivery(
   let nextCompletedOvers = currentInnings.completedOvers;
   let nextLegalBalls = currentInnings.legalBallsInCurrentOver;
   let nextBowlerId = bowlerId;
+  let isOverComplete = false;
 
   if (resolution.isLegalDelivery) {
     nextLegalBalls += 1;
@@ -356,6 +357,7 @@ export function stepDelivery(
     if (nextLegalBalls === 6) {
       nextCompletedOvers += 1;
       nextLegalBalls = 0;
+      isOverComplete = true;
 
       // End of over strike rotation (batters switch ends)
       const temp = nextStrikerId;
@@ -418,7 +420,7 @@ export function stepDelivery(
     currentInnings.targetRuns !== undefined &&
     newTotalRuns >= currentInnings.targetRuns;
 
-  const isInningsDone = isAllOut || isOverLimit || isTargetOverhauled;
+  const isInningsDone = isAllOut || isOverLimit || isTargetOverhauled || currentInnings.isDeclared;
 
   // Free Hit State Transition (ICC Men's T20I Playing Conditions Clause 21.19):
   // 1. A No-Ball always creates a Free Hit for the next delivery.
@@ -460,54 +462,25 @@ export function stepDelivery(
 
   let nextInningsIndex = inningsIndex;
 
-  if (isInningsDone) {
-    if (currentInnings.inningsNumber === 1 && state.config.format === 'T20') {
-      // T20 Innings 1 concluded -> Initialize Innings 2 with target
-      const targetRuns = newTotalRuns + 1;
-      const innings2 = createInitialInningsState(
-        2,
-        state.config.team2.id,
-        state.config.team1.id,
-        state.config.team2.lineup as any,
-        state.config.team1.lineup as any,
-        targetRuns,
-      );
+  const format = state.config.format;
+  const isLimitedOvers = format === 'T10' || format === 'T20' || format === 'ODI';
+  const isTest = format === 'TEST_RED_BALL' || format === 'TEST_PINK_BALL';
 
-      updatedInningsArray.push(innings2);
-      nextInningsIndex = 1;
-    } else if (currentInnings.inningsNumber === 2 && state.config.format === 'T20') {
-      // T20 Match Completed!
-      matchStatus = 'COMPLETED';
-      const inn1 = updatedInningsArray[0];
-      const inn2 = updatedInnings;
+  let currentDay = state.currentDayNumber ?? (isTest ? 1 : undefined);
+  let currentSession = state.currentSessionNumber ?? (isTest ? 1 : undefined);
+  let sessionOvers = state.sessionOversBowled ?? (isTest ? 0 : undefined);
+  let oversSinceNewBall = state.oversSinceNewBall ?? (isTest ? 0 : undefined);
+  let isFollowOnEnforced = state.isFollowOnEnforced ?? false;
 
-      if (inn2.totalRuns > inn1.totalRuns) {
-        // Team 2 Won Chasing
-        const wicketsLeft = 10 - inn2.totalWickets;
-        result = {
-          winningTeamId: inn2.battingTeamId,
-          marginWickets: wicketsLeft,
-          isTie: false,
-          isDraw: false,
-          summary: `${state.config.team2.name} won by ${wicketsLeft} wicket${wicketsLeft === 1 ? '' : 's'}`,
-        };
-      } else if (inn1.totalRuns > inn2.totalRuns) {
-        // Team 1 Defended Target
-        const runsMargin = inn1.totalRuns - inn2.totalRuns;
-        result = {
-          winningTeamId: inn1.battingTeamId,
-          marginRuns: runsMargin,
-          isTie: false,
-          isDraw: false,
-          summary: `${state.config.team1.name} won by ${runsMargin} run${runsMargin === 1 ? '' : 's'}`,
-        };
-      } else {
-        // Tie
-        result = {
-          isTie: true,
-          isDraw: false,
-          summary: 'Match tied!',
-        };
+  if (isOverComplete && isTest) {
+    sessionOvers = (sessionOvers ?? 0) + 1;
+    oversSinceNewBall = (oversSinceNewBall ?? 0) + 1;
+    if (sessionOvers >= 30) {
+      sessionOvers = 0;
+      currentSession = (currentSession ?? 1) + 1;
+      if (currentSession > 3) {
+        currentSession = 1;
+        currentDay = (currentDay ?? 1) + 1;
       }
     }
   }
@@ -517,8 +490,240 @@ export function stepDelivery(
     state.config.format,
     resolution.isLegalDelivery,
   );
-  const nextBallWear = Math.min(1.0, state.ballWearIndex + ballWearDelta);
+  let nextBallWear = Math.min(1.0, state.ballWearIndex + ballWearDelta);
   const nextPitchWear = Math.min(1.0, state.pitchWearIndex + pitchWearDelta);
+
+  if (isTest && (oversSinceNewBall ?? 0) >= 80) {
+    // New ball taken after 80 overs in Test cricket!
+    oversSinceNewBall = 0;
+    nextBallWear = 0.05;
+  }
+
+  if (isInningsDone) {
+    if (isLimitedOvers) {
+      if (currentInnings.inningsNumber === 1) {
+        // Limited Overs Innings 1 concluded -> Initialize Innings 2 with target
+        const targetRuns = newTotalRuns + 1;
+        const innings2 = createInitialInningsState(
+          2,
+          state.config.team2.id,
+          state.config.team1.id,
+          state.config.team2.lineup as any,
+          state.config.team1.lineup as any,
+          targetRuns,
+        );
+
+        updatedInningsArray.push(innings2);
+        nextInningsIndex = 1;
+      } else if (currentInnings.inningsNumber === 2) {
+        // Limited Overs Match Completed!
+        matchStatus = 'COMPLETED';
+        const inn1 = updatedInningsArray[0];
+        const inn2 = updatedInnings;
+
+        if (inn2.totalRuns > inn1.totalRuns) {
+          // Team 2 Won Chasing
+          const wicketsLeft = 10 - inn2.totalWickets;
+          result = {
+            winningTeamId: inn2.battingTeamId,
+            marginWickets: wicketsLeft,
+            isTie: false,
+            isDraw: false,
+            summary: `${state.config.team2.name} won by ${wicketsLeft} wicket${wicketsLeft === 1 ? '' : 's'}`,
+          };
+        } else if (inn1.totalRuns > inn2.totalRuns) {
+          // Team 1 Defended Target
+          const runsMargin = inn1.totalRuns - inn2.totalRuns;
+          result = {
+            winningTeamId: inn1.battingTeamId,
+            marginRuns: runsMargin,
+            isTie: false,
+            isDraw: false,
+            summary: `${state.config.team1.name} won by ${runsMargin} run${runsMargin === 1 ? '' : 's'}`,
+          };
+        } else {
+          // Tie
+          result = {
+            isTie: true,
+            isDraw: false,
+            summary: 'Match tied!',
+          };
+        }
+      }
+    } else if (isTest) {
+      // Test Red Ball / Pink Ball Multi-Innings State Transitions
+      if (currentInnings.inningsNumber === 1) {
+        // Test Innings 1 Concluded -> Team 2 bats Innings 2
+        const innings2 = createInitialInningsState(
+          2,
+          state.config.team2.id,
+          state.config.team1.id,
+          state.config.team2.lineup as any,
+          state.config.team1.lineup as any,
+        );
+        updatedInningsArray.push(innings2);
+        nextInningsIndex = 1;
+        oversSinceNewBall = 0;
+        nextBallWear = 0.05;
+      } else if (currentInnings.inningsNumber === 2) {
+        // Test Innings 2 Concluded -> Evaluate Follow-On
+        const inn1 = updatedInningsArray[0];
+        const inn2 = updatedInnings;
+        const deficit = inn1.totalRuns - inn2.totalRuns;
+
+        // If Team 2 is behind by 200+ runs, follow-on is eligible
+        if (deficit >= 200) {
+          isFollowOnEnforced = true;
+          // Team 2 bats again in Innings 3
+          const innings3 = createInitialInningsState(
+            3,
+            state.config.team2.id,
+            state.config.team1.id,
+            state.config.team2.lineup as any,
+            state.config.team1.lineup as any,
+          );
+          updatedInningsArray.push({
+            ...innings3,
+            isFollowOn: true,
+            leadOrDeficit: -deficit,
+          });
+        } else {
+          isFollowOnEnforced = false;
+          // Standard: Team 1 bats again in Innings 3
+          const innings3 = createInitialInningsState(
+            3,
+            state.config.team1.id,
+            state.config.team2.id,
+            state.config.team1.lineup as any,
+            state.config.team2.lineup as any,
+          );
+          updatedInningsArray.push({
+            ...innings3,
+            leadOrDeficit: deficit,
+          });
+        }
+        nextInningsIndex = 2;
+        oversSinceNewBall = 0;
+        nextBallWear = 0.05;
+      } else if (currentInnings.inningsNumber === 3) {
+        // Test Innings 3 Concluded
+        const inn1 = updatedInningsArray[0];
+        const inn2 = updatedInningsArray[1];
+        const inn3 = updatedInnings;
+
+        if (isFollowOnEnforced) {
+          // Team 2 batted Innings 2 and 3
+          const team2Aggregate = inn2.totalRuns + inn3.totalRuns;
+          if (team2Aggregate < inn1.totalRuns) {
+            // Team 1 wins by innings and runs!
+            const inningsMargin = inn1.totalRuns - team2Aggregate;
+            matchStatus = 'COMPLETED';
+            result = {
+              winningTeamId: state.config.team1.id,
+              marginRuns: inningsMargin,
+              isInningsWin: true,
+              isTie: false,
+              isDraw: false,
+              summary: `${state.config.team1.name} won by an innings and ${inningsMargin} run${inningsMargin === 1 ? '' : 's'}`,
+            };
+          } else {
+            // Team 2 erased deficit and set target for Team 1
+            const targetRuns = team2Aggregate - inn1.totalRuns + 1;
+            const innings4 = createInitialInningsState(
+              4,
+              state.config.team1.id,
+              state.config.team2.id,
+              state.config.team1.lineup as any,
+              state.config.team2.lineup as any,
+              targetRuns,
+            );
+            updatedInningsArray.push(innings4);
+            nextInningsIndex = 3;
+            oversSinceNewBall = 0;
+            nextBallWear = 0.05;
+          }
+        } else {
+          // Standard Test: Team 1 batted Innings 1 and 3
+          const team1Aggregate = inn1.totalRuns + inn3.totalRuns;
+          const lead = team1Aggregate - inn2.totalRuns;
+          if (lead > 0) {
+            const targetRuns = lead + 1;
+            const innings4 = createInitialInningsState(
+              4,
+              state.config.team2.id,
+              state.config.team1.id,
+              state.config.team2.lineup as any,
+              state.config.team1.lineup as any,
+              targetRuns,
+            );
+            updatedInningsArray.push(innings4);
+            nextInningsIndex = 3;
+            oversSinceNewBall = 0;
+            nextBallWear = 0.05;
+          } else {
+            // Extremely rare: Team 2 already ahead after 1st innings
+            matchStatus = 'COMPLETED';
+            result = {
+              winningTeamId: state.config.team2.id,
+              marginWickets: 10,
+              isTie: false,
+              isDraw: false,
+              summary: `${state.config.team2.name} won by 10 wickets`,
+            };
+          }
+        }
+      } else if (currentInnings.inningsNumber === 4) {
+        // Test Innings 4 Concluded -> Match Completed!
+        matchStatus = 'COMPLETED';
+        const inn4 = updatedInnings;
+        const chasingTeamId = inn4.battingTeamId;
+        const defendingTeamId = inn4.bowlingTeamId;
+        const chasingTeamName =
+          chasingTeamId === state.config.team1.id ? state.config.team1.name : state.config.team2.name;
+        const defendingTeamName =
+          defendingTeamId === state.config.team1.id ? state.config.team1.name : state.config.team2.name;
+
+        const target = inn4.targetRuns ?? 0;
+        if (inn4.totalRuns >= target) {
+          const wicketsLeft = 10 - inn4.totalWickets;
+          result = {
+            winningTeamId: chasingTeamId,
+            marginWickets: wicketsLeft,
+            isTie: false,
+            isDraw: false,
+            summary: `${chasingTeamName} won by ${wicketsLeft} wicket${wicketsLeft === 1 ? '' : 's'}`,
+          };
+        } else if (inn4.totalWickets >= 10) {
+          const runDeficit = target - 1 - inn4.totalRuns;
+          if (runDeficit > 0) {
+            result = {
+              winningTeamId: defendingTeamId,
+              marginRuns: runDeficit,
+              isTie: false,
+              isDraw: false,
+              summary: `${defendingTeamName} won by ${runDeficit} run${runDeficit === 1 ? '' : 's'}`,
+            };
+          } else {
+            result = {
+              isTie: true,
+              isDraw: false,
+              summary: 'Match tied!',
+            };
+          }
+        }
+      }
+    }
+  }
+
+  // Check 5-Day Stumps Draw condition for Test matches
+  if (isTest && currentDay && currentDay > 5 && matchStatus !== 'COMPLETED') {
+    matchStatus = 'COMPLETED';
+    result = {
+      isTie: false,
+      isDraw: true,
+      summary: 'Match drawn (Day 5 overs concluded)',
+    };
+  }
 
   const nextState: MatchState = {
     ...state,
@@ -527,6 +732,11 @@ export function stepDelivery(
     innings: updatedInningsArray,
     ballWearIndex: Math.round(nextBallWear * 1000) / 1000,
     pitchWearIndex: Math.round(nextPitchWear * 1000) / 1000,
+    currentDayNumber: currentDay,
+    currentSessionNumber: currentSession,
+    sessionOversBowled: sessionOvers,
+    oversSinceNewBall,
+    isFollowOnEnforced,
     result,
   };
 
