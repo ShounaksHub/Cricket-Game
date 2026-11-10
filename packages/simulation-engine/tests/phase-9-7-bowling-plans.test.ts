@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   calculateOutcomeLogits,
+  applyBowlingPlan,
   getActiveBowlingPhase,
   getBowlingPhases,
   type TacticalDeliveryAction,
@@ -59,5 +60,17 @@ describe('Phase 9.7 phase-based bowling plans', () => {
     expect(attack.WICKET).toBeGreaterThan(defensive.WICKET);
     expect(attack.FOUR).toBeGreaterThan(defensive.FOUR);
     expect(defensive.SIX).toBeLessThan(attack.SIX);
+  });
+
+  it('uses plan-derived delivery parameters when no advanced override is supplied', () => {
+    const base = action('ATTACK');
+    const attack = applyBowlingPlan({ ...base, bowlerLine: undefined, bowlerLength: undefined, bowlerVariation: undefined, bowlingPaceStrategy: undefined, bowlingIntent: undefined, fieldPreset: undefined } as unknown as TacticalDeliveryAction, 'ATTACK');
+    const defensive = applyBowlingPlan({ ...base, bowlerLine: undefined, bowlerLength: undefined, bowlerVariation: undefined, bowlingPaceStrategy: undefined, bowlingIntent: undefined, fieldPreset: undefined } as unknown as TacticalDeliveryAction, 'DEFENSIVE');
+    expect(attack.bowlerLine).toBe('STUMPS');
+    expect(attack.bowlerLength).toBe('FULL');
+    expect(attack.bowlingIntent).toBe('WICKET_TAKING');
+    expect(defensive.bowlerLength).toBe('BACK_OF_LENGTH');
+    expect(defensive.bowlingIntent).toBe('CONTAINMENT');
+    expect(defensive.fieldPreset).toBe('DEATH_BOUNDARY_DEFENSE');
   });
 });

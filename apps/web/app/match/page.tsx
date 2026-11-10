@@ -63,6 +63,7 @@ import {
   type MatchSimulationResult,
   type MatchState,
   type DeliveryEvent,
+  type MatchDecisionEvent,
   type ReconciledMatchScorecard,
   type PlayerOfTheMatch,
   type BatterIntent,
@@ -136,6 +137,7 @@ export interface ActiveMatchSession {
   } | null;
   currentEventIndex: number;
   visibleEvents: DeliveryEvent[];
+  decisionEvents?: MatchDecisionEvent[];
   initialStateHash: string;
   savedAt: string;
   userIntent?: BatterIntent;
@@ -146,6 +148,7 @@ export interface ActiveMatchSession {
   userField?: FieldPreset;
   customFielders?: InteractiveFielder[];
   userOpeningBowlerId?: string;
+  userNominatedBowlerId?: string;
   userBattingLineup?: DreamTeamPlayerSlotInput[];
   configSnapshot?: {
     readonly config: Omit<MatchSimulationConfig, 'seed' | 'playerProfiles'> & {
@@ -175,6 +178,10 @@ export interface ArchivedMatchRecord {
   } | null;
   initialStateHash: string;
   totalDeliveries: number;
+  /** Full interactive action log for reproducible local replay. */
+  allEvents?: DeliveryEvent[];
+  decisionEvents?: MatchDecisionEvent[];
+  configSnapshot?: ActiveMatchSession['configSnapshot'];
 }
 
 export default function MatchSimulationPage() {
@@ -207,6 +214,8 @@ export default function MatchSimulationPage() {
   const [simulationResult, setSimulationResult] = useState<MatchSimulationResult | null>(null);
   const [liveState, setLiveState] = useState<MatchState | null>(null);
   const [visibleEvents, setVisibleEvents] = useState<DeliveryEvent[]>([]);
+  const [decisionEvents, setDecisionEvents] = useState<MatchDecisionEvent[]>([]);
+  const decisionEventsRef = useRef<MatchDecisionEvent[]>([]);
   const [currentEventIndex, setCurrentEventIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [playSpeed, setPlaySpeed] = useState<number>(300); // ms per ball
@@ -262,6 +271,7 @@ export default function MatchSimulationPage() {
   const [aiIPLTeam, setAiIPLTeam] = useState<string>('MI');
   const [savedSquads, setSavedSquads] = useState<any[]>([]);
   const [selectedSquadId, setSelectedSquadId] = useState<string>('');
+  const decisionSequenceRef = useRef(0);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -354,6 +364,9 @@ export default function MatchSimulationPage() {
     currentState: MatchState,
     events: DeliveryEvent[],
     eventIndex: number,
+    modeOverride: 'MANUAL' | 'ASSISTED' | 'AUTOMATIC' = managementMode,
+    decisions: MatchDecisionEvent[] = decisionEvents,
+    overrides: Partial<Pick<ActiveMatchSession, 'userBowlingPlan' | 'userField' | 'userNominatedBowlerId'>> = {},
   ) {
     if (typeof window === 'undefined') return;
     try {
@@ -379,9 +392,11 @@ export default function MatchSimulationPage() {
         userIntent,
         userPaceStrategy,
         userBowlingIntent,
-        userField,
-        userBowlingPlan,
-        managementMode,
+        userField: overrides.userField ?? userField,
+        userBowlingPlan: overrides.userBowlingPlan ?? userBowlingPlan,
+        userNominatedBowlerId: overrides.userNominatedBowlerId ?? userNominatedBowlerId,
+        managementMode: modeOverride,
+        decisionEvents: decisions,
         customFielders,
         configSnapshot: {
           config: {
@@ -395,6 +410,54 @@ export default function MatchSimulationPage() {
     } catch (err) {
       console.error('Failed to save active match session:', err);
     }
+  }
+
+  function recordCaptainDecision(
+    type: MatchDecisionEvent['type'],
+    payload: Readonly<Record<string, unknown>>,
+    modeOverride: 'MANUAL' | 'ASSISTED' | 'AUTOMATIC' = managementMode,
+    overrides: Partial<Pick<ActiveMatchSession, 'userBowlingPlan' | 'userField' | 'userNominatedBowlerId'>> = {},
+  ) {
+    const state = liveStateRef.current;
+    if (!state) return;
+    const event: MatchDecisionEvent = {
+      type,
+      matchId: state.config.matchId,
+      inningsNumber: state.currentInningsIndex + 1,
+      sequenceNumber: ++decisionSequenceRef.current,
+      deliverySequenceNumber: state.innings.reduce((sum, innings) => sum + innings.events.length, 0),
+      payload,
+    };
+    const next = [...decisionEventsRef.current, event];
+    decisionEventsRef.current = next;
+    setDecisionEvents(next);
+    saveActiveSession(state, visibleEvents, currentEventIndex, modeOverride, next, overrides);
+  }
+
+  function setCaptainBowlingPlan(plan: BowlingPlan) {
+    if (plan === userBowlingPlan) return;
+    setUserBowlingPlan(plan);
+    recordCaptainDecision('BOWLING_PLAN_CHANGED', { from: userBowlingPlan, to: plan }, managementMode, { userBowlingPlan: plan });
+  }
+
+  function setCaptainBowler(playerId: string) {
+    if (playerId === userNominatedBowlerId) return;
+    setUserNominatedBowlerId(playerId);
+    recordCaptainDecision('BOWLER_SELECTED', { playerId }, managementMode, { userNominatedBowlerId: playerId });
+  }
+
+  function setCaptainField(field: FieldPreset) {
+    if (field === userField) return;
+    setUserField(field);
+    recordCaptainDecision('FIELD_CHANGED', { field }, managementMode, { userField: field });
+  }
+
+  function handleManagementModeChange(nextMode: 'MANUAL' | 'ASSISTED' | 'AUTOMATIC') {
+    if (nextMode === managementMode) return;
+    setManagementMode(nextMode);
+    recordCaptainDecision('MANAGEMENT_MODE_CHANGED', { from: managementMode, to: nextMode }, nextMode);
+    setOverDecisionPending(false);
+    setLastCompletedOverSummary(null);
   }
 
   function archiveCompletedMatch(result: MatchSimulationResult) {
@@ -432,6 +495,15 @@ export default function MatchSimulationPage() {
           : null,
         initialStateHash: result.initialStateHash,
         totalDeliveries: result.allEvents.length,
+        allEvents: [...result.allEvents],
+        decisionEvents,
+        configSnapshot: {
+          config: {
+            ...result.finalState.config,
+            seed: result.finalState.config.seed.toString(),
+            playerProfiles: [...result.finalState.config.playerProfiles.entries()],
+          },
+        },
       };
 
       const updated = [record, ...history.filter((h) => h.id !== record.id)].slice(0, 20);
@@ -535,7 +607,11 @@ export default function MatchSimulationPage() {
     if (activeSession.userBowlingIntent) setUserBowlingIntent(activeSession.userBowlingIntent);
     if (activeSession.userBowlingPlan) setUserBowlingPlan(activeSession.userBowlingPlan);
     if (activeSession.managementMode) setManagementMode(activeSession.managementMode);
+    setDecisionEvents(activeSession.decisionEvents ?? []);
+    decisionEventsRef.current = activeSession.decisionEvents ?? [];
+    decisionSequenceRef.current = Math.max(0, ...(activeSession.decisionEvents ?? []).map((event) => event.sequenceNumber));
     if (activeSession.userField) setUserField(activeSession.userField);
+    if (activeSession.userNominatedBowlerId) setUserNominatedBowlerId(activeSession.userNominatedBowlerId);
     if (activeSession.customFielders && activeSession.customFielders.length === 9) {
       setCustomFielders(activeSession.customFielders);
     }
@@ -547,12 +623,71 @@ export default function MatchSimulationPage() {
   function handleVerifyReplay(targetResult?: MatchSimulationResult) {
     const resultToVerify = targetResult || simulationResult;
     if (!resultToVerify) return;
-    const report = verifyMatchReplay(resultToVerify);
+    const hasInteractiveActions = resultToVerify.allEvents.some((event) => event.tactics?.managementMode);
+    const report = hasInteractiveActions
+      ? verifyRecordedDeliveryReplay(resultToVerify)
+      : verifyMatchReplay(resultToVerify);
     setReplayReport(report);
     setShowReplayModal(true);
   }
 
+  function verifyRecordedDeliveryReplay(result: MatchSimulationResult): ReplayVerificationReport {
+    const discrepancies: string[] = [];
+    const prng = new DeterministicPRNG(result.finalState.config.seed);
+    let state = createInitialMatchState(result.finalState.config);
+    for (let i = 0; i < result.allEvents.length; i++) {
+      const expected = result.allEvents[i];
+      if (!expected.tactics) {
+        discrepancies.push(`Delivery ${i + 1} has no recorded tactical action.`);
+        break;
+      }
+      const stepped = stepDelivery(state, expected.tactics, prng);
+      if (stepped.event.outcome !== expected.outcome ||
+          stepped.event.scorecardDelta.totalRuns !== expected.scorecardDelta.totalRuns ||
+          stepped.event.scorecardDelta.totalWickets !== expected.scorecardDelta.totalWickets ||
+          stepped.event.bowlerPlayerId !== expected.bowlerPlayerId) {
+        discrepancies.push(`Recorded replay diverged at delivery ${i + 1}.`);
+        break;
+      }
+      state = stepped.nextState;
+    }
+    if (state.status !== result.finalState.status || state.result?.summary !== result.finalState.result?.summary) {
+      discrepancies.push('Replayed final match status or result differs from the recorded match.');
+    }
+    return {
+      isValid: discrepancies.length === 0,
+      matchId: result.matchId,
+      originalStateHash: result.initialStateHash,
+      replayedStateHash: state.initialStateHash,
+      discrepancies,
+    };
+  }
+
   function handleVerifyArchivedMatch(record: ArchivedMatchRecord) {
+    if (record.configSnapshot && record.allEvents) {
+      const config = {
+        ...record.configSnapshot.config,
+        seed: BigInt(record.configSnapshot.config.seed),
+        playerProfiles: new Map(record.configSnapshot.config.playerProfiles),
+      } as MatchSimulationConfig;
+      let recordedState = createInitialMatchState(config);
+      const replayPrng = new DeterministicPRNG(config.seed);
+      for (const event of record.allEvents) {
+        if (!event.tactics) break;
+        recordedState = stepDelivery(recordedState, event.tactics, replayPrng).nextState;
+      }
+      const result = simulateFullMatch(config);
+      const recordedResult: MatchSimulationResult = {
+        ...result,
+        finalState: recordedState,
+        scorecard: reconcileMatchScorecard(recordedState),
+        allEvents: record.allEvents,
+        totalDeliveriesSimulated: record.allEvents.length,
+      };
+      setReplayReport(verifyRecordedDeliveryReplay(recordedResult));
+      setShowReplayModal(true);
+      return;
+    }
     const all = VERIFIED_BENCHMARK_PLAYERS.map(ingestPlayerRecord);
     const profiles = new Map<string, PlayerSquadContext>();
     for (const p of all) {
@@ -617,6 +752,31 @@ export default function MatchSimulationPage() {
   }
 
   function handleLoadArchivedReplay(record: ArchivedMatchRecord) {
+    if (record.configSnapshot && record.allEvents) {
+      const config = {
+        ...record.configSnapshot.config,
+        seed: BigInt(record.configSnapshot.config.seed),
+        playerProfiles: new Map(record.configSnapshot.config.playerProfiles),
+      } as MatchSimulationConfig;
+      const livePrng = new DeterministicPRNG(config.seed);
+      let state = createInitialMatchState(config);
+      for (const event of record.allEvents) {
+        if (!event.tactics) break;
+        state = stepDelivery(state, event.tactics, livePrng).nextState;
+      }
+      liveStateRef.current = state;
+      livePrngRef.current = livePrng;
+      setLiveState(state);
+      setSimulationResult(simulateFullMatch(config));
+      setVisibleEvents(record.allEvents);
+      setCurrentEventIndex(record.allEvents.length);
+      setDecisionEvents(record.decisionEvents ?? []);
+      decisionEventsRef.current = record.decisionEvents ?? [];
+      setPhase(state.status === 'COMPLETED' ? 'COMPLETED' : 'LIVE');
+      setShowHistoryDrawer(false);
+      setIsPlaying(false);
+      return;
+    }
     setSeedInput(record.seed);
     setFormat(record.format);
     setSelectedPitch((record.pitchType as any) || 'HARD');
@@ -974,13 +1134,13 @@ export default function MatchSimulationPage() {
 
     const action: TacticalDeliveryAction = {
       batterIntent: isUserBatting ? userIntent : aiAction.batterIntent,
-      bowlerLength: isUserBowling && !automaticBowling ? userLength : aiAction.bowlerLength,
-      bowlerLine: isUserBowling && !automaticBowling ? userLine : aiAction.bowlerLine,
-      bowlerVariation: isUserBowling && !automaticBowling ? userVariation : aiAction.bowlerVariation,
+      bowlerLength: isUserBowling && !automaticBowling ? showAdvancedTactics ? userLength : userBowlingPlan === 'ATTACK' ? 'FULL' : userBowlingPlan === 'DEFENSIVE' ? 'BACK_OF_LENGTH' : userLength : aiAction.bowlerLength,
+      bowlerLine: isUserBowling && !automaticBowling ? showAdvancedTactics ? userLine : userBowlingPlan === 'ATTACK' ? 'STUMPS' : userBowlingPlan === 'DEFENSIVE' ? 'OUTSIDE_OFF' : userLine : aiAction.bowlerLine,
+      bowlerVariation: isUserBowling && !automaticBowling ? showAdvancedTactics ? userVariation : userBowlingPlan === 'DEFENSIVE' ? 'SLOWER_BALL' : userVariation : aiAction.bowlerVariation,
       fieldPreset: isUserBowling && !automaticBowling ? userField : aiAction.fieldPreset,
       customFieldPositions: isUserBowling && !automaticBowling && mappedCustomField.length > 0 ? mappedCustomField : undefined,
-      bowlingPaceStrategy: isUserBowling && !automaticBowling ? userPaceStrategy : aiAction.bowlingPaceStrategy,
-      bowlingIntent: isUserBowling && !automaticBowling ? userBowlingIntent : aiAction.bowlingIntent,
+      bowlingPaceStrategy: isUserBowling && !automaticBowling ? showAdvancedTactics ? userPaceStrategy : userBowlingPlan === 'ATTACK' ? 'EFFORT_BALL' : userBowlingPlan === 'DEFENSIVE' ? 'CONSERVE' : userPaceStrategy : aiAction.bowlingPaceStrategy,
+      bowlingIntent: isUserBowling && !automaticBowling ? showAdvancedTactics ? userBowlingIntent : userBowlingPlan === 'ATTACK' ? 'WICKET_TAKING' : userBowlingPlan === 'DEFENSIVE' ? 'CONTAINMENT' : userBowlingIntent : aiAction.bowlingIntent,
       bowlingPlan: isUserBowling && !automaticBowling ? userBowlingPlan : aiAction.bowlingPlan,
       activePhase: getActiveBowlingPhase(
         state.config.format,
@@ -1072,9 +1232,9 @@ export default function MatchSimulationPage() {
   }
 
   function acceptBowlingRecommendation() {
-    setUserBowlingPlan(recommendedPlan);
-    if (recommendedBowler) setUserNominatedBowlerId(recommendedBowler.playerId);
-    setUserField(recommendedPlan === 'DEFENSIVE' ? 'DEATH_BOUNDARY_DEFENSE' : recommendedPlan === 'ATTACK' ? 'ATTACKING_CLOSE_CATCHERS' : 'BALANCED_RING');
+    setCaptainBowlingPlan(recommendedPlan);
+    if (recommendedBowler) setCaptainBowler(recommendedBowler.playerId);
+    setCaptainField(recommendedPlan === 'DEFENSIVE' ? 'DEATH_BOUNDARY_DEFENSE' : recommendedPlan === 'ATTACK' ? 'ATTACKING_CLOSE_CATCHERS' : 'BALANCED_RING');
     resumeCaptaincyDecision();
   }
 
@@ -3252,7 +3412,7 @@ export default function MatchSimulationPage() {
                       </div>
                       <select
                         value={managementMode}
-                        onChange={(e) => setManagementMode(e.target.value as 'MANUAL' | 'ASSISTED' | 'AUTOMATIC')}
+                        onChange={(e) => handleManagementModeChange(e.target.value as 'MANUAL' | 'ASSISTED' | 'AUTOMATIC')}
                         className="bg-surface-card border border-border-hairline text-text-slate rounded px-2 py-1 text-[10px]"
                         aria-label="Bowling management mode"
                       >
@@ -3270,7 +3430,7 @@ export default function MatchSimulationPage() {
                         <button
                           key={id}
                           type="button"
-                          onClick={() => setUserBowlingPlan(id)}
+                          onClick={() => setCaptainBowlingPlan(id)}
                           className={`rounded-md border px-2 py-2 text-left transition ${userBowlingPlan === id ? 'border-primary bg-primary/15 text-primary' : 'border-border-hairline bg-surface-card text-text-slate hover:text-text-chalk'}`}
                         >
                           <span className="block text-[10px] font-bold uppercase">{id}</span>
@@ -3321,7 +3481,7 @@ export default function MatchSimulationPage() {
                       </label>
                       <select
                         value={userNominatedBowlerId || bowlerId || ''}
-                        onChange={(e) => setUserNominatedBowlerId(e.target.value)}
+                        onChange={(e) => setCaptainBowler(e.target.value)}
                         className="bg-surface-recessed border border-border-hairline text-text-chalk p-1.5 rounded text-[11px] font-label-caps focus:outline-none cursor-pointer"
                       >
                         {userBowlingSlots.map((slot) => {
@@ -3465,7 +3625,7 @@ export default function MatchSimulationPage() {
                         value={userField}
                         onChange={(e) => {
                           const newPreset = e.target.value as FieldPreset;
-                          setUserField(newPreset);
+                          setCaptainField(newPreset);
                           if (newPreset !== 'CUSTOM' && CANONICAL_FIELD_PRESETS[newPreset]) {
                             setCustomFielders(
                               CANONICAL_FIELD_PRESETS[newPreset].positions.map((pos, idx) => ({
@@ -3510,7 +3670,7 @@ export default function MatchSimulationPage() {
                       fielders={customFielders}
                       isUserBowling={isUserBowling}
                       onPresetSelect={(p) => {
-                        setUserField(p);
+                        setCaptainField(p);
                         if (CANONICAL_FIELD_PRESETS[p]) {
                           setCustomFielders(
                             CANONICAL_FIELD_PRESETS[p].positions.map((pos, idx) => ({

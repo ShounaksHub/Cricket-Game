@@ -165,6 +165,15 @@ export interface DeliveryEvent {
   readonly tactics?: TacticalDeliveryAction;
 }
 
+export interface MatchDecisionEvent {
+  readonly type: 'MANAGEMENT_MODE_CHANGED' | 'BOWLING_PLAN_CHANGED' | 'BOWLER_SELECTED' | 'FIELD_CHANGED';
+  readonly matchId: string;
+  readonly inningsNumber: number;
+  readonly sequenceNumber: number;
+  readonly deliverySequenceNumber: number;
+  readonly payload: Readonly<Record<string, unknown>>;
+}
+
 export interface BatterScorecardEntry {
   readonly playerId: string;
   readonly runs: number;

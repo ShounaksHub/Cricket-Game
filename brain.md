@@ -475,4 +475,9 @@ c:\Users\shoun\OneDrive\Desktop\cricket game\
 - **Status:** Accepted (November 2026)
 - **Decision:** Manual and Assisted bowling pause only after authoritative over completion; Automatic mode evaluates the same context internally and continues without a modal. Recommendations and next-bowler choices are validated by the existing transition rules. Management mode is recorded with delivery tactics so mode-driven decisions remain part of the deterministic action history. Beginner controls expose plan, bowler, field and one next action while advanced controls remain progressively disclosed.
 
+### ADR-020: Persist Captain Decisions Separately and Replay Recorded Interactive Deliveries (Phase 9.8.1)
+- **Status:** Accepted (November 2026)
+- **Decision:** Persist captain mode, plan, bowler, and field changes immediately as match-scoped decision events, in addition to storing the effective tactical action on each delivery. Keep the delivery action as the simulation authority and replay it through the same `stepDelivery` transition with the original seed. Completed local history records retain the exact match config, profile map, delivery events, and captain decisions so interactive matches can be inspected and reconstructed without synthesizing teams from a seed. A selected high-level plan supplies line, length, variation, pace, and intent unless the selected plan is Balanced and advanced overrides are active; the selected field remains independently honored.
+- **Limit:** Decision-event history is currently a local browser snapshot. Cross-browser automation/screenshots and interactive replay validation require an attached browser session and remain environment-dependent.
+
 *End of Master Project Brain (`brain.md`) — Maintained by Antigravity AI Engine & Engineering Team.*
