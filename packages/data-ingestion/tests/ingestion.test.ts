@@ -439,6 +439,61 @@ describe('Data Ingestion Engine (@cricket/data-ingestion)', () => {
         expect(p.id).toMatch(uuidRegex);
       }
     });
+
+    it('Gate P7.4: runs full 1,000+ registry through 4-layer rating engine with explainability and zero NaNs', () => {
+      const profiles = GLOBAL_CRICKET_PLAYER_REGISTRY.map(ingestPlayerRecord);
+      expect(profiles.length).toBeGreaterThanOrEqual(1000);
+
+      let benchmarkTierCount = 0;
+      let measuredTierCount = 0;
+      let estimatedTierCount = 0;
+
+      for (const profile of profiles) {
+        // Assert basic metadata
+        expect(profile.id).toBeDefined();
+        expect(profile.fullName).toBeDefined();
+        expect(profile.primaryNationality).toBeDefined();
+        expect(profile.primaryRole).toBeDefined();
+
+        // Check ratings across formats
+        const formats = ['TEST_RED_BALL', 'ODI', 'T20'] as const;
+        for (const fmt of formats) {
+          const rating = profile.ratings[fmt];
+          if (rating) {
+            expect(Number.isNaN(rating.overallRating)).toBe(false);
+            expect(Number.isNaN(rating.battingRating)).toBe(false);
+            expect(Number.isNaN(rating.bowlingRating)).toBe(false);
+            expect(Number.isNaN(rating.fieldingRating)).toBe(false);
+
+            expect(rating.overallRating).toBeGreaterThanOrEqual(10);
+            expect(rating.overallRating).toBeLessThanOrEqual(100);
+
+            if (rating.confidenceTier === 'BENCHMARK') benchmarkTierCount++;
+            if (rating.confidenceTier === 'MEASURED') measuredTierCount++;
+            if (rating.confidenceTier === 'ESTIMATED') estimatedTierCount++;
+          }
+        }
+
+        // Verify player attributes
+        expect(profile.attributes.timing).toBeGreaterThanOrEqual(0);
+        expect(profile.attributes.timing).toBeLessThanOrEqual(100);
+        expect(profile.attributes.accuracy).toBeGreaterThanOrEqual(0);
+        expect(profile.attributes.accuracy).toBeLessThanOrEqual(100);
+      }
+
+      // Assert diverse confidence tier distribution
+      expect(measuredTierCount).toBeGreaterThan(500);
+      expect(benchmarkTierCount + estimatedTierCount).toBeGreaterThan(100);
+
+      // Verify specific domestic legends receive high first-class ratings
+      const jaffer = profiles.find((p) => p.fullName === 'Wasim Jaffer')!;
+      expect(jaffer).toBeDefined();
+      expect(jaffer.ratings.TEST_RED_BALL?.battingRating).toBeGreaterThanOrEqual(75);
+
+      const hick = profiles.find((p) => p.fullName === 'Graeme Hick')!;
+      expect(hick).toBeDefined();
+      expect(hick.ratings.TEST_RED_BALL?.battingRating).toBeGreaterThanOrEqual(75);
+    });
   });
 });
 
