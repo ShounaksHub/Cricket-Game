@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   createProvenanceRecord,
+  detectDuplicatePlayers,
   generateStandardAliases,
   ingestPlayerRecord,
   jaroWinklerSimilarity,
@@ -291,5 +292,56 @@ describe('Data Ingestion Engine (@cricket/data-ingestion)', () => {
       const warne = ingestPlayerRecord(warneRaw);
       expect(warne.ratings.TEST_RED_BALL?.bowlingRating).toBeGreaterThanOrEqual(90);
     });
+
+    it('validates zero duplicate identities in the verified benchmark cohort via detectDuplicatePlayers', () => {
+      const audit = detectDuplicatePlayers(VERIFIED_BENCHMARK_PLAYERS);
+      expect(audit.hasDuplicates).toBe(false);
+      expect(audit.duplicateCount).toBe(0);
+      expect(audit.issues).toHaveLength(0);
+    });
+
+    it('correctly detects duplicate IDs, duplicate cricsheet IDs and canonical name collisions', () => {
+      const tamperedRoster = [
+        ...VERIFIED_BENCHMARK_PLAYERS.slice(0, 5),
+        // Inject duplicate ID
+        {
+          ...VERIFIED_BENCHMARK_PLAYERS[0],
+          fullName: 'Unique Name But Duplicate UUID',
+        },
+        // Inject duplicate Cricsheet ID
+        {
+          ...VERIFIED_BENCHMARK_PLAYERS[1],
+          id: 'fake-unique-id-999',
+          fullName: 'Different Player Same Cricsheet',
+        },
+      ];
+
+      const audit = detectDuplicatePlayers(tamperedRoster);
+      expect(audit.hasDuplicates).toBe(true);
+      expect(audit.duplicateIdCount).toBeGreaterThan(0);
+      expect(audit.duplicateCricsheetCount).toBeGreaterThan(0);
+      expect(audit.issues.length).toBeGreaterThan(0);
+    });
+
+    it('supports careerCategory, isDomesticOnly, and competitions in player ingestion', () => {
+      const domesticSpecialistRaw = {
+        ...VERIFIED_BENCHMARK_PLAYERS[0],
+        id: 'test-domestic-player-001',
+        cricsheetId: 'cric-test-dom-001',
+        wikidataId: 'Q99999999',
+        fullName: 'Test Domestic Veteran',
+        displayName: 'T. Veteran',
+        careerCategory: 'DOMESTIC_ONLY' as const,
+        isDomesticOnly: true,
+        competitions: ['Ranji Trophy', 'IPL', 'Syed Mushtaq Ali Trophy'],
+      };
+
+      const profile = ingestPlayerRecord(domesticSpecialistRaw);
+      expect(profile.careerCategory).toBe('DOMESTIC_ONLY');
+      expect(profile.isDomesticOnly).toBe(true);
+      expect(profile.competitions).toContain('Ranji Trophy');
+      expect(profile.competitions).toContain('IPL');
+    });
   });
 });
+

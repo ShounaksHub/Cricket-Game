@@ -146,3 +146,101 @@ export function generateStandardAliases(fullName: string): string[] {
 
   return Array.from(aliases);
 }
+
+export interface DuplicateAuditReport {
+  readonly hasDuplicates: boolean;
+  readonly totalPlayersChecked: number;
+  readonly duplicateCount: number;
+  readonly duplicateIdCount: number;
+  readonly duplicateCricsheetCount: number;
+  readonly duplicateWikidataCount: number;
+  readonly duplicateCanonicalNameCount: number;
+  readonly issues: string[];
+}
+
+/**
+ * Scans a roster of player records for duplicate IDs, external IDs, and conflicting identities.
+ */
+export function detectDuplicatePlayers(
+  players: Array<{
+    id: string;
+    fullName: string;
+    displayName: string;
+    cricsheetId?: string;
+    wikidataId?: string;
+    primaryNationality: string;
+    careerDebutYear: number;
+  }>
+): DuplicateAuditReport {
+  const seenIds = new Set<string>();
+  const seenCricsheet = new Set<string>();
+  const seenWikidata = new Set<string>();
+  const seenCanonical = new Map<string, string>();
+  const issues: string[] = [];
+
+  let duplicateIdCount = 0;
+  let duplicateCricsheetCount = 0;
+  let duplicateWikidataCount = 0;
+  let duplicateCanonicalNameCount = 0;
+
+  for (const p of players) {
+    // 1. UUID uniqueness
+    if (seenIds.has(p.id)) {
+      issues.push(`Duplicate player ID found: "${p.id}" (${p.fullName})`);
+      duplicateIdCount++;
+    } else {
+      seenIds.add(p.id);
+    }
+
+    // 2. Cricsheet ID uniqueness
+    if (p.cricsheetId) {
+      if (seenCricsheet.has(p.cricsheetId)) {
+        issues.push(`Duplicate Cricsheet ID "${p.cricsheetId}" on player ${p.fullName} [${p.id}]`);
+        duplicateCricsheetCount++;
+      } else {
+        seenCricsheet.add(p.cricsheetId);
+      }
+    }
+
+    // 3. Wikidata ID uniqueness
+    if (p.wikidataId) {
+      if (seenWikidata.has(p.wikidataId)) {
+        issues.push(`Duplicate Wikidata ID "${p.wikidataId}" on player ${p.fullName} [${p.id}]`);
+        duplicateWikidataCount++;
+      } else {
+        seenWikidata.add(p.wikidataId);
+      }
+    }
+
+    // 4. Canonical name uniqueness within country & era window (same decade)
+    const norm = normalizePlayerName(p.fullName);
+    const key = `${norm}__${p.primaryNationality.toLowerCase()}__${Math.floor(p.careerDebutYear / 10)}`;
+    if (seenCanonical.has(key)) {
+      const existingId = seenCanonical.get(key);
+      issues.push(
+        `Likely duplicate canonical player: "${p.fullName}" [${p.id}] duplicates [${existingId}] (${p.primaryNationality}, decade ${Math.floor(p.careerDebutYear / 10)}0s)`
+      );
+      duplicateCanonicalNameCount++;
+    } else {
+      seenCanonical.set(key, p.id);
+    }
+  }
+
+  const duplicateCount =
+    duplicateIdCount +
+    duplicateCricsheetCount +
+    duplicateWikidataCount +
+    duplicateCanonicalNameCount;
+
+  return {
+    hasDuplicates: duplicateCount > 0,
+    totalPlayersChecked: players.length,
+    duplicateCount,
+    duplicateIdCount,
+    duplicateCricsheetCount,
+    duplicateWikidataCount,
+    duplicateCanonicalNameCount,
+    issues,
+  };
+}
+

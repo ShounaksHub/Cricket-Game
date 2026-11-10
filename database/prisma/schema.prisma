@@ -27,6 +27,13 @@ enum HistoricalEra {
   CONTEMPORARY_2021_PRESENT
 }
 
+enum CareerCategory {
+  INTERNATIONAL
+  DOMESTIC_ONLY
+  HISTORICAL_LEGEND
+}
+
+
 enum PrimaryRole {
   TOP_ORDER_BATTER
   MIDDLE_ORDER_BATTER
@@ -254,6 +261,9 @@ model Player {
   careerDebutYear       Int                     @map("career_debut_year")
   careerRetirementYear  Int?                    @map("career_retirement_year")
   isActive              Boolean                 @default(false) @map("is_active")
+  careerCategory        CareerCategory          @default(INTERNATIONAL) @map("career_category")
+  isDomesticOnly        Boolean                 @default(false) @map("is_domestic_only")
+  competitions          String[]                @default([]) @map("competitions")
   confidenceScore       Decimal                 @default(1.00) @map("confidence_score") @db.Decimal(3, 2)
   createdAt             DateTime                @default(now()) @map("created_at") @db.Timestamptz
   updatedAt             DateTime                @default(now()) @updatedAt @map("updated_at") @db.Timestamptz

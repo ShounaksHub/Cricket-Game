@@ -1,6 +1,7 @@
 import type {
   BattingHand,
   BowlingStyle,
+  CareerCategory,
   ConfidenceTier,
   HistoricalEra,
   MatchFormat,
@@ -28,6 +29,9 @@ export interface PlayerIdentity {
   readonly careerDebutYear: number;
   readonly careerRetirementYear?: number;
   readonly isActive: boolean;
+  readonly careerCategory?: CareerCategory;
+  readonly isDomesticOnly?: boolean;
+  readonly competitions?: readonly string[];
   readonly confidenceScore: number; // 0.0 to 1.0
   readonly visualAsset?: PlayerVisualAsset;
   readonly provenance: DataSourceProvenance;

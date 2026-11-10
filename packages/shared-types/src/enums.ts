@@ -92,3 +92,6 @@ export type LicenseType =
 export type TossDecision = 'BAT' | 'BOWL';
 
 export type DreamTeamStatus = 'DRAFT' | 'MATCH_READY';
+
+export type CareerCategory = 'INTERNATIONAL' | 'DOMESTIC_ONLY' | 'HISTORICAL_LEGEND';
+

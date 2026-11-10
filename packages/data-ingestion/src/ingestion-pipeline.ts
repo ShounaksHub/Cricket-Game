@@ -32,6 +32,9 @@ export interface RawPlayerIngestionInput {
   readonly careerDebutYear: number;
   readonly careerRetirementYear?: number;
   readonly isActive?: boolean;
+  readonly careerCategory?: PlayerIdentity['careerCategory'];
+  readonly isDomesticOnly?: boolean;
+  readonly competitions?: readonly string[];
   readonly rawStatsByFormat: Partial<Record<MatchFormat, Omit<PlayerRawFormatStats, 'format' | 'dataSourceId'>>>;
   readonly sourceName: 'CRICSHEET' | 'WIKIDATA' | 'MANUAL_CURATION';
   readonly sourceUri: string;
@@ -138,6 +141,9 @@ export function ingestPlayerRecord(input: RawPlayerIngestionInput): PlayerProfil
     careerDebutYear: input.careerDebutYear,
     careerRetirementYear: input.careerRetirementYear,
     isActive: input.isActive ?? false,
+    careerCategory: input.careerCategory ?? (input.isDomesticOnly ? 'DOMESTIC_ONLY' : (input.careerDebutYear < 1992 ? 'HISTORICAL_LEGEND' : 'INTERNATIONAL')),
+    isDomesticOnly: input.isDomesticOnly ?? (input.careerCategory === 'DOMESTIC_ONLY'),
+    competitions: input.competitions ?? [],
     confidenceScore,
     provenance,
     formatStats,
