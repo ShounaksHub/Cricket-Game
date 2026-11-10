@@ -114,6 +114,23 @@ export default function MatchSimulationPage() {
   const [userVariation, setUserVariation] = useState<BowlingVariation>('STOCK');
   const [userField, setUserField] = useState<FieldPreset>('BALANCED_RING');
   const [isAIOptimized, setIsAIOptimized] = useState<boolean>(true);
+  const [userTeamName, setUserTeamName] = useState<string>('User Dream XI');
+  const [aiTeamName, setAiTeamName] = useState<string>('AI World Legends XI');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const stored = localStorage.getItem('cricket_active_user_team');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed?.teamName) {
+          setUserTeamName(parsed.teamName);
+        }
+      }
+    } catch {
+      // Ignore
+    }
+  }, []);
 
   const commentaryContainerRef = useRef<HTMLDivElement>(null);
 
@@ -178,55 +195,68 @@ export default function MatchSimulationPage() {
       });
     }
 
-    // Team 1: Challengers Dream XI (Kohli, Tendulkar, Bradman, Smith, Buttler, Stokes, Sobers, Akram, Warne, Bumrah, Rashid)
-    const t1Ids = [
-      'f1e10001-0000-0000-0000-000000000001', // Kohli
-      'f2e20002-0000-0000-0000-000000000002', // Tendulkar
-      'f2e20002-0000-0000-0000-000000000001', // Bradman
-      'f1e10001-0000-0000-0000-000000000002', // Smith
-      'f1e10001-0000-0000-0000-000000000006', // Buttler (WK)
-      'f1e10001-0000-0000-0000-000000000004', // Stokes
-      'f2e20002-0000-0000-0000-000000000003', // Sobers
-      'f2e20002-0000-0000-0000-000000000005', // Wasim Akram
-      'f2e20002-0000-0000-0000-000000000004', // Shane Warne
-      'f1e10001-0000-0000-0000-000000000003', // Bumrah
-      'f1e10001-0000-0000-0000-000000000005', // Rashid Khan
+    let lineup1: DreamTeamPlayerSlotInput[] = [];
+    let customName = userTeamName;
+
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('cricket_active_user_team');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed?.lineup) && parsed.lineup.length === 11) {
+            lineup1 = parsed.lineup;
+            if (parsed.teamName) customName = parsed.teamName;
+          }
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    if (lineup1.length !== 11) {
+      // Default Team 1: Balanced XI (Rohit, Gilchrist, Kohli, Lara, De Villiers, Sobers, Stokes, Jadeja, Akram, Warne, Bumrah)
+      const t1Names = ['Rohit', 'Gilchrist', 'Kohli', 'Lara', 'Villiers', 'Sobers', 'Stokes', 'Jadeja', 'Akram', 'Warne', 'Bumrah'];
+      const defaultIds = t1Names.map((n) => all.find((p) => p.fullName.includes(n))?.id || all[0].id);
+      lineup1 = defaultIds.map((pid, idx) => ({
+        playerId: pid,
+        battingOrder: idx + 1,
+        isCaptain: idx === 2,
+        isDesignatedWicketkeeper: idx === 1,
+        bowlingPriority: idx === 8 ? 1 : idx === 10 ? 1 : idx === 9 ? 2 : idx === 7 ? 3 : idx === 5 ? 4 : idx === 6 ? 5 : null,
+      }));
+    }
+
+    // Team 2: AI World Legends XI selected strictly from remaining pool (0 overlapping players with Team 1)
+    const userIds = new Set(lineup1.map((s) => s.playerId));
+    const availableAI = all.filter((p) => !userIds.has(p.id));
+
+    const aiKeeper = availableAI.find((p) => p.isWicketkeeper) || availableAI[0];
+    const aiTopMiddle = availableAI.filter(
+      (p) => p.id !== aiKeeper.id && (p.primaryRole === 'TOP_ORDER_BATTER' || p.primaryRole === 'MIDDLE_ORDER_BATTER')
+    );
+    const aiAllRounders = availableAI.filter(
+      (p) => p.primaryRole === 'BATTING_ALL_ROUNDER' || p.primaryRole === 'BOWLING_ALL_ROUNDER'
+    );
+    const aiPacers = availableAI.filter((p) => p.primaryRole === 'PACE_BOWLER');
+    const aiSpinners = availableAI.filter((p) => p.primaryRole === 'SPIN_BOWLER');
+
+    const lineup2: DreamTeamPlayerSlotInput[] = [
+      { playerId: aiTopMiddle[0]?.id || availableAI[1].id, battingOrder: 1, isCaptain: false, isDesignatedWicketkeeper: false },
+      { playerId: aiTopMiddle[1]?.id || availableAI[2].id, battingOrder: 2, isCaptain: false, isDesignatedWicketkeeper: false },
+      { playerId: aiTopMiddle[2]?.id || availableAI[3].id, battingOrder: 3, isCaptain: true, isDesignatedWicketkeeper: false },
+      { playerId: aiTopMiddle[3]?.id || availableAI[4].id, battingOrder: 4, isCaptain: false, isDesignatedWicketkeeper: false },
+      { playerId: aiKeeper.id, battingOrder: 5, isCaptain: false, isDesignatedWicketkeeper: true },
+      { playerId: aiAllRounders[0]?.id || availableAI[5].id, battingOrder: 6, isCaptain: false, isDesignatedWicketkeeper: false, bowlingPriority: 4 },
+      { playerId: aiAllRounders[1]?.id || availableAI[6].id, battingOrder: 7, isCaptain: false, isDesignatedWicketkeeper: false, bowlingPriority: 5 },
+      { playerId: aiPacers[0]?.id || availableAI[7].id, battingOrder: 8, isCaptain: false, isDesignatedWicketkeeper: false, bowlingPriority: 1 },
+      { playerId: aiSpinners[0]?.id || availableAI[8].id, battingOrder: 9, isCaptain: false, isDesignatedWicketkeeper: false, bowlingPriority: 2 },
+      { playerId: aiPacers[1]?.id || availableAI[9].id, battingOrder: 10, isCaptain: false, isDesignatedWicketkeeper: false, bowlingPriority: 1 },
+      { playerId: aiSpinners[1]?.id || availableAI[10].id, battingOrder: 11, isCaptain: false, isDesignatedWicketkeeper: false, bowlingPriority: 3 },
     ];
-
-    const lineup1: DreamTeamPlayerSlotInput[] = t1Ids.map((pid, idx) => ({
-      playerId: pid,
-      battingOrder: idx + 1,
-      isCaptain: idx === 0,
-      isDesignatedWicketkeeper: idx === 4,
-      bowlingPriority: idx === 7 ? 1 : idx === 8 ? 2 : idx === 9 ? 3 : idx === 5 ? 4 : idx === 6 ? 5 : idx === 10 ? 6 : null,
-    }));
-
-    // Team 2: AI World Legends XI (Richards, Perry, Grace, Barnes, etc.)
-    const t2Ids = [
-      'f2e20002-0000-0000-0000-000000000006', // Viv Richards
-      'f1e10001-0000-0000-0000-000000000007', // Ellyse Perry
-      'f2e20002-0000-0000-0000-000000000007', // W.G. Grace
-      'f1e10001-0000-0000-0000-000000000002', // Steve Smith (shared legend pool)
-      'f1e10001-0000-0000-0000-000000000006', // Buttler
-      'f2e20002-0000-0000-0000-000000000003', // Sobers
-      'f1e10001-0000-0000-0000-000000000004', // Stokes
-      'f2e20002-0000-0000-0000-000000000008', // Sydney Barnes
-      'f2e20002-0000-0000-0000-000000000005', // Wasim Akram
-      'f1e10001-0000-0000-0000-000000000003', // Bumrah
-      'f2e20002-0000-0000-0000-000000000004', // Warne
-    ];
-
-    const lineup2: DreamTeamPlayerSlotInput[] = t2Ids.map((pid, idx) => ({
-      playerId: pid,
-      battingOrder: idx + 1,
-      isCaptain: idx === 0,
-      isDesignatedWicketkeeper: idx === 4,
-      bowlingPriority: idx === 7 ? 1 : idx === 8 ? 2 : idx === 9 ? 3 : idx === 10 ? 4 : idx === 5 ? 5 : null,
-    }));
 
     return {
-      team1: { id: 'user-team', name: 'User Dream XI', lineup: lineup1 },
-      team2: { id: 'ai-team', name: 'AI World Legends XI', lineup: lineup2 },
+      team1: { id: 'user-team', name: customName, lineup: lineup1 },
+      team2: { id: 'ai-team', name: aiTeamName, lineup: lineup2 },
       profiles,
     };
   }
@@ -493,7 +523,7 @@ export default function MatchSimulationPage() {
                         <Shield className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="text-sm font-semibold text-[#F8F9FA]">User Dream XI</div>
+                        <div className="text-sm font-semibold text-[#F8F9FA]">{userTeamName}</div>
                         <div className="text-[11px] text-[#8A94A6]">11 Verified Benchmark Legends</div>
                       </div>
                     </div>
@@ -512,7 +542,7 @@ export default function MatchSimulationPage() {
                         <Activity className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="text-sm font-semibold text-[#F8F9FA]">AI World Legends XI</div>
+                        <div className="text-sm font-semibold text-[#F8F9FA]">{aiTeamName}</div>
                         <div className="text-[11px] text-[#8A94A6]">Autonomous Tactical Captaincy</div>
                       </div>
                     </div>
@@ -727,7 +757,7 @@ export default function MatchSimulationPage() {
                   <div className="text-xs text-[#8A94A6] mb-1">Coin landed on:</div>
                   <div className="text-lg font-bold text-[#D4AF37] mb-2">{tossResult.coinLanded}</div>
                   <div className="text-base font-bold text-[#F8F9FA]">
-                    {tossResult.winner === 'USER' ? 'You won the toss!' : 'AI World Legends XI won the toss!'}
+                    {tossResult.winner === 'USER' ? `${userTeamName} won the toss!` : `${aiTeamName} won the toss!`}
                   </div>
                   <div className="text-xs text-[#8A94A6] mt-1">
                     {tossResult.winner === 'USER'
@@ -764,11 +794,11 @@ export default function MatchSimulationPage() {
                     <h2 className="text-lg md:text-xl font-bold text-[#F8F9FA]">
                       {currentEvent?.inningsNumber === 1
                         ? simulationResult?.finalState.innings[0].battingTeamId === 'user-team'
-                          ? 'User Dream XI'
-                          : 'AI World Legends XI'
+                          ? userTeamName
+                          : aiTeamName
                         : simulationResult?.finalState.innings[1]?.battingTeamId === 'user-team'
-                          ? 'User Dream XI'
-                          : 'AI World Legends XI'}
+                          ? userTeamName
+                          : aiTeamName}
                     </h2>
                     <span className="text-xs font-mono px-2 py-0.5 rounded bg-[#1C2430] text-[#D4AF37] border border-[#D4AF37]/30">
                       Innings {currentEvent?.inningsNumber ?? 1}
@@ -778,11 +808,11 @@ export default function MatchSimulationPage() {
                     vs{' '}
                     {currentEvent?.inningsNumber === 1
                       ? simulationResult?.finalState.innings[0].bowlingTeamId === 'ai-team'
-                        ? 'AI World Legends XI'
-                        : 'User Dream XI'
+                        ? aiTeamName
+                        : userTeamName
                       : simulationResult?.finalState.innings[1]?.bowlingTeamId === 'ai-team'
-                        ? 'AI World Legends XI'
-                        : 'User Dream XI'}
+                        ? aiTeamName
+                        : userTeamName}
                   </p>
                 </div>
               </div>
