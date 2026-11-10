@@ -251,11 +251,11 @@ export default function HomeScreen() {
             />
             <span className="px-space-sm py-1 rounded-full bg-surface-elevated font-label-caps text-label-caps text-text-chalk uppercase tracking-widest shadow-sm border border-border-hairline flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              AUTHENTIC ICC SIMULATION ENGINE
+              AUTHENTIC MATCH SIMULATOR
             </span>
             <span className="h-1.5 w-1.5 rounded-full bg-secondary hidden sm:inline-block" />
             <span className="font-label-caps text-label-caps text-text-slate uppercase tracking-wider hidden sm:inline-block">
-              BROADCAST TELEMETRY HUD
+              BROADCAST SCOREBOARD
             </span>
           </div>
 
@@ -269,7 +269,7 @@ export default function HomeScreen() {
           </h1>
 
           <p className="font-headline-md text-title-md text-text-slate max-w-2xl font-normal leading-relaxed">
-            Assemble an unstoppable international XI, craft tactical field placements, and lead the chase against world-class bowling algorithms in zero-latency offline play.
+            Build your ultimate cricket XI, set dynamic field placements, and chase glory across iconic stadiums in fast, realistic matches.
           </p>
 
           {/* Primary Action CTA Cluster */}
@@ -354,28 +354,28 @@ export default function HomeScreen() {
           <div className="flex items-center gap-space-xs">
             <span className="material-symbols-outlined text-[18px] text-primary">verified</span>
             <span className="font-label-caps text-label-caps text-text-slate uppercase tracking-wider">
-              CERTIFIED CRICKET MATCH SIMULATOR ENGINE
+              OFFLINE CRICKET MATCH SIMULATOR
             </span>
           </div>
         </div>
       </section>
 
-      {/* Section 2: Quick Access Tactical Operations (3 Crisp Cards) */}
+      {/* Section 2: Quick Access Operations (3 Crisp Cards) */}
       <section className="w-full max-w-[1440px] mx-auto px-4 md:px-margin-desktop py-space-xl z-10">
         <div className="flex items-end justify-between mb-space-md">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-space-xs">
               <span className="w-2 h-2 rounded-full bg-secondary" />
               <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest">
-                TACTICAL COMMAND
+                QUICK ACCESS
               </span>
             </div>
             <h2 className="font-headline-lg text-headline-lg text-text-chalk tracking-tight uppercase">
-              ACTIVE LOCKER ROOM & RUNNING CAMPAIGNS
+              ACTIVE SQUADS & MATCHES
             </h2>
           </div>
           <span className="font-label-caps text-label-caps text-text-subdued uppercase tracking-widest hidden sm:inline-block">
-            DIRECT ACCESS TILES • 03 NODES
+            QUICK ACTIONS
           </span>
         </div>
 
@@ -1022,20 +1022,20 @@ export default function HomeScreen() {
             <div>
               <div className="flex items-center justify-between mb-space-md">
                 <div className="flex items-center gap-space-xs">
-                  <span className="material-symbols-outlined text-[18px] text-telemetry-blue">thermostat</span>
-                  <span className="font-label-caps text-label-caps text-telemetry-blue uppercase tracking-wider font-extrabold">
-                    LIVE TELEMETRY ENGINE
+                  <span className="material-symbols-outlined text-[18px] text-primary">thermostat</span>
+                  <span className="font-label-caps text-label-caps text-primary uppercase tracking-wider font-extrabold">
+                    VENUE CONDITIONS
                   </span>
                 </div>
                 <span className="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container text-primary font-mono">
-                  SIM ENGINE v2.4
+                  LIVE WEATHER
                 </span>
               </div>
               <h4 className="font-headline-md text-title-md text-text-chalk uppercase mb-space-xs">
-                PITCH COMPOSITION MATRIX
+                PITCH &amp; WEATHER CONDITIONS
               </h4>
               <p className="font-body-sm text-body-sm text-text-slate mb-space-md">
-                Real-time dynamic degradation calculations based on over count.
+                Dynamic pitch wear, bounce, and atmospheric swing behavior.
               </p>
               {/* Radar Pitch Matrix */}
               <div className="bg-surface-recessed p-space-md rounded-lg mb-space-md flex items-center justify-between">
@@ -1052,10 +1052,10 @@ export default function HomeScreen() {
                   <div>
                     <div className="flex justify-between font-label-caps text-label-caps mb-1">
                       <span className="text-text-slate">BOUNCE &amp; CARRY</span>
-                      <span className="text-telemetry-blue font-mono">84%</span>
+                      <span className="text-primary font-mono">84%</span>
                     </div>
                     <div className="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
-                      <div className="h-full bg-telemetry-blue" style={{ width: '84%' }} />
+                      <div className="h-full bg-primary" style={{ width: '84%' }} />
                     </div>
                   </div>
                   <div>
@@ -1102,7 +1102,7 @@ export default function HomeScreen() {
               </span>
             </div>
             <span className="text-border-hairline hidden sm:inline">•</span>
-            <span className="font-label-caps text-label-caps text-text-slate">OFFLINE ENGINE v2.4 ACTIVE</span>
+            <span className="font-label-caps text-label-caps text-text-slate">100% OFFLINE READY</span>
             <span className="text-border-hairline hidden sm:inline">•</span>
             <span className="font-label-caps text-label-caps text-secondary-fixed">
               1,144 INTERNATIONAL PLAYERS LOADED

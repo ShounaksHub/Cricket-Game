@@ -1031,7 +1031,7 @@ export default function MatchSimulationPage() {
           </Link>
           <span className="text-text-subdued">/</span>
           <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest font-bold">
-            MATCH ARENA // {phase}
+            MATCH ARENA • {phase}
           </span>
           <span className="text-text-subdued">•</span>
           <span className="font-label-caps text-[10px] text-tertiary uppercase">
@@ -1154,7 +1154,7 @@ export default function MatchSimulationPage() {
               <div className="flex items-center gap-space-xs">
                 <span className="w-1.5 h-4 bg-primary rounded-full" />
                 <span className="font-label-caps text-label-caps uppercase text-text-subdued tracking-wider">
-                  STEP 01 // MATCH FORMAT SPECIFICATION
+                  STEP 1: SELECT MATCH FORMAT
                 </span>
               </div>
               <span className="font-label-caps text-label-caps text-text-slate uppercase">5 TIERS SANCTIONED</span>
@@ -1305,7 +1305,7 @@ export default function MatchSimulationPage() {
                 <div className="flex items-center gap-space-xs">
                   <span className="w-1.5 h-4 bg-secondary rounded-full" />
                   <span className="font-label-caps text-label-caps uppercase text-text-subdued tracking-wider">
-                    STEP 02 // SQUAD & RIVALRY
+                    STEP 2: SQUADS & TEAMS
                   </span>
                 </div>
                 <button
@@ -1591,7 +1591,7 @@ export default function MatchSimulationPage() {
                 <div className="flex items-center gap-space-xs">
                   <span className="w-1.5 h-4 bg-tertiary rounded-full" />
                   <span className="font-label-caps text-label-caps uppercase text-text-subdued tracking-wider">
-                    STEP 03 // CONDITIONS & VENUE
+                    STEP 3: VENUE & CONDITIONS
                   </span>
                 </div>
                 <span className="font-label-caps text-label-caps text-tertiary font-bold uppercase">
@@ -2416,23 +2416,23 @@ export default function MatchSimulationPage() {
               {/* Tactical Status Tag */}
               <div className="bg-surface-elevated rounded-xl p-3 border border-border-hairline shadow-md flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className={`w-3 h-3 rounded-full ${isUserBatting ? 'bg-primary animate-pulse' : 'bg-telemetry-blue animate-pulse'}`} />
+                  <span className={`w-3 h-3 rounded-full ${isUserBatting ? 'bg-primary animate-pulse' : 'bg-primary'}`} />
                   <span className="font-label-caps text-xs font-extrabold uppercase tracking-wider text-text-chalk">
-                    {isUserBatting ? 'USER BATTING COCKPIT' : 'USER BOWLING COMMAND'}
+                    {isUserBatting ? 'BATTING CONTROLS' : 'BOWLING CONTROLS'}
                   </span>
                 </div>
                 <span className="font-label-caps text-[10px] text-text-subdued px-2 py-0.5 rounded bg-surface-recessed border border-border-hairline uppercase">
-                  {isUserBatting ? 'CPU BOWLING' : 'CPU BATTING'}
+                  {isUserBatting ? 'OPPONENT BOWLING' : 'OPPONENT BATTING'}
                 </span>
               </div>
 
-              {/* USER BATTING COCKPIT (Shown only when user is batting) */}
+              {/* USER BATTING CONTROLS (Shown only when user is batting) */}
               {isUserBatting ? (
                 <div className="bg-surface-card rounded-xl p-space-md shadow-lg border border-border-hairline flex flex-col gap-space-sm">
                   <div className="flex items-center justify-between">
                     <span className="font-label-caps text-label-caps text-primary uppercase font-bold flex items-center gap-1">
                       <span className="material-symbols-outlined text-[16px]">sports_baseball</span>
-                      YOUR BATTER TACTICAL INTENT
+                      BATTER SHOT INTENT
                     </span>
                     <span className="font-label-caps text-[10px] text-text-subdued uppercase">DIRECT CONTROL</span>
                   </div>
@@ -2466,8 +2466,8 @@ export default function MatchSimulationPage() {
                   {/* CPU Bowler Plan (Read-Only Information) */}
                   <div className="mt-2 p-2.5 rounded-lg bg-surface-recessed border border-border-hairline flex flex-col gap-1">
                     <div className="flex items-center justify-between text-[10px] font-label-caps text-text-subdued uppercase">
-                      <span>CPU OPPONENT BOWLING INTENT</span>
-                      <span className="text-telemetry-blue font-bold">AUTONOMOUS</span>
+                      <span>BOWLER STRATEGY</span>
+                      <span className="text-primary font-bold">ACTIVE</span>
                     </div>
                     <div className="text-xs text-text-chalk flex items-center gap-1 font-mono">
                       <span className="text-text-slate">{bowlerName}:</span>
@@ -2476,21 +2476,21 @@ export default function MatchSimulationPage() {
                   </div>
                 </div>
               ) : (
-                /* USER BOWLING COCKPIT (Shown when user is bowling) */
+                /* USER BOWLING CONTROLS (Shown when user is bowling) */
                 <div className="bg-surface-card rounded-xl p-space-md shadow-lg border border-border-hairline flex flex-col gap-space-sm">
                   <div className="flex items-center justify-between">
-                    <span className="font-label-caps text-label-caps text-telemetry-blue uppercase font-bold flex items-center gap-1">
+                    <span className="font-label-caps text-label-caps text-primary uppercase font-bold flex items-center gap-1">
                       <span className="material-symbols-outlined text-[16px]">sports_cricket</span>
-                      YOUR BOWLING MANAGEMENT COCKPIT
+                      BOWLING MANAGEMENT
                     </span>
-                    <span className="font-label-caps text-[10px] text-text-subdued uppercase">USER DEFENSE</span>
+                    <span className="font-label-caps text-[10px] text-text-subdued uppercase">TACTICS</span>
                   </div>
 
                   {/* Bowler Selection / Change */}
                   {userBowlingSlots.length > 0 && (
                     <div className="flex flex-col gap-1">
                       <label className="text-[10px] font-label-caps text-text-subdued uppercase">
-                        NEXT BOWLER (MCC LAW 21.7 COMPLIANT)
+                        SELECT BOWLER FOR NEXT OVER
                       </label>
                       <select
                         value={userNominatedBowlerId || bowlerId || ''}

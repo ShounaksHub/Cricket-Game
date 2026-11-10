@@ -236,15 +236,15 @@ export default function PlayerCataloguePage() {
               <div className="flex items-center gap-2 mb-2">
                 <span className="w-2 h-2 rounded-full bg-secondary" />
                 <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest">
-                  GLOBAL CRICKET REPOSITORY // {allPlayers.length.toLocaleString()} ARCHIVES
+                  PLAYER DATABASE • {allPlayers.length.toLocaleString()} PLAYERS
                 </span>
               </div>
               <h1 className="font-display-lg text-display-lg text-text-chalk tracking-tight uppercase">
-                EXPLORE THE GAME&apos;S GREATS
+                EXPLORE CRICKET LEGENDS
               </h1>
               <p className="font-body-base text-body-base text-text-slate max-w-2xl mt-1">
-                Discover iconic cricketers across countries, generations, and match formats. Calibrate ratings,
-                inspect kinetic metrics, and recruit into your Dream XI.
+                Explore cricketers across nations, generations, and formats. Compare authentic career statistics,
+                ratings, and draft them into your Dream XI.
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -754,9 +754,9 @@ export default function PlayerCataloguePage() {
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center justify-between">
                       <span className="font-label-caps text-label-caps text-text-subdued uppercase tracking-wider">
-                        CAREER FORMAT TELEMETRY
+                        CAREER STATISTICS
                       </span>
-                      <span className="font-label-caps text-label-caps text-secondary">ICN VERIFIED</span>
+                      <span className="font-label-caps text-label-caps text-secondary">VERIFIED STATS</span>
                     </div>
 
                     {/* Format Switcher */}
@@ -827,10 +827,10 @@ export default function PlayerCataloguePage() {
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center justify-between">
                       <span className="font-label-caps text-label-caps text-text-subdued uppercase tracking-wider">
-                        TACTICAL ATTRIBUTE SPECTRUM
+                        PLAYER SKILLS &amp; RATINGS
                       </span>
                       <span className="font-label-caps text-label-caps text-tertiary font-bold">
-                        PRIME CALIBRATION
+                        PEAK ATTRIBUTES
                       </span>
                     </div>
                     <div className="space-y-2.5 bg-surface-recessed p-4 rounded-xl border border-border-hairline">

@@ -141,18 +141,18 @@ export function WelcomeModal({ forceOpen, onClose }: WelcomeModalProps) {
                   What is the Cricket Dream XI Championship?
                 </h3>
                 <p className="text-xs text-text-slate leading-relaxed">
-                  A high-fidelity cricket management and tactical simulation engine combining realistic cricket strategy with live 2D top-down broadcast rendering. You can craft dream playing XIs from over 1,140 authentic cricketers spanning all eras, or challenge authentic international rivalries!
+                  A realistic cricket simulation combining authentic player stats with top-down broadcast ball tracking. Pick your dream playing XI from over 1,140 cricketers across eras, or recreate historic international rivalries.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="p-4 rounded-xl bg-surface-container border border-border-hairline">
-                  <div className="w-8 h-8 rounded-lg bg-sky-950/60 border border-telemetry-blue/30 flex items-center justify-center text-telemetry-blue mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-sky-950/60 border border-primary/30 flex items-center justify-center text-primary mb-2">
                     <Shield className="w-4 h-4" />
                   </div>
                   <h4 className="text-xs font-bold text-text-chalk mb-1">1. Squad Selection</h4>
                   <p className="text-[11px] text-text-slate leading-normal">
-                    Assemble 11 players in the Squad Builder. Choose custom dream teams, All-Time National XIs, or the One-Player-Per-Nation World XI!
+                    Draft your 11 players in the Squad Builder. Choose custom dream teams, All-Time National XIs, or the 1-Player-Per-Nation World XI.
                   </p>
                 </div>
 
@@ -162,7 +162,7 @@ export function WelcomeModal({ forceOpen, onClose }: WelcomeModalProps) {
                   </div>
                   <h4 className="text-xs font-bold text-text-chalk mb-1">2. Venue & Toss</h4>
                   <p className="text-[11px] text-text-slate leading-normal">
-                    Select authentic stadium dimensions (MCG, Lord&apos;s, Wankhede) and pitch conditions (Green, Turning, Flat). Call the coin toss to choose Bat or Bowl.
+                    Select authentic grounds (MCG, Lord&apos;s, Wankhede) and pitch conditions. Call the coin toss to decide Bat or Bowl.
                   </p>
                 </div>
 
@@ -170,9 +170,9 @@ export function WelcomeModal({ forceOpen, onClose }: WelcomeModalProps) {
                   <div className="w-8 h-8 rounded-lg bg-emerald-950/60 border border-primary/30 flex items-center justify-center text-primary mb-2">
                     <Activity className="w-4 h-4" />
                   </div>
-                  <h4 className="text-xs font-bold text-text-chalk mb-1">3. Live Match Cockpit</h4>
+                  <h4 className="text-xs font-bold text-text-chalk mb-1">3. Live Match Simulation</h4>
                   <p className="text-[11px] text-text-slate leading-normal">
-                    Command every delivery with live tactical adjustments, watch ballistic flight arcs on the 2D PixiJS radar, and inspect reconciled scorecards.
+                    Control shot aggression when batting, rotate bowlers and set fields when bowling, and follow ball-by-ball broadcast action.
                   </p>
                 </div>
               </div>

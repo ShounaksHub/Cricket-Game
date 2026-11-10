@@ -409,7 +409,7 @@ export default function DreamXIBuilderPage() {
           </Link>
           <span className="text-text-subdued">/</span>
           <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest font-bold">
-            SQUAD ARCHITECT // PLAYING XI
+            DREAM XI BUILDER • PLAYING XI
           </span>
         </div>
 
@@ -911,7 +911,7 @@ export default function DreamXIBuilderPage() {
                 </span>
                 <span>
                   {isSquadReady
-                    ? 'SQUAD VALIDATION // PASS: 11/11 REGISTERED'
+                    ? 'SQUAD VERIFIED • 11/11 READY'
                     : `SQUAD INCOMPLETE (${selectedSlots.length}/11 SELECTED)`}
                 </span>
               </div>

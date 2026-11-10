@@ -92,7 +92,7 @@ export function StitchFooter() {
             type="button"
             className="font-label-caps text-[11px] text-text-subdued hover:text-text-chalk transition-colors cursor-pointer uppercase tracking-wider"
           >
-            RULES &amp; TELEMETRY
+            MATCH RULES &amp; GUIDE
           </button>
         </div>
       </div>
