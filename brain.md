@@ -1,7 +1,7 @@
 # Global Cricket Dream Team & Simulation Game — Master Project Brain (`brain.md`)
 
-**Document Version:** 2.1.0  
-**Last Updated:** November 2026 (Post-Phase 9.3 Engine & UX Overhaul)  
+**Document Version:** 2.2.0  
+**Last Updated:** November 2026 (Post-Phase 9.3.1 Player Agency, Manual Field Placement & Bowling Calibration)  
 **System Status:** Production-Ready Single-Project Monorepo (Next.js 15.5.29, NestJS 11, Turborepo 2.3, PixiJS v8.22, Prisma v6, PostgreSQL 16)  
 **Deployment Target:** Unified Vercel Monorepo (`apps/web` + standalone `@cricket/simulation-engine` package)  
 **Active Services & URLs:**
@@ -101,6 +101,7 @@ Cricket-Game (Monorepo Root)
 | **ADR-012** | Vector-Pure Brand Identity Architecture | Accepted | Replaced raster logos with clean SVG vectors, comprehensive multi-resolution favicons, web app manifest icons, and social Open Graph metadata. |
 | **ADR-013** | Deterministic Vector Avatars & Strict Photo Attribution | Accepted | Mandates that zero unverified photos are claimed as authentic. All 1,144 players resolve to deterministic SVG data URIs based on nationality palettes, role glyphs, and initials. |
 | **ADR-014** | Strict Asymmetric Player Agency & Authoritative Match State | Accepted | The user manages their own Dream XI (batting intent when batting, complete bowling/fielding cockpit when bowling). The opponent is managed autonomously by CPU AI. In-match scoreboards read directly from authoritative state, preventing score summation bugs. |
+| **ADR-015** | Interactive 2D Field Placement & MCC Law 28.4 Enforcement | Accepted | Introduced `InteractiveFieldEditor` enabling click-to-reposition for all 9 fielders, dynamic Cartesian-to-polar mapping, and real-time regulation checks for leg-side fielder limits. Custom coordinates directly modulate simulation logits. |
 
 ---
 
@@ -381,7 +382,7 @@ All workspace verification commands execute cleanly with 100% passing results:
    ```bash
    pnpm turbo run test
    ```
-   *Result:* 15/15 test suites passed (100% green, 258/258 tests passed). Covers:
+   *Result:* 15/15 test suites passed (100% green, 263/263 tests passed). Covers:
    - Ballistics, swing, and spin physics calculations.
    - 10-stage execution pipeline determinism across all 5 formats (T10, T20, ODI, Test Red/Pink).
    - DLS target adjustment calculations.
@@ -391,6 +392,7 @@ All workspace verification commands execute cleanly with 100% passing results:
    - Complete player image resolver & deterministic SVG avatar verification.
    - End-to-end match gameplay, session resume, and replay determinism.
    - Phase 9.3 match score integrity, single authoritative state, and asymmetric player agency.
+   - Phase 9.3.1 manual field positioning, Law 28.4 compliance, speed ballistics, and style-gated bowling variations.
 
 3. **Production Build:**
    ```bash
