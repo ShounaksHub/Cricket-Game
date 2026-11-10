@@ -1,246 +1,973 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Shield, Trophy, Activity, CheckCircle2, Server, Globe2, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import type { MatchFormat } from '@cricket/shared-types';
 
-interface ApiHealthResponse {
-  status: string;
-  service: string;
-  version: string;
-  uptimeSeconds: number;
-  database: {
-    status: string;
-    latencyMs?: number;
-    error?: string;
-  };
-}
-
-export default function LandingPage() {
-  const [apiHealth, setApiHealth] = useState<ApiHealthResponse | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+export default function HomeScreen() {
+  const router = useRouter();
+  const [formatFilter, setFormatFilter] = useState<'all' | 'white' | 'red'>('all');
+  const [savedTeam, setSavedTeam] = useState<{
+    name: string;
+    captainName: string;
+    vcName: string;
+    playerCount: number;
+    synergy: number;
+  } | null>(null);
+  const [activeMatch, setActiveMatch] = useState<{
+    format: MatchFormat;
+    userTeamName: string;
+    aiTeamName: string;
+    scoreStr: string;
+    oversStr: string;
+    targetStr?: string;
+    ballsThisOver: string[];
+  } | null>(null);
 
   useEffect(() => {
-    async function checkBackend() {
-      try {
-        const res = await fetch(`${apiUrl}/health`);
-        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-        const data: ApiHealthResponse = await res.json();
-        setApiHealth(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Backend unreachable');
-      } finally {
-        setLoading(false);
+    if (typeof window === 'undefined') return;
+
+    // Load saved custom dream team from localStorage
+    try {
+      const rawSquads = localStorage.getItem('cricket_dream_teams');
+      if (rawSquads) {
+        const parsed = JSON.parse(rawSquads);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const team = parsed[0];
+          const cap = team.players?.find((p: any) => p.isCaptain);
+          const vc = team.players?.find((p: any) => p.isViceCaptain);
+          setSavedTeam({
+            name: team.name || 'THUNDERBOLTS XI',
+            captainName: cap?.name || 'V. Kohli',
+            vcName: vc?.name || 'J. Bumrah',
+            playerCount: team.players?.length || 11,
+            synergy: 96,
+          });
+        }
       }
+    } catch {
+      // Fallback to default benchmark
     }
 
-    checkBackend();
-  }, [apiUrl]);
+    // Load active match session from localStorage
+    try {
+      const rawMatch = localStorage.getItem('cricket_active_match');
+      if (rawMatch) {
+        const parsed = JSON.parse(rawMatch);
+        if (parsed?.matchState) {
+          const inn = parsed.matchState.innings?.[parsed.matchState.currentInningsIndex];
+          if (inn) {
+            const balls = inn.deliveries?.slice(-6).map((d: any) => {
+              if (d.outcome === 'WICKET') return 'W';
+              if (d.runsBatter === 6) return '6';
+              if (d.runsBatter === 4) return '4';
+              if (d.runsBatter === 0) return '•';
+              return String(d.runsTotal);
+            }) || ['1', '4', 'W', '6', '●'];
 
-  const formats: { code: MatchFormat; name: string; overs: string; desc: string }[] = [
-    { code: 'T10', name: 'T10 Cricket', overs: '10 Overs / Innings', desc: 'Hyper-aggressive power hitting and death-over execution.' },
-    { code: 'T20', name: 'T20 Cricket', overs: '20 Overs / Innings', desc: 'Powerplays, middle-overs spin matchups, and tactical acceleration.' },
-    { code: 'ODI', name: 'One Day International', overs: '50 Overs / Innings', desc: 'Innings consolidation, two new white balls, and 3-stage powerplays.' },
-    { code: 'TEST_RED_BALL', name: 'Test Match (Red Ball)', overs: 'Multi-Day / 90 Overs/Day', desc: 'Traditional attrition, multi-session stamina, follow-ons, and wear.' },
-    { code: 'TEST_PINK_BALL', name: 'Test Match (Pink Ball)', overs: 'Day-Night / Twilight', desc: 'Floodlight visibility shifts, twilight swing, and dew modulation.' },
-  ];
+            setActiveMatch({
+              format: parsed.format || 'T20',
+              userTeamName: parsed.matchState.config?.teamA?.name || 'IND',
+              aiTeamName: parsed.matchState.config?.teamB?.name || 'AUS',
+              scoreStr: `${inn.runs}/${inn.wickets}`,
+              oversStr: `${Math.floor(inn.ballsBowled / 6)}.${inn.ballsBowled % 6}`,
+              targetStr: inn.target ? `TARGET ${inn.target} RUNS` : undefined,
+              ballsThisOver: balls.length > 0 ? balls : ['1', '4', 'W', '6', '●'],
+            });
+          }
+        }
+      }
+    } catch {
+      // Fallback
+    }
+  }, []);
+
+  function handleStartFormat(format: MatchFormat) {
+    router.push(`/match?format=${format}`);
+  }
 
   return (
-    <main className="min-h-screen bg-[#0E1013] text-[#F8F9FA] px-4 py-8 md:px-12 md:py-16">
-      {/* Top Navigation Bar */}
-      <nav className="max-w-6xl mx-auto flex items-center justify-between pb-8 border-b border-[#2E3440]">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-[#0D4A38] border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
-            <Trophy className="w-5 h-5" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-[#F8F9FA]">CRICKET DREAM SIMULATION</h1>
-            <p className="text-xs tracking-widest text-[#9CA3AF] uppercase">Architectural Foundation v1.0.0</p>
-          </div>
-        </div>
+    <div className="flex flex-col w-full relative overflow-hidden select-none">
+      {/* Top Atmospheric Glow & Spatial Grid */}
+      <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[1200px] h-[550px] bg-gradient-to-b from-primary/15 via-secondary-container/10 to-transparent blur-[140px] pointer-events-none rounded-full z-0" />
+      <div className="absolute top-20 right-[-100px] w-96 h-96 bg-telemetry-blue/10 blur-[120px] pointer-events-none rounded-full z-0" />
+      <div className="absolute top-96 left-[-120px] w-96 h-96 bg-tertiary/10 blur-[130px] pointer-events-none rounded-full z-0" />
 
-        {/* Backend Communication Telemetry Badge */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#181B20] border border-[#2E3440] text-xs">
-          <Server className="w-3.5 h-3.5 text-[#9CA3AF]" />
-          <span className="text-[#9CA3AF]">API:</span>
-          {loading ? (
-            <span className="text-yellow-400 font-mono animate-pulse">Connecting...</span>
-          ) : apiHealth ? (
-            <div className="flex items-center gap-1.5 text-emerald-400 font-mono font-medium">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span>ONLINE ({apiHealth.database.status === 'up' ? `DB: ${apiHealth.database.latencyMs}ms` : 'STANDALONE'})</span>
+      {/* Hero Panoramic Sports Section */}
+      <section className="relative w-full z-10 px-4 md:px-margin-desktop py-space-xl max-w-[1440px] mx-auto flex flex-col justify-between min-h-[580px] lg:min-h-[640px] rounded-xl overflow-hidden mt-space-sm shadow-xl bg-surface-recessed">
+        {/* Stadium Background Visual */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-screen scale-105 pointer-events-none"
+          style={{ backgroundImage: `url('/assets/stitch/stadium-hero.png')` }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/85 to-surface/40 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-surface-recessed via-surface/60 to-transparent pointer-events-none" />
+
+        {/* Stadium Live Telemetry Overline Tag */}
+        <div className="relative z-10 flex flex-wrap items-center justify-between gap-space-sm w-full">
+          <div className="flex items-center gap-space-xs bg-surface-card/90 backdrop-blur-md px-space-md py-space-xs rounded-full shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
+            <span className="w-2 h-2 rounded-full bg-primary -ml-2.5" />
+            <span className="font-label-caps text-label-caps text-primary tracking-widest uppercase">
+              SEASON 2025 • PAVILION ACCESS UNLOCKED
+            </span>
+            <span className="text-text-subdued font-label-caps text-label-caps">/</span>
+            <span className="font-label-caps text-label-caps text-secondary-fixed-dim">
+              HYDERABAD COLOSSEUM
+            </span>
+          </div>
+
+          {/* Quick Match Telemetry Pill */}
+          <div className="hidden md:flex items-center gap-space-md bg-surface-container/80 backdrop-blur-md px-space-md py-space-xs rounded-lg shadow-sm">
+            <div className="flex items-center gap-space-xs">
+              <span className="material-symbols-outlined text-[16px] text-tertiary">wb_sunny</span>
+              <span className="font-label-caps text-label-caps text-text-chalk">DAY-NIGHT DRY CRACK</span>
             </div>
-          ) : (
-            <span className="text-rose-400 font-mono">OFFLINE ({error})</span>
-          )}
-        </div>
-      </nav>
-
-      {/* Hero Header */}
-      <section className="max-w-4xl mx-auto text-center mt-12 md:mt-20">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0D4A38]/30 border border-[#0D4A38] text-xs text-[#D4AF37] mb-6">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>PHASE 8: MULTI-FORMAT ENGINE (T10, T20, ODI, TEST RED & PINK BALL) LIVE</span>
-        </div>
-        <h2 className="text-4xl md:text-6xl font-serif font-bold tracking-tight text-[#F8F9FA] mb-6 leading-tight">
-          Global Cricket Dream Team & Simulation Engine
-        </h2>
-        <p className="text-lg md:text-xl text-[#9CA3AF] max-w-2xl mx-auto mb-10 leading-relaxed">
-          Assemble cross-era playing XIs from 1,144 verified players, challenge situational AI opponents, and experience authoritative multi-format cricket simulations governed by true MCC laws.
-        </p>
-
-        <div className="flex flex-wrap items-center justify-center gap-4">
-          <Link
-            href="/match"
-            className="px-6 py-3.5 rounded-md bg-[#D4AF37] hover:bg-[#D4AF37]/90 text-[#0E1013] font-bold shadow-lg shadow-[#D4AF37]/20 transition flex items-center gap-2"
-          >
-            <Trophy className="w-4 h-4 text-[#0E1013]" />
-            <span>Play Match (All 5 Formats)</span>
-          </Link>
-          <Link
-            href="/dream-teams"
-            className="px-6 py-3.5 rounded-md bg-[#0D4A38] hover:bg-[#0D4A38]/90 text-[#F8F9FA] font-medium border border-[#D4AF37]/40 shadow-lg shadow-[#0D4A38]/20 transition flex items-center gap-2"
-          >
-            <Shield className="w-4 h-4 text-[#D4AF37]" />
-            <span>Build Your Dream Team (1,144 Players)</span>
-          </Link>
-          <Link
-            href="/players"
-            className="px-6 py-3.5 rounded-md bg-[#181B20] hover:bg-[#22262E] text-[#F8F9FA] font-medium border border-[#2E3440] transition flex items-center gap-2"
-          >
-            <Sparkles className="w-4 h-4 text-[#9CA3AF]" />
-            <span>Explore Player Registry & Ratings</span>
-          </Link>
-        </div>
-      </section>
-
-      {/* Supported Formats Grid */}
-      <section className="max-w-6xl mx-auto mt-20">
-        <div className="flex items-center justify-between mb-8 pb-3 border-b border-[#2E3440]/60">
-          <h3 className="text-xl font-serif font-bold text-[#F8F9FA] flex items-center gap-2">
-            <Globe2 className="w-5 h-5 text-[#D4AF37]" />
-            <span>Supported Cricket Formats</span>
-          </h3>
-          <span className="text-xs text-[#9CA3AF] uppercase tracking-wider">All 5 Formats Playable</span>
+            <div className="flex items-center gap-space-xs">
+              <span className="material-symbols-outlined text-[16px] text-telemetry-blue">air</span>
+              <span className="font-label-caps text-label-caps text-text-slate">14 KM/H CROSSWIND</span>
+            </div>
+            <div className="flex items-center gap-space-xs">
+              <span className="material-symbols-outlined text-[16px] text-primary">speed</span>
+              <span className="font-label-caps text-label-caps text-primary">FAST OUTFIELD (1.2x)</span>
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {formats.map((f) => (
-            <div
-              key={f.code}
-              className="p-5 rounded-lg bg-[#181B20] border border-[#2E3440] hover:border-[#D4AF37]/50 transition duration-200"
+        {/* Central Hero Headline & Value Proposition */}
+        <div className="relative z-10 max-w-4xl flex flex-col gap-space-md my-auto pt-space-xl pb-space-lg">
+          <div className="flex items-center gap-space-xs">
+            <span className="px-space-sm py-0.5 rounded-full bg-surface-elevated font-label-caps text-label-caps text-text-chalk uppercase tracking-widest shadow-sm">
+              AUTHENTIC 3D TACTICAL SIMULATION
+            </span>
+            <span className="h-1.5 w-1.5 rounded-full bg-secondary" />
+            <span className="font-label-caps text-label-caps text-text-slate uppercase tracking-wider">
+              NEXT-GEN BROADCAST HUD
+            </span>
+          </div>
+
+          <h1 className="font-display-lg text-display-lg text-text-chalk tracking-tight uppercase leading-none drop-shadow-md">
+            YOUR TEAM.<br />
+            <span className="bg-gradient-to-r from-text-chalk via-primary to-secondary bg-clip-text text-transparent">
+              YOUR ERA.
+            </span>
+            <br />
+            YOUR GAME.
+          </h1>
+
+          <p className="font-headline-md text-title-md text-text-slate max-w-2xl font-normal leading-relaxed">
+            Assemble an unstoppable international XI, craft tactical field placements, and lead the chase against world-class bowling algorithms in zero-latency offline play.
+          </p>
+
+          {/* Primary Action CTA Cluster */}
+          <div className="flex flex-wrap items-center gap-space-md pt-space-sm">
+            {/* Main 'PLAY CRICKET' CTA */}
+            <Link
+              href="/match"
+              className="group relative px-space-xl py-4 bg-primary text-on-primary font-headline-md text-title-md tracking-wider uppercase rounded-lg shadow-[0_4px_24px_rgba(120,220,119,0.35)] hover:shadow-[0_8px_32px_rgba(120,220,119,0.5)] transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center gap-space-sm"
+              id="btn-play-cricket"
             >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-mono px-2 py-0.5 rounded bg-[#22262E] text-[#D4AF37] border border-[#2E3440]">
-                  {f.code}
-                </span>
-                <span className="text-xs text-[#9CA3AF] font-mono">{f.overs}</span>
-              </div>
-              <h4 className="text-lg font-bold text-[#F8F9FA] mb-2">{f.name}</h4>
-              <p className="text-sm text-[#9CA3AF] leading-relaxed">{f.desc}</p>
+              <span className="material-symbols-outlined text-[26px] group-hover:rotate-45 transition-transform duration-300">
+                sports_cricket
+              </span>
+              <span className="font-extrabold tracking-widest">PLAY CRICKET</span>
+              <span className="material-symbols-outlined text-[20px] transition-transform group-hover:translate-x-1">
+                arrow_forward
+              </span>
+            </Link>
+
+            {/* Secondary 'BUILD YOUR DREAM XI' CTA */}
+            <Link
+              href="/dream-teams"
+              className="group px-space-lg py-4 bg-surface-card hover:bg-surface-elevated text-text-chalk font-headline-md text-title-md uppercase tracking-wider rounded-lg shadow-sm transition-all flex items-center gap-space-sm"
+              id="btn-build-xi"
+            >
+              <span className="material-symbols-outlined text-[22px] text-secondary group-hover:scale-110 transition-transform">
+                shield_person
+              </span>
+              <span className="font-bold">BUILD DREAM XI</span>
+              <span className="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container text-secondary-fixed">
+                11/11 READY
+              </span>
+            </Link>
+
+            {/* Tertiary Quick Resume Action */}
+            <Link
+              href="/match?resume=true"
+              className="group px-space-md py-4 bg-surface-container/60 hover:bg-surface-container text-text-slate hover:text-text-chalk font-label-caps text-label-caps uppercase tracking-widest rounded-lg transition-all flex items-center gap-space-xs"
+              id="btn-quick-resume"
+            >
+              <span className="material-symbols-outlined text-[18px] text-telemetry-blue group-hover:animate-pulse">
+                play_circle
+              </span>
+              <span>
+                {activeMatch
+                  ? `QUICK RESUME (${activeMatch.format} ${activeMatch.oversStr} OV)`
+                  : 'QUICK RESUME (T20 16.2 OV)'}
+              </span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Micro Stats Ticker Bar */}
+        <div className="relative z-10 w-full pt-space-md flex flex-wrap items-center justify-between gap-space-md">
+          <div className="flex items-center gap-space-xl">
+            <div className="flex flex-col">
+              <span className="font-label-caps text-label-caps text-text-subdued uppercase">GLOBAL CAREER RUNS</span>
+              <span className="font-scoreboard-md text-scoreboard-md text-text-chalk">
+                14,892 <span className="font-label-caps text-label-caps text-primary">+342 TODAY</span>
+              </span>
             </div>
-          ))}
+            <div className="flex flex-col">
+              <span className="font-label-caps text-label-caps text-text-subdued uppercase">WIN PERCENTAGE</span>
+              <span className="font-scoreboard-md text-scoreboard-md text-secondary">
+                74.8% <span className="font-label-caps text-label-caps text-text-slate">(48/64 WINS)</span>
+              </span>
+            </div>
+            <div className="hidden sm:flex flex-col">
+              <span className="font-label-caps text-label-caps text-text-subdued uppercase">TROPHY CABINET</span>
+              <span className="font-scoreboard-md text-scoreboard-md text-tertiary">
+                11 CUPS <span className="font-label-caps text-label-caps text-tertiary-fixed-dim">TIER 1 ELITE</span>
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-space-xs">
+            <span className="material-symbols-outlined text-[18px] text-primary">verified</span>
+            <span className="font-label-caps text-label-caps text-text-slate uppercase tracking-wider">
+              CERTIFIED CRICKET MATCH SIMULATOR ENGINE
+            </span>
+          </div>
         </div>
       </section>
 
-      {/* Strategic Product Roadmap & Future Milestones (Phases 8–11) */}
-      <section className="max-w-6xl mx-auto mt-20">
-        <div className="flex items-center justify-between mb-8 pb-3 border-b border-[#2E3440]/60">
-          <div>
-            <h3 className="text-xl font-serif font-bold text-[#F8F9FA] flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-[#D4AF37]" />
-              <span>Strategic Product Roadmap</span>
-            </h3>
-            <p className="text-xs text-[#9CA3AF] mt-1">Long-term vision: From multi-format foundation to photorealistic 3D cricket simulation</p>
+      {/* Section 2: Quick Access Tactical Operations (3 Crisp Cards) */}
+      <section className="w-full max-w-[1440px] mx-auto px-4 md:px-margin-desktop py-space-xl z-10">
+        <div className="flex items-end justify-between mb-space-md">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-space-xs">
+              <span className="w-2 h-2 rounded-full bg-secondary" />
+              <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest">
+                TACTICAL COMMAND
+              </span>
+            </div>
+            <h2 className="font-headline-lg text-headline-lg text-text-chalk tracking-tight uppercase">
+              ACTIVE LOCKER ROOM & RUNNING CAMPAIGNS
+            </h2>
           </div>
-          <span className="text-xs font-mono px-2.5 py-1 rounded bg-[#0D4A38]/40 text-[#D4AF37] border border-[#D4AF37]/30">
-            Phases 8 – 11
+          <span className="font-label-caps text-label-caps text-text-subdued uppercase tracking-widest hidden sm:inline-block">
+            DIRECT ACCESS TILES • 03 NODES
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Phase 8 */}
-          <div className="p-5 rounded-xl bg-gradient-to-b from-[#181B20] to-[#121418] border border-emerald-500/40 relative overflow-hidden">
-            <div className="absolute top-0 right-0 px-2 py-0.5 bg-emerald-500 text-[#0E1013] text-[10px] font-mono font-bold rounded-bl uppercase">
-              Current
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-space-lg">
+          {/* Card 1: YOUR DREAM XI */}
+          <div className="group relative bg-surface-card hover:bg-surface-elevated rounded-xl p-space-lg flex flex-col justify-between transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 overflow-hidden border border-border-hairline">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all pointer-events-none" />
+            <div>
+              <div className="flex items-center justify-between w-full mb-space-md">
+                <span className="font-label-caps text-label-caps px-2.5 py-1 rounded bg-secondary-container text-on-secondary-container uppercase tracking-wider font-extrabold flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px]">groups</span>
+                  YOUR DREAM XI
+                </span>
+                <span className="font-label-caps text-label-caps text-primary px-2 py-0.5 rounded bg-surface-recessed flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[13px] text-tertiary">military_tech</span>
+                  {savedTeam ? `${savedTeam.synergy}% SYNERGY` : '96% SYNERGY'}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-space-md mb-space-md">
+                <div className="w-14 h-14 rounded-lg bg-surface-container flex items-center justify-center shadow-inner relative flex-shrink-0">
+                  <span className="material-symbols-outlined text-[32px] text-primary">bolt</span>
+                  <span className="absolute -top-1.5 -right-1.5 bg-tertiary text-on-tertiary font-label-caps text-[9px] px-1 py-0.2 rounded font-extrabold shadow-sm">
+                    C
+                  </span>
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <span className="font-headline-md text-headline-md text-text-chalk tracking-tight truncate group-hover:text-primary transition-colors">
+                    {savedTeam ? savedTeam.name : 'THUNDERBOLTS XI'}
+                  </span>
+                  <span className="font-body-sm text-body-sm text-text-slate">
+                    Captain:{' '}
+                    <strong className="text-text-chalk">
+                      {savedTeam ? savedTeam.captainName : 'V. Kohli'} (C)
+                    </strong>{' '}
+                    • VC:{' '}
+                    <strong className="text-text-chalk">
+                      {savedTeam ? savedTeam.vcName : 'J. Bumrah'}
+                    </strong>
+                  </span>
+                </div>
+              </div>
+
+              {/* Composition Pill Bar */}
+              <div className="bg-surface-recessed p-space-sm rounded-lg mb-space-md flex flex-col gap-1.5">
+                <div className="flex justify-between items-center text-body-sm">
+                  <span className="font-label-caps text-label-caps text-text-subdued uppercase">
+                    SQUAD ROSTER BALANCE
+                  </span>
+                  <span className="font-label-caps text-label-caps text-primary font-bold">
+                    {savedTeam ? `${savedTeam.playerCount} / 11 SELECTED` : '11 / 11 SELECTED'}
+                  </span>
+                </div>
+                {/* Progress Segment Meter */}
+                <div className="h-2 w-full bg-surface-container rounded-full overflow-hidden flex gap-0.5">
+                  <div className="h-full bg-secondary" style={{ width: '36%' }} title="4 Pure Batsmen" />
+                  <div className="h-full bg-warning-amber" style={{ width: '10%' }} title="1 Wicketkeeper" />
+                  <div className="h-full bg-tertiary" style={{ width: '27%' }} title="3 All-Rounders" />
+                  <div className="h-full bg-telemetry-blue" style={{ width: '27%' }} title="3 Strike Bowlers" />
+                </div>
+                <div className="flex justify-between font-label-caps text-[10px] text-text-subdued pt-0.5">
+                  <span className="text-secondary-fixed">4 BAT</span>
+                  <span className="text-warning-amber">1 WK</span>
+                  <span className="text-tertiary-fixed">3 AR</span>
+                  <span className="text-telemetry-blue">3 BOWL</span>
+                </div>
+              </div>
             </div>
-            <div className="text-xs font-mono text-emerald-400 font-bold mb-2">PHASE 8</div>
-            <h4 className="text-base font-bold text-[#F8F9FA] mb-2">Multi-Format Engine & Audit</h4>
-            <p className="text-xs text-[#9CA3AF] leading-relaxed mb-4">
-              Native simulation for T10, T20, ODI, Test Red Ball & Pink Ball. Session tracking, follow-on mechanics, 80-over new ball reset, and comprehensive codebase pre-deployment audit.
-            </p>
-            <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-mono">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Fully Implemented
+
+            <div className="flex items-center gap-space-sm pt-space-xs">
+              <Link
+                href="/dream-teams"
+                className="flex-1 py-2.5 px-space-md bg-surface-container hover:bg-surface-bright text-text-chalk font-label-caps text-label-caps uppercase tracking-wider rounded transition-colors flex items-center justify-center gap-space-xs"
+              >
+                <span className="material-symbols-outlined text-[16px]">edit_note</span>
+                <span>EDIT LINEUP</span>
+              </Link>
+              <Link
+                href="/match"
+                className="py-2.5 px-space-sm bg-primary/10 hover:bg-primary/20 text-primary rounded transition-colors flex items-center justify-center"
+                title="Play with Squad"
+              >
+                <span className="material-symbols-outlined text-[18px]">play_arrow</span>
+              </Link>
             </div>
           </div>
 
-          {/* Phase 9 */}
-          <div className="p-5 rounded-xl bg-[#181B20] border border-[#2E3440] hover:border-[#D4AF37]/50 transition duration-200">
-            <div className="text-xs font-mono text-[#D4AF37] font-bold mb-2">PHASE 9</div>
-            <h4 className="text-base font-bold text-[#F8F9FA] mb-2">Multiplayer & Live Rooms</h4>
-            <p className="text-xs text-[#9CA3AF] leading-relaxed mb-4">
-              Real-time WebSocket multiplayer matchmaking, peer-to-peer tactical head-to-head battles, spectator lobbies, and synchronized live broadcast rooms.
-            </p>
-            <div className="flex items-center gap-1.5 text-[11px] text-amber-400 font-mono">
-              <Activity className="w-3.5 h-3.5" /> Next Release
+          {/* Card 2: CONTINUE MATCH (Active Match Live Node) */}
+          <div className="group relative bg-surface-card hover:bg-surface-elevated rounded-xl p-space-lg flex flex-col justify-between transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 overflow-hidden border border-border-hairline">
+            <div className="absolute top-0 right-0 w-36 h-36 bg-warning-amber/10 rounded-full blur-2xl pointer-events-none group-hover:bg-warning-amber/20 transition-all" />
+            <div>
+              <div className="flex items-center justify-between w-full mb-space-md">
+                <span className="font-label-caps text-label-caps px-2.5 py-1 rounded bg-wicket-red-container text-on-error uppercase tracking-wider font-extrabold flex items-center gap-1.5 animate-pulse">
+                  <span className="w-1.5 h-1.5 rounded-full bg-wicket-red" />
+                  MATCH IN PROGRESS
+                </span>
+                <span className="font-label-caps text-label-caps text-text-chalk px-2 py-0.5 rounded bg-surface-recessed font-mono">
+                  {activeMatch ? `${activeMatch.format} LEAGUE` : 'T20 SUPER LEAGUE'}
+                </span>
+              </div>
+
+              {/* Fixture Header */}
+              <div className="flex items-center justify-between mb-space-sm">
+                <div className="flex items-center gap-space-xs">
+                  <span className="font-headline-md text-title-md text-text-chalk font-extrabold">
+                    {activeMatch ? activeMatch.userTeamName : 'IND'}
+                  </span>
+                  <span className="font-label-caps text-label-caps text-text-subdued font-bold">vs</span>
+                  <span className="font-headline-md text-title-md text-text-slate font-extrabold">
+                    {activeMatch ? activeMatch.aiTeamName : 'AUS'}
+                  </span>
+                </div>
+                <span className="font-label-caps text-label-caps text-secondary-fixed bg-surface-container px-2 py-0.5 rounded">
+                  CHASING TARGET
+                </span>
+              </div>
+
+              {/* Live Scoreboard Sub-Widget */}
+              <div className="bg-surface-recessed p-space-md rounded-lg mb-space-md flex flex-col gap-space-xs">
+                <div className="flex items-baseline justify-between">
+                  <span className="font-scoreboard-xl text-scoreboard-xl text-text-chalk leading-none tracking-tight">
+                    {activeMatch ? activeMatch.scoreStr : '142'}<span className="text-wicket-red font-headline-lg">{activeMatch ? '' : '/3'}</span>
+                  </span>
+                  <span className="font-scoreboard-md text-scoreboard-md text-text-slate">
+                    {activeMatch ? activeMatch.oversStr : '16.2'}{' '}
+                    <span className="font-label-caps text-label-caps text-text-subdued font-normal">/ 20 OV</span>
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-body-sm text-text-subdued pt-1">
+                  <span className="font-label-caps text-label-caps text-warning-amber">
+                    {activeMatch?.targetStr || 'TARGET 178 RUNS'}
+                  </span>
+                  <span className="font-label-caps text-label-caps text-primary">NEED 36 RUNS IN 22 BALLS</span>
+                </div>
+                {/* Over Ball Feed */}
+                <div className="flex items-center gap-1.5 pt-2">
+                  <span className="font-label-caps text-[10px] text-text-subdued uppercase">THIS OVER:</span>
+                  {(activeMatch?.ballsThisOver || ['1', '4', 'W', '6', '●']).map((b, idx) => (
+                    <span
+                      key={idx}
+                      className={`w-5 h-5 rounded-full flex items-center justify-center font-label-caps text-[10px] font-bold ${
+                        b === 'W'
+                          ? 'bg-wicket-red-container text-error font-extrabold'
+                          : b === '6'
+                          ? 'bg-primary-container text-on-primary-container font-extrabold shadow-sm'
+                          : b === '●'
+                          ? 'bg-surface-elevated animate-pulse text-primary'
+                          : 'bg-surface-container text-text-chalk'
+                      }`}
+                    >
+                      {b}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
+
+            <Link
+              href="/match?resume=true"
+              className="w-full py-2.5 px-space-md bg-warning-amber text-surface-container-lowest font-headline-md text-body-bold uppercase tracking-wider rounded shadow-[0_4px_16px_rgba(245,158,11,0.25)] hover:shadow-[0_4px_24px_rgba(245,158,11,0.4)] transition-all flex items-center justify-center gap-space-xs font-bold"
+            >
+              <span className="material-symbols-outlined text-[18px]">sports</span>
+              <span>RESUME MATCH</span>
+            </Link>
           </div>
 
-          {/* Phase 10 */}
-          <div className="p-5 rounded-xl bg-[#181B20] border border-[#2E3440] hover:border-[#D4AF37]/30 transition duration-200">
-            <div className="text-xs font-mono text-[#9CA3AF] font-bold mb-2">PHASE 10</div>
-            <h4 className="text-base font-bold text-[#F8F9FA] mb-2">Franchise & Career Dynasty</h4>
-            <p className="text-xs text-[#9CA3AF] leading-relaxed mb-4">
-              Multi-season franchise dynasty leagues, IPL-style mega auctions, player salary caps, youth scouting academy, and progressive player rating evolution.
-            </p>
-            <div className="flex items-center gap-1.5 text-[11px] text-[#9CA3AF] font-mono">
-              Planned Architecture
-            </div>
-          </div>
+          {/* Card 3: RECENT MATCH (Victory Record) */}
+          <div className="group relative bg-surface-card hover:bg-surface-elevated rounded-xl p-space-lg flex flex-col justify-between transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 overflow-hidden border border-border-hairline">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 pointer-events-none transition-all" />
+            <div>
+              <div className="flex items-center justify-between w-full mb-space-md">
+                <span className="font-label-caps text-label-caps px-2.5 py-1 rounded bg-surface-container text-primary uppercase tracking-wider font-extrabold flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px] text-primary">trophy</span>
+                  COMPLETED MATCH
+                </span>
+                <span className="font-label-caps text-label-caps text-text-subdued px-2 py-0.5 rounded bg-surface-recessed font-mono">
+                  ODI 50 OVERS
+                </span>
+              </div>
+              <div className="flex flex-col mb-space-sm">
+                <span className="font-label-caps text-label-caps text-secondary-fixed uppercase tracking-widest font-extrabold mb-1">
+                  VICTORY BY 24 RUNS
+                </span>
+                <div className="flex items-center justify-between">
+                  <span className="font-headline-md text-title-md text-text-chalk">YOUR XI</span>
+                  <span className="font-scoreboard-md text-scoreboard-md text-text-chalk">
+                    312/7 <span className="text-body-sm text-text-subdued font-normal">(50.0)</span>
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-text-slate">
+                  <span className="font-headline-md text-title-md text-text-slate">ENGLAND XI</span>
+                  <span className="font-scoreboard-md text-scoreboard-md text-text-slate">
+                    288 <span className="text-body-sm text-text-subdued font-normal">(48.2)</span>
+                  </span>
+                </div>
+              </div>
 
-          {/* Phase 11 */}
-          <div className="p-5 rounded-xl bg-[#181B20] border border-[#2E3440] hover:border-[#D4AF37]/30 transition duration-200">
-            <div className="text-xs font-mono text-[#9CA3AF] font-bold mb-2">PHASE 11</div>
-            <h4 className="text-base font-bold text-[#F8F9FA] mb-2">3D Stadiums & Visuals</h4>
-            <p className="text-xs text-[#9CA3AF] leading-relaxed mb-4">
-              WebGPU-accelerated photorealistic 3D stadium geometry, volumetric atmospheric lighting, 3D trajectory ball physics, and multi-angle broadcast replay cameras.
-            </p>
-            <div className="flex items-center gap-1.5 text-[11px] text-[#9CA3AF] font-mono">
-              Future Milestone
+              {/* Player of the Match Spotlight */}
+              <div className="bg-surface-recessed p-space-sm rounded-lg mb-space-md flex items-center gap-space-sm">
+                <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center flex-shrink-0">
+                  <span className="material-symbols-outlined text-[20px] text-tertiary">star</span>
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-label-caps text-[10px] text-tertiary uppercase tracking-wider font-bold">
+                      PLAYER OF MATCH
+                    </span>
+                    <span className="w-1 h-1 rounded-full bg-text-subdued" />
+                    <span className="font-label-caps text-[10px] text-text-subdued">BATTER</span>
+                  </div>
+                  <span className="font-body-bold text-body-bold text-text-chalk truncate">
+                    V. Kohli <span className="font-scoreboard-md text-body-sm text-secondary">89* (68)</span> &amp; 1 CTH
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-space-sm">
+              <Link
+                href="/match?stage=completed"
+                className="flex-1 py-2.5 px-space-md bg-surface-container hover:bg-surface-bright text-text-chalk font-label-caps text-label-caps uppercase tracking-wider rounded transition-colors flex items-center justify-center gap-space-xs"
+              >
+                <span className="material-symbols-outlined text-[16px]">analytics</span>
+                <span>FULL SCORECARD</span>
+              </Link>
+              <Link
+                href="/my-cricket"
+                className="py-2.5 px-space-sm bg-surface-container hover:bg-surface-bright text-text-slate hover:text-text-chalk rounded transition-colors"
+                title="Match History & Replays"
+              >
+                <span className="material-symbols-outlined text-[18px]">replay</span>
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* System Status & Verification Checklist */}
-      <section className="max-w-6xl mx-auto mt-16 p-6 rounded-xl bg-[#181B20]/80 border border-[#2E3440]">
-        <h4 className="text-base font-bold text-[#F8F9FA] mb-4 flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-          <span>Pre-Deployment Verification Matrix</span>
-        </h4>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs font-mono">
-          <div className="p-3 rounded bg-[#0E1013] border border-[#2E3440]">
-            <span className="text-[#9CA3AF] block mb-1">WORKSPACE</span>
-            <span className="text-emerald-400">pnpm + Turborepo Monorepo</span>
+      {/* Section 3: Quick Play Format Carousel / Selector (5 Tactile Cards) */}
+      <section className="w-full max-w-[1440px] mx-auto px-4 md:px-margin-desktop py-space-xl z-10">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-space-sm mb-space-lg">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-space-xs">
+              <span className="w-2 h-2 rounded-full bg-primary" />
+              <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest">
+                TACTICAL ARENA
+              </span>
+            </div>
+            <h2 className="font-headline-lg text-headline-lg text-text-chalk tracking-tight uppercase">
+              SELECT MATCH FORMAT
+            </h2>
+            <p className="font-body-base text-body-base text-text-slate">
+              From frantic 10-over blitzes to grueling 5-day red ball attrition.
+            </p>
           </div>
-          <div className="p-3 rounded bg-[#0E1013] border border-[#2E3440]">
-            <span className="text-[#9CA3AF] block mb-1">FRONTEND RUNTIME</span>
-            <span className="text-emerald-400">Next.js 15.1.7 (React 19)</span>
+
+          {/* Quick Category Toggle Pills */}
+          <div className="flex items-center p-1 bg-surface-card rounded-lg gap-1 border border-border-hairline">
+            <button
+              onClick={() => setFormatFilter('all')}
+              className={`px-space-md py-1.5 rounded font-label-caps text-label-caps uppercase font-bold transition-all ${
+                formatFilter === 'all' ? 'text-on-primary bg-primary' : 'text-text-slate hover:text-text-chalk'
+              }`}
+              type="button"
+            >
+              ALL FORMATS
+            </button>
+            <button
+              onClick={() => setFormatFilter('white')}
+              className={`px-space-md py-1.5 rounded font-label-caps text-label-caps uppercase font-bold transition-all ${
+                formatFilter === 'white' ? 'text-on-primary bg-primary' : 'text-text-slate hover:text-text-chalk'
+              }`}
+              type="button"
+            >
+              LIMITED OVERS
+            </button>
+            <button
+              onClick={() => setFormatFilter('red')}
+              className={`px-space-md py-1.5 rounded font-label-caps text-label-caps uppercase font-bold transition-all ${
+                formatFilter === 'red' ? 'text-on-primary bg-primary' : 'text-text-slate hover:text-text-chalk'
+              }`}
+              type="button"
+            >
+              TEST CRICKET
+            </button>
           </div>
-          <div className="p-3 rounded bg-[#0E1013] border border-[#2E3440]">
-            <span className="text-[#9CA3AF] block mb-1">BACKEND RUNTIME</span>
-            <span className="text-emerald-400">NestJS 11 (Node 24 LTS)</span>
+        </div>
+
+        {/* 5 Distinct Format Grid Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-space-md">
+          {/* Format 1: T10 SUPER SLAM */}
+          {(formatFilter === 'all' || formatFilter === 'white') && (
+            <div className="group relative bg-surface-card hover:bg-surface-elevated rounded-xl p-space-md flex flex-col justify-between transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 overflow-hidden border border-border-hairline">
+              <div className="h-1 w-full bg-gradient-to-r from-tertiary-fixed to-warning-amber rounded-full mb-space-md" />
+              <div>
+                <div className="flex items-center justify-between mb-space-sm">
+                  <div className="w-10 h-10 rounded-full bg-[#261F0A] flex items-center justify-center shadow-inner" title="White Kookaburra Ball">
+                    <svg className="w-6 h-6 text-tertiary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="M12 3a9 9 0 0 1 9 9M3 12a9 9 0 0 1 9 9" strokeDasharray="2 2" />
+                    </svg>
+                  </div>
+                  <span className="font-label-caps text-label-caps px-2 py-0.5 rounded bg-[#261F0A] text-tertiary font-extrabold">
+                    T10 SLAM
+                  </span>
+                </div>
+                <h3 className="font-headline-md text-title-md text-text-chalk uppercase group-hover:text-tertiary transition-colors mb-1">
+                  SUPER SLAM
+                </h3>
+                <span className="font-scoreboard-md text-scoreboard-md text-tertiary block mb-space-sm">
+                  10 OVERS <span className="font-label-caps text-label-caps text-text-subdued font-normal">/ INNINGS</span>
+                </span>
+                <p className="font-body-sm text-body-sm text-text-slate mb-space-md line-clamp-2">
+                  Non-stop power hitting, maximum field restrictions, and aggressive death deliveries. 15 minute match.
+                </p>
+                <div className="space-y-1.5 bg-surface-recessed p-space-sm rounded-lg mb-space-md">
+                  <div className="flex justify-between font-label-caps text-label-caps">
+                    <span className="text-text-subdued">PACE OF PLAY</span>
+                    <span className="text-tertiary font-bold">HYPER SPEED</span>
+                  </div>
+                  <div className="flex justify-between font-label-caps text-label-caps">
+                    <span className="text-text-subdued">POWERPLAY</span>
+                    <span className="text-text-chalk">3 OVERS</span>
+                  </div>
+                  <div className="flex justify-between font-label-caps text-label-caps">
+                    <span className="text-text-subdued">MAX PER BOWLER</span>
+                    <span className="text-text-chalk">2 OVERS</span>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => handleStartFormat('T10')}
+                className="w-full py-2 bg-surface-container group-hover:bg-tertiary group-hover:text-on-tertiary text-text-chalk font-label-caps text-label-caps uppercase tracking-wider rounded font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[16px]">play_arrow</span>
+                <span>START T10</span>
+              </button>
+            </div>
+          )}
+
+          {/* Format 2: T20 WORLD CUP */}
+          {(formatFilter === 'all' || formatFilter === 'white') && (
+            <div className="group relative bg-surface-card hover:bg-surface-elevated rounded-xl p-space-md flex flex-col justify-between transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 overflow-hidden border border-border-hairline">
+              <div className="h-1 w-full bg-gradient-to-r from-primary to-secondary rounded-full mb-space-md" />
+              <div>
+                <div className="flex items-center justify-between mb-space-sm">
+                  <div className="w-10 h-10 rounded-full bg-[#0C2B1D] flex items-center justify-center shadow-inner" title="White Kookaburra Ball">
+                    <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="M6 6c3 3 3 9 0 12M18 6c-3 3-3 9 0 12" />
+                    </svg>
+                  </div>
+                  <span className="font-label-caps text-label-caps px-2 py-0.5 rounded bg-[#0C2B1D] text-primary font-extrabold">
+                    T20 CLASSIC
+                  </span>
+                </div>
+                <h3 className="font-headline-md text-title-md text-text-chalk uppercase group-hover:text-primary transition-colors mb-1">
+                  WORLD CUP T20
+                </h3>
+                <span className="font-scoreboard-md text-scoreboard-md text-primary block mb-space-sm">
+                  20 OVERS <span className="font-label-caps text-label-caps text-text-subdued font-normal">/ INNINGS</span>
+                </span>
+                <p className="font-body-sm text-body-sm text-text-slate mb-space-md line-clamp-2">
+                  The global gold standard. Strategic middle-over anchor shifts and electric death overs simulation.
+                </p>
+                <div className="space-y-1.5 bg-surface-recessed p-space-sm rounded-lg mb-space-md">
+                  <div className="flex justify-between font-label-caps text-label-caps">
+                    <span className="text-text-subdued">PACE OF PLAY</span>
+                    <span className="text-primary font-bold">DYNAMIC STRATEGY</span>
+                  </div>
+                  <div className="flex justify-between font-label-caps text-label-caps">
+                    <span className="text-text-subdued">POWERPLAY</span>
+                    <span className="text-text-chalk">6 OVERS</span>
+                  </div>
+                  <div className="flex justify-between font-label-caps text-label-caps">
+                    <span className="text-text-subdued">MAX PER BOWLER</span>
+                    <span className="text-text-chalk">4 OVERS</span>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => handleStartFormat('T20')}
+                className="w-full py-2 bg-primary text-on-primary font-label-caps text-label-caps uppercase tracking-wider rounded font-bold shadow-[0_4px_12px_rgba(120,220,119,0.25)] hover:shadow-[0_4px_16px_rgba(120,220,119,0.4)] transition-all flex items-center justify-center gap-1 cursor-pointer"
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[16px]">play_arrow</span>
+                <span>START T20</span>
+              </button>
+            </div>
+          )}
+
+          {/* Format 3: ODI CHAMPIONSHIP */}
+          {(formatFilter === 'all' || formatFilter === 'white') && (
+            <div className="group relative bg-surface-card hover:bg-surface-elevated rounded-xl p-space-md flex flex-col justify-between transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 overflow-hidden border border-border-hairline">
+              <div className="h-1 w-full bg-gradient-to-r from-telemetry-blue to-sky-300 rounded-full mb-space-md" />
+              <div>
+                <div className="flex items-center justify-between mb-space-sm">
+                  <div className="w-10 h-10 rounded-full bg-[#0E2342] flex items-center justify-center shadow-inner" title="Two White Balls">
+                    <svg className="w-6 h-6 text-telemetry-blue" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <circle cx="9" cy="12" r="7" />
+                      <circle cx="15" cy="12" r="7" strokeDasharray="2 2" />
+                    </svg>
+                  </div>
+                  <span className="font-label-caps text-label-caps px-2 py-0.5 rounded bg-[#0E2342] text-telemetry-blue font-extrabold">
+                    ODI SHIELD
+                  </span>
+                </div>
+                <h3 className="font-headline-md text-title-md text-text-chalk uppercase group-hover:text-telemetry-blue transition-colors mb-1">
+                  CHAMPIONSHIP
+                </h3>
+                <span className="font-scoreboard-md text-scoreboard-md text-telemetry-blue block mb-space-sm">
+                  50 OVERS <span className="font-label-caps text-label-caps text-text-subdued font-normal">/ INNINGS</span>
+                </span>
+                <p className="font-body-sm text-body-sm text-text-slate mb-space-md line-clamp-2">
+                  The tactical craft. Strike rotation, 3-phase field restrictions, and building immense 300+ totals.
+                </p>
+                <div className="space-y-1.5 bg-surface-recessed p-space-sm rounded-lg mb-space-md">
+                  <div className="flex justify-between font-label-caps text-label-caps">
+                    <span className="text-text-subdued">PACE OF PLAY</span>
+                    <span className="text-telemetry-blue font-bold">TACTICAL CRAFT</span>
+                  </div>
+                  <div className="flex justify-between font-label-caps text-label-caps">
+                    <span className="text-text-subdued">POWERPLAY</span>
+                    <span className="text-text-chalk">10 + 30 + 10 OVERS</span>
+                  </div>
+                  <div className="flex justify-between font-label-caps text-label-caps">
+                    <span className="text-text-subdued">MAX PER BOWLER</span>
+                    <span className="text-text-chalk">10 OVERS</span>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => handleStartFormat('ODI')}
+                className="w-full py-2 bg-surface-container group-hover:bg-telemetry-blue group-hover:text-surface-container-lowest text-text-chalk font-label-caps text-label-caps uppercase tracking-wider rounded font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[16px]">play_arrow</span>
+                <span>START ODI</span>
+              </button>
+            </div>
+          )}
+
+          {/* Format 4: TEST RED BALL */}
+          {(formatFilter === 'all' || formatFilter === 'red') && (
+            <div className="group relative bg-surface-card hover:bg-surface-elevated rounded-xl p-space-md flex flex-col justify-between transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 overflow-hidden border border-border-hairline">
+              <div className="h-1 w-full bg-gradient-to-r from-wicket-red to-error rounded-full mb-space-md" />
+              <div>
+                <div className="flex items-center justify-between mb-space-sm">
+                  <div className="w-10 h-10 rounded-full bg-[#2E0F0F] flex items-center justify-center shadow-inner" title="Red Leather Dukes Ball">
+                    <svg className="w-6 h-6 text-wicket-red" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="9" stroke="currentColor" />
+                      <path d="M12 3v18" stroke="currentColor" strokeWidth="2.5" />
+                      <path d="M9 7l6 2M9 11l6 2M9 15l6 2" stroke="currentColor" strokeWidth="1.5" />
+                    </svg>
+                  </div>
+                  <span className="font-label-caps text-label-caps px-2 py-0.5 rounded bg-[#2E0F0F] text-wicket-red font-extrabold">
+                    RED BALL
+                  </span>
+                </div>
+                <h3 className="font-headline-md text-title-md text-text-chalk uppercase group-hover:text-wicket-red transition-colors mb-1">
+                  TEST RED BALL
+                </h3>
+                <span className="font-scoreboard-md text-scoreboard-md text-wicket-red block mb-space-sm">
+                  5 DAYS <span className="font-label-caps text-label-caps text-text-subdued font-normal">/ 2 INNINGS EA</span>
+                </span>
+                <p className="font-body-sm text-body-sm text-text-slate mb-space-md line-clamp-2">
+                  The purest crucible. Conventional &amp; reverse swing, crumbling pitch cracks, and slips cordon catches.
+                </p>
+                <div className="space-y-1.5 bg-surface-recessed p-space-sm rounded-lg mb-space-md">
+                  <div className="flex justify-between font-label-caps text-label-caps">
+                    <span className="text-text-subdued">PACE OF PLAY</span>
+                    <span className="text-wicket-red font-bold">ENDURANCE WAR</span>
+                  </div>
+                  <div className="flex justify-between font-label-caps text-label-caps">
+                    <span className="text-text-subdued">BALL DECAY</span>
+                    <span className="text-text-chalk">80 OVERS RE-BALL</span>
+                  </div>
+                  <div className="flex justify-between font-label-caps text-label-caps">
+                    <span className="text-text-subdued">SESSIONS</span>
+                    <span className="text-text-chalk">3 PER DAY (90 OV)</span>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => handleStartFormat('TEST_RED_BALL')}
+                className="w-full py-2 bg-surface-container group-hover:bg-wicket-red group-hover:text-text-chalk text-text-chalk font-label-caps text-label-caps uppercase tracking-wider rounded font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[16px]">play_arrow</span>
+                <span>START TEST</span>
+              </button>
+            </div>
+          )}
+
+          {/* Format 5: TEST PINK BALL */}
+          {(formatFilter === 'all' || formatFilter === 'red') && (
+            <div className="group relative bg-surface-card hover:bg-surface-elevated rounded-xl p-space-md flex flex-col justify-between transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 overflow-hidden border border-border-hairline">
+              <div className="h-1 w-full bg-gradient-to-r from-test-pink to-rose-400 rounded-full mb-space-md" />
+              <div>
+                <div className="flex items-center justify-between mb-space-sm">
+                  <div className="w-10 h-10 rounded-full bg-[#33101E] flex items-center justify-center shadow-inner" title="Pink Kookaburra Seam">
+                    <svg className="w-6 h-6 text-test-pink" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="M12 3v18" stroke="currentColor" strokeWidth="2.5" />
+                      <path d="M8 8l8 8M16 8l-8 8" stroke="currentColor" strokeWidth="1.2" />
+                    </svg>
+                  </div>
+                  <span className="font-label-caps text-label-caps px-2 py-0.5 rounded bg-[#33101E] text-test-pink font-extrabold">
+                    DAY / NIGHT
+                  </span>
+                </div>
+                <h3 className="font-headline-md text-title-md text-text-chalk uppercase group-hover:text-test-pink transition-colors mb-1">
+                  PINK BALL TEST
+                </h3>
+                <span className="font-scoreboard-md text-scoreboard-md text-test-pink block mb-space-sm">
+                  FLOODLIGHTS <span className="font-label-caps text-label-caps text-text-subdued font-normal">/ TWILIGHT</span>
+                </span>
+                <p className="font-body-sm text-body-sm text-text-slate mb-space-md line-clamp-2">
+                  Dramatic dusk twilight swing acceleration. Heavy evening dew factor meets extra lacquered pink seam.
+                </p>
+                <div className="space-y-1.5 bg-surface-recessed p-space-sm rounded-lg mb-space-md">
+                  <div className="flex justify-between font-label-caps text-label-caps">
+                    <span className="text-text-subdued">PACE OF PLAY</span>
+                    <span className="text-test-pink font-bold">ATMOSPHERIC DRAMA</span>
+                  </div>
+                  <div className="flex justify-between font-label-caps text-label-caps">
+                    <span className="text-text-subdued">TWILIGHT HOUR</span>
+                    <span className="text-text-chalk">SWING +35%</span>
+                  </div>
+                  <div className="flex justify-between font-label-caps text-label-caps">
+                    <span className="text-text-subdued">DEW FACTOR</span>
+                    <span className="text-text-chalk">GRIP -20% AT NIGHT</span>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => handleStartFormat('TEST_PINK_BALL')}
+                className="w-full py-2 bg-surface-container group-hover:bg-test-pink group-hover:text-surface-container-lowest text-text-chalk font-label-caps text-label-caps uppercase tracking-wider rounded font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+                type="button"
+              >
+                <span className="material-symbols-outlined text-[16px]">play_arrow</span>
+                <span>START PINK TEST</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Section 4: Game Modes & Quick Challenges Bento */}
+      <section className="w-full max-w-[1440px] mx-auto px-4 md:px-margin-desktop py-space-lg z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+          {/* Left Bento: Quick Scenario Challenge */}
+          <div className="lg:col-span-7 bg-surface-card rounded-xl p-space-lg relative overflow-hidden shadow-md flex flex-col justify-between border border-border-hairline">
+            <div className="absolute -right-8 -bottom-8 w-60 h-60 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+            <div>
+              <div className="flex items-center justify-between mb-space-md">
+                <div className="flex items-center gap-space-xs">
+                  <span className="material-symbols-outlined text-[18px] text-tertiary">bolt</span>
+                  <span className="font-label-caps text-label-caps text-tertiary uppercase tracking-wider font-extrabold">
+                    DAILY MASTERCLASS SCENARIO
+                  </span>
+                </div>
+                <span className="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container text-text-slate">
+                  EXPIRES IN 07H 42M
+                </span>
+              </div>
+              <h3 className="font-headline-lg text-headline-lg text-text-chalk uppercase tracking-tight mb-space-xs">
+                THE GABBA HEIST • 2021 TRIBUTE
+              </h3>
+              <p className="font-body-base text-body-base text-text-slate mb-space-md max-w-xl">
+                Day 5, Final Session: Australia have set 328 to win. You are on 296/7 with Rishabh Pant batting on 78*. Score 33 runs in the final 30 balls with 3 wickets remaining.
+              </p>
+              <div className="grid grid-cols-3 gap-space-sm bg-surface-recessed p-space-md rounded-lg mb-space-lg max-w-lg">
+                <div className="flex flex-col">
+                  <span className="font-label-caps text-label-caps text-text-subdued uppercase">REQUIRED RUN RATE</span>
+                  <span className="font-scoreboard-md text-scoreboard-md text-warning-amber">6.60 RPO</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-label-caps text-label-caps text-text-subdued uppercase">WICKETS REMAINING</span>
+                  <span className="font-scoreboard-md text-scoreboard-md text-wicket-red">3 WICKETS</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-label-caps text-label-caps text-text-subdued uppercase">REWARD XP</span>
+                  <span className="font-scoreboard-md text-scoreboard-md text-primary">+2,500 XP</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-space-md">
+              <Link
+                href="/match?scenario=gabba2021"
+                className="px-space-lg py-3 bg-secondary-container hover:bg-secondary-fixed text-on-secondary-container font-headline-md text-body-bold uppercase tracking-wider rounded transition-all flex items-center gap-space-xs font-bold shadow-md"
+              >
+                <span className="material-symbols-outlined text-[20px]">play_circle</span>
+                <span>ENTER SCENARIO CLUTCH</span>
+              </Link>
+              <span className="font-label-caps text-label-caps text-text-subdued">1,402 MANAGERS SOLVED TODAY</span>
+            </div>
           </div>
-          <div className="p-3 rounded bg-[#0E1013] border border-[#2E3440]">
-            <span className="text-[#9CA3AF] block mb-1">PLAYER DATABASE</span>
-            <span className="text-emerald-400">1,144 Verified Records</span>
+
+          {/* Right Bento: Live Pitch Weather & AI Conditions */}
+          <div className="lg:col-span-5 bg-surface-card rounded-xl p-space-lg relative overflow-hidden shadow-md flex flex-col justify-between border border-border-hairline">
+            <div>
+              <div className="flex items-center justify-between mb-space-md">
+                <div className="flex items-center gap-space-xs">
+                  <span className="material-symbols-outlined text-[18px] text-telemetry-blue">thermostat</span>
+                  <span className="font-label-caps text-label-caps text-telemetry-blue uppercase tracking-wider font-extrabold">
+                    LIVE TELEMETRY ENGINE
+                  </span>
+                </div>
+                <span className="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container text-primary font-mono">
+                  SIM ENGINE v2.4
+                </span>
+              </div>
+              <h4 className="font-headline-md text-title-md text-text-chalk uppercase mb-space-xs">
+                PITCH COMPOSITION MATRIX
+              </h4>
+              <p className="font-body-sm text-body-sm text-text-slate mb-space-md">
+                Real-time dynamic degradation calculations based on over count.
+              </p>
+              {/* Radar Pitch Matrix */}
+              <div className="bg-surface-recessed p-space-md rounded-lg mb-space-md flex items-center justify-between">
+                <div className="space-y-2 flex-1 pr-space-md">
+                  <div>
+                    <div className="flex justify-between font-label-caps text-label-caps mb-1">
+                      <span className="text-text-slate">SEAM &amp; MOVEMENT</span>
+                      <span className="text-primary font-mono">78%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+                      <div className="h-full bg-primary" style={{ width: '78%' }} />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between font-label-caps text-label-caps mb-1">
+                      <span className="text-text-slate">BOUNCE &amp; CARRY</span>
+                      <span className="text-telemetry-blue font-mono">84%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+                      <div className="h-full bg-telemetry-blue" style={{ width: '84%' }} />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between font-label-caps text-label-caps mb-1">
+                      <span className="text-text-slate">SPIN &amp; TURN RATE</span>
+                      <span className="text-tertiary font-mono">42%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+                      <div className="h-full bg-tertiary" style={{ width: '42%' }} />
+                    </div>
+                  </div>
+                </div>
+                {/* Mini Graphic Pitch Visualizer */}
+                <div className="w-24 h-24 rounded-lg bg-surface-container flex flex-col items-center justify-center p-2 text-center flex-shrink-0 shadow-inner">
+                  <span className="material-symbols-outlined text-[30px] text-secondary">grass</span>
+                  <span className="font-label-caps text-[9px] text-text-slate uppercase mt-1 leading-tight">
+                    GREEN TOP DENSE GRASS
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between text-body-sm pt-space-xs text-text-subdued">
+              <span className="font-label-caps text-label-caps">OPTIMAL TOSS STRATEGY:</span>
+              <span className="font-label-caps text-label-caps text-secondary-fixed font-bold">
+                BOWL FIRST (OVERCAST)
+              </span>
+            </div>
           </div>
         </div>
       </section>
-    </main>
+
+      {/* Section 5: Offline Engine Status Bar & Quick Stats Strip */}
+      <section className="w-full bg-surface-container-lowest mt-space-xl py-space-md z-10 border-t border-border-hairline">
+        <div className="max-w-[1440px] mx-auto px-4 md:px-margin-desktop flex flex-col md:flex-row items-center justify-between gap-space-md">
+          {/* Engine Status */}
+          <div className="flex flex-wrap items-center gap-space-md">
+            <div className="flex items-center gap-space-xs">
+              <span className="w-2.5 h-2.5 rounded-full bg-primary" />
+              <span className="font-label-caps text-label-caps text-text-chalk uppercase tracking-widest font-extrabold">
+                STANDALONE SIMULATION READY
+              </span>
+            </div>
+            <span className="text-border-hairline hidden sm:inline">•</span>
+            <span className="font-label-caps text-label-caps text-text-slate">OFFLINE ENGINE v2.4 ACTIVE</span>
+            <span className="text-border-hairline hidden sm:inline">•</span>
+            <span className="font-label-caps text-label-caps text-secondary-fixed">
+              1,144 INTERNATIONAL PLAYERS LOADED
+            </span>
+          </div>
+          {/* Quick Controls */}
+          <div className="flex items-center gap-space-lg">
+            <div className="flex items-center gap-space-xs">
+              <span className="material-symbols-outlined text-[16px] text-primary">battery_charging_full</span>
+              <span className="font-label-caps text-label-caps text-text-slate">BATTERY EFFICIENT SIM</span>
+            </div>
+            <div className="flex items-center gap-space-xs">
+              <span className="material-symbols-outlined text-[16px] text-telemetry-blue">cloud_off</span>
+              <span className="font-label-caps text-label-caps text-text-slate">NO INTERNET REQUIRED</span>
+            </div>
+            <button
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.dispatchEvent(new CustomEvent('open-cricket-welcome-modal'));
+                }
+              }}
+              className="font-label-caps text-label-caps text-tertiary hover:underline uppercase tracking-wider font-bold cursor-pointer"
+              type="button"
+            >
+              MCC LAWS & RULES
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }

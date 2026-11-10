@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@700;800&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"primary-container":"#4caf50","error":"#ffb4ab","secondary":"#a9d55f","warning-amber":"#f59e0b","wicket-red":"#c92a2a","on-error":"#690005","on-primary":"#00390a","surface":"#101410","tertiary-fixed-dim":"#e9c349","surface-card":"#181f19","surface-dim":"#101410","on-tertiary":"#3c2f00","surface-container-high":"#272b26","telemetry-blue":"#38bdf8","on-secondary":"#233600","inverse-on-surface":"#2d312d","border-focus":"#435144","wicket-red-container":"#3d0d0d","primary":"#78dc77","text-slate":"#a2aaa1","tertiary-fixed":"#ffe088","surface-variant":"#323631","on-primary-container":"#003c0b","on-background":"#e0e4dc","on-surface":"#e0e4dc","outline":"#899484","outline-variant":"#3f4a3c","on-surface-variant":"#becab9","on-secondary-fixed":"#131f00","error-container":"#93000a","surface-container":"#1d211c","text-chalk":"#f4f5f0","on-secondary-container":"#d3ff87","surface-bright":"#363a35","surface-container-highest":"#323631","inverse-primary":"#006e1c","secondary-fixed":"#c5f177","on-tertiary-fixed-variant":"#574500","border-hairline":"#303a31","on-primary-fixed-variant":"#005313","tertiary-container":"#cca72f","on-tertiary-fixed":"#241a00","surface-container-low":"#191d18","on-tertiary-container":"#4e3d00","on-primary-fixed":"#002204","background":"#101410","surface-tint":"#78dc77","on-secondary-fixed-variant":"#354e00","surface-container-lowest":"#0b0f0b","secondary-container":"#537802","secondary-fixed-dim":"#a9d55f","tertiary":"#e9c349","test-pink":"#e64980","primary-fixed":"#94f990","surface-recessed":"#0c0f0c","primary-fixed-dim":"#78dc77","text-subdued":"#6b756c","on-error-container":"#ffdad6","surface-elevated":"#202920","inverse-surface":"#e0e4dc"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-xl":"2rem","space-md":"1rem","gutter-desktop":"1.5rem","margin-desktop":"2rem","gutter":"1rem","space-xs":"0.25rem","space-sm":"0.5rem","space-lg":"1.5rem","margin":"1rem"},"fontFamily":{"headline-lg":["Manrope"],"headline-md":["Manrope"],"body-base":["Inter"],"scoreboard-xl-mobile":["JetBrains Mono"],"display-lg-mobile":["Manrope"],"label-caps":["JetBrains Mono"],"title-md":["Manrope"],"display-lg":["Manrope"],"body-bold":["Inter"],"headline-lg-mobile":["Manrope"],"body-sm":["Inter"],"scoreboard-md":["JetBrains Mono"],"scoreboard-xl":["JetBrains Mono"]},"fontSize":{"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.015em","fontWeight":"700"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"700"}],"body-base":["15px",{"lineHeight":"22px","letterSpacing":"0","fontWeight":"400"}],"scoreboard-xl-mobile":["32px",{"lineHeight":"34px","letterSpacing":"-0.03em","fontWeight":"800"}],"display-lg-mobile":["32px",{"lineHeight":"38px","letterSpacing":"-0.02em","fontWeight":"800"}],"label-caps":["11px",{"lineHeight":"14px","letterSpacing":"0.06em","fontWeight":"700"}],"title-md":["18px",{"lineHeight":"26px","letterSpacing":"-0.005em","fontWeight":"600"}],"display-lg":["48px",{"lineHeight":"56px","letterSpacing":"-0.02em","fontWeight":"800"}],"body-bold":["15px",{"lineHeight":"22px","letterSpacing":"0","fontWeight":"600"}],"headline-lg-mobile":["26px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"700"}],"body-sm":["13px",{"lineHeight":"18px","letterSpacing":"0","fontWeight":"400"}],"scoreboard-md":["20px",{"lineHeight":"24px","letterSpacing":"-0.02em","fontWeight":"700"}],"scoreboard-xl":["42px",{"lineHeight":"44px","letterSpacing":"-0.03em","fontWeight":"800"}]}}}};</script></head><body class="bg-surface font-body-base text-body-base text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl border-b border-border-hairline shadow-[0_4px_24px_rgba(0,0,0,0.5)]"><div class="h-20 max-w-[1440px] mx-auto px-margin-desktop flex items-center justify-between"><div class="flex items-center gap-space-md"><a class="flex items-center gap-space-sm group focus:outline-none" data-path="home" href="#"><img alt="Cricket Dream XI Official Logo" class="h-8 w-auto object-contain transition-transform group-hover:scale-105" src="https://lh3.googleusercontent.com/aida/ALJJyrDjO6jMwR_yUbtfW9pdyFkOewwppX6HI79sy9wxVoRr-B_A80uid5C5lmoldsHCV_RKYrCJSJoLESMlUIo8Kr3A81UphQzKt-YBzfbxyd9kSTENhTuHq4ALAgzYiWEC1E5Nlr3SfWsfFXMGcTwdayHjg3YoguhQfJwVsRsUFj_4-B9U0lGzEyee2GLtsSKWEH4WF-WqaEV7JEc311vnv1SzmYjzQur9dsxdjkpem7bq"/><div class="flex flex-col"><span class="font-headline-md text-title-md text-text-chalk tracking-tight leading-none group-hover:text-primary transition-colors">DREAM XI</span><span class="font-label-caps text-label-caps text-text-subdued uppercase tracking-widest">CHAMPIONSHIP</span></div></a></div><nav class="hidden lg:flex items-center gap-space-xs" data-active-classes="bg-surface-elevated text-text-chalk border-b-2 border-primary shadow-[0_0_12px_rgba(76,175,80,0.2)]"><a aria-current="page" class="px-space-md py-space-sm rounded-t-lg font-headline-md tracking-wider transition-all bg-surface-elevated text-text-chalk border-b-2 border-primary shadow-[0_0_12px_rgba(76,175,80,0.2)]" data-path="home" href="#">HOME</a><a class="px-space-md py-space-sm rounded-t-lg font-headline-md text-title-md tracking-wider text-text-slate hover:bg-surface-elevated hover:text-on-surface transition-all" data-path="dream-xi" href="#">DREAM XI</a><a class="px-space-md py-space-sm rounded-t-lg font-headline-md text-title-md tracking-wider text-text-slate hover:bg-surface-elevated hover:text-on-surface transition-all" data-path="players" href="#">PLAYERS</a><a class="px-space-md py-space-sm rounded-t-lg font-headline-md text-title-md tracking-wider text-text-slate hover:bg-surface-elevated hover:text-on-surface transition-all" data-path="my-cricket" href="#">MY CRICKET</a></nav><div class="flex items-center gap-space-md"><div class="hidden sm:flex items-center gap-space-xs px-space-sm py-space-xs bg-surface-container rounded-full border border-border-hairline"><span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span><span class="font-label-caps text-label-caps text-primary tracking-widest uppercase">OFFLINE READY</span></div><button aria-label="Audio Settings" class="p-space-xs rounded-lg text-text-slate hover:text-text-chalk hover:bg-surface-elevated transition-all flex items-center justify-center" type="button"><span class="material-symbols-outlined text-[20px]">volume_up</span></button><button aria-label="Game Settings" class="p-space-xs rounded-lg text-text-slate hover:text-text-chalk hover:bg-surface-elevated transition-all flex items-center justify-center" type="button"><span class="material-symbols-outlined text-[20px]">settings</span></button><div class="relative flex items-center pl-space-xs border-l border-border-hairline"><div class="relative cursor-pointer group"><img alt="Profile" class="w-9 h-9 rounded-full object-cover ring-2 ring-border-focus group-hover:ring-primary transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCilyxany21uh98skrT0SXMocCZgmyqA5xJ225uPT7xqGNSzNdeS0KFWpZlwRowaJE6XtopqpP4rKJx0POK4p8z80ukvzK6VD6isdiKkE-LAI73pBa-bYWDkqA9gDCuBvte5zP11J3hcq_dhtvHWDIXjewHVSkIyIw_S55_UXFf7NNSv6Ih8tIJF7twP74ukCFyE5OUohz1ROWKWxX-n7KUcmwLXyGLcxQXK4s0JhtD"/><span class="absolute -bottom-1 -right-1 bg-tertiary text-on-tertiary font-label-caps text-[9px] px-1 rounded-sm leading-tight font-extrabold shadow-[0_0_8px_rgba(233,195,73,0.4)]" title="Captain Rank">C</span></div></div></div></div></header><main class="w-full pt-20 bg-surface min-h-[calc(100vh-80px)] flex flex-col"><div class="flex flex-col w-full relative overflow-hidden select-none">
+<!-- Top Atmospheric Glow & Spatial Grid -->
+<div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[1200px] h-[550px] bg-gradient-to-b from-primary/15 via-secondary-container/10 to-transparent blur-[140px] pointer-events-none rounded-full z-0"></div>
+<div class="absolute top-20 right-[-100px] w-96 h-96 bg-telemetry-blue/10 blur-[120px] pointer-events-none rounded-full z-0"></div>
+<div class="absolute top-96 left-[-120px] w-96 h-96 bg-tertiary/10 blur-[130px] pointer-events-none rounded-full z-0"></div>
+<!-- Hero Panoramic Sports Section -->
+<section class="relative w-full z-10 px-margin-desktop py-space-xl max-w-[1440px] mx-auto flex flex-col justify-between min-h-[580px] lg:min-h-[640px] rounded-xl overflow-hidden mt-space-sm shadow-xl bg-surface-recessed">
+<!-- Atmospheric Stadium Scrim + Background Visual -->
+<div class="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-screen scale-105 pointer-events-none" data-alt="Panoramic illuminated cricket stadium at twilight floodlights, vivid emerald green pitch grass detail, dramatic stadium stadium roof architecture, atmospheric mist and stadium floodlight haze, cinematic photorealistic sports photography with dark moody vignette and sharp pitch lighting" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBRM_q1EK_v7T7-KLry5vANUA1_AMEnnild1046x-ltQ1fsMJM9UgSXvHYTmnggXjTlNgw6O67cfQhIbmlWf-g_MWCBiRbLGASAib7_1P0HOr1bSIGj4zUTNzsynoyOFiYjqkzarsK2uaFBAdjN06aTuvOgNnzhls4B4mKfoAHDuaGxpOOOTWUM3EWXGzbsRw9KPHHVYAOBZsQNgzd7NmFMDkmabZD1Orb2FgYC9qBx')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface via-surface/85 to-surface/40 pointer-events-none"></div>
+<div class="absolute inset-0 bg-gradient-to-r from-surface-recessed via-surface/60 to-transparent pointer-events-none"></div>
+<!-- Stadium Live Telemetry Overline Tag -->
+<div class="relative z-10 flex flex-wrap items-center justify-between gap-space-sm w-full">
+<div class="flex items-center gap-space-xs bg-surface-card/90 backdrop-blur-md px-space-md py-space-xs rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary animate-ping"></span>
+<span class="w-2 h-2 rounded-full bg-primary -ml-2.5"></span>
+<span class="font-label-caps text-label-caps text-primary tracking-widest uppercase">SEASON 2025 • PAVILION ACCESS UNLOCKED</span>
+<span class="text-text-subdued font-label-caps text-label-caps">/</span>
+<span class="font-label-caps text-label-caps text-secondary-fixed-dim">HYDERABAD COLOSSEUM</span>
+</div>
+<!-- Quick Match Telemetry Pill -->
+<div class="hidden md:flex items-center gap-space-md bg-surface-container/80 backdrop-blur-md px-space-md py-space-xs rounded-lg shadow-sm">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px] text-tertiary">wb_sunny</span>
+<span class="font-label-caps text-label-caps text-text-chalk">DAY-NIGHT DRY CRACK</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px] text-telemetry-blue">air</span>
+<span class="font-label-caps text-label-caps text-text-slate">14 KM/H CROSSWIND</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px] text-primary">speed</span>
+<span class="font-label-caps text-label-caps text-primary">FAST OUTFIELD (1.2x)</span>
+</div>
+</div>
+</div>
+<!-- Central Hero Headline & Value Proposition -->
+<div class="relative z-10 max-w-4xl flex flex-col gap-space-md my-auto pt-space-xl pb-space-lg">
+<div class="flex items-center gap-space-xs">
+<span class="px-space-sm py-0.5 rounded-full bg-surface-elevated font-label-caps text-label-caps text-text-chalk uppercase tracking-widest shadow-sm">AUTHENTIC 3D TACTICAL SIMULATION</span>
+<span class="h-1.5 w-1.5 rounded-full bg-secondary"></span>
+<span class="font-label-caps text-label-caps text-text-slate uppercase tracking-wider">NEXT-GEN BROADCAST HUD</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-text-chalk tracking-tight uppercase leading-none drop-shadow-md">
+        YOUR TEAM.<br/>
+<span class="bg-gradient-to-r from-text-chalk via-primary to-secondary bg-clip-text text-transparent">YOUR ERA.</span><br/>
+        YOUR GAME.
+      </h1>
+<p class="font-headline-md text-title-md text-text-slate max-w-2xl font-normal leading-relaxed">
+        Assemble an unstoppable international XI, craft tactical field placements, and lead the chase against world-class bowling algorithms in zero-latency offline play.
+      </p>
+<!-- Primary Action CTA Cluster -->
+<div class="flex flex-wrap items-center gap-space-md pt-space-sm">
+<!-- Main 'PLAY CRICKET' CTA -->
+<button class="group relative px-space-xl py-4 bg-primary text-on-primary font-headline-md text-title-md tracking-wider uppercase rounded-lg shadow-[0_4px_24px_rgba(120,220,119,0.35)] hover:shadow-[0_8px_32px_rgba(120,220,119,0.5)] transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center gap-space-sm" id="btn-play-cricket" type="button">
+<span class="material-symbols-outlined text-[26px] group-hover:rotate-45 transition-transform duration-300">sports_cricket</span>
+<span class="font-extrabold tracking-widest">PLAY CRICKET</span>
+<span class="material-symbols-outlined text-[20px] transition-transform group-hover:translate-x-1">arrow_forward</span>
+</button>
+<!-- Secondary 'BUILD YOUR DREAM XI' CTA -->
+<button class="group px-space-lg py-4 bg-surface-card hover:bg-surface-elevated text-text-chalk font-headline-md text-title-md uppercase tracking-wider rounded-lg shadow-sm transition-all flex items-center gap-space-sm" id="btn-build-xi" type="button">
+<span class="material-symbols-outlined text-[22px] text-secondary group-hover:scale-110 transition-transform">shield_person</span>
+<span class="font-bold">BUILD DREAM XI</span>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container text-secondary-fixed">11/11 READY</span>
+</button>
+<!-- Tertiary Quick Resume Action -->
+<button class="group px-space-md py-4 bg-surface-container/60 hover:bg-surface-container text-text-slate hover:text-text-chalk font-label-caps text-label-caps uppercase tracking-widest rounded-lg transition-all flex items-center gap-space-xs" id="btn-quick-resume" type="button">
+<span class="material-symbols-outlined text-[18px] text-telemetry-blue group-hover:animate-pulse">play_circle</span>
+<span>QUICK RESUME (T20 16.2 OV)</span>
+</button>
+</div>
+</div>
+<!-- Micro Stats Ticker Bar -->
+<div class="relative z-10 w-full pt-space-md flex flex-wrap items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-xl">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">GLOBAL CAREER RUNS</span>
+<span class="font-scoreboard-md text-scoreboard-md text-text-chalk">14,892 <span class="font-label-caps text-label-caps text-primary">+342 TODAY</span></span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">WIN PERCENTAGE</span>
+<span class="font-scoreboard-md text-scoreboard-md text-secondary">74.8% <span class="font-label-caps text-label-caps text-text-slate">(48/64 WINS)</span></span>
+</div>
+<div class="hidden sm:flex flex-col">
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">TROPHY CABINET</span>
+<span class="font-scoreboard-md text-scoreboard-md text-tertiary">11 CUPS <span class="font-label-caps text-label-caps text-tertiary-fixed-dim">TIER 1 ELITE</span></span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-primary">verified</span>
+<span class="font-label-caps text-label-caps text-text-slate uppercase tracking-wider">CERTIFIED CRICKET MATCH SIMULATOR ENGINE</span>
+</div>
+</div>
+</section>
+<!-- Section 2: Quick Access Tactical Operations (3 Crisp Cards) -->
+<section class="w-full max-w-[1440px] mx-auto px-margin-desktop py-space-xl z-10">
+<div class="flex items-end justify-between mb-space-md">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-caps text-label-caps text-secondary uppercase tracking-widest">TACTICAL COMMAND</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-text-chalk tracking-tight uppercase">ACTIVE LOCKER ROOM &amp; RUNNING CAMPAIGNS</h2>
+</div>
+<span class="font-label-caps text-label-caps text-text-subdued uppercase tracking-widest hidden sm:inline-block">DIRECT ACCESS TILES • 03 NODES</span>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-space-lg">
+<!-- Card 1: YOUR DREAM XI -->
+<div class="group relative bg-surface-card hover:bg-surface-elevated rounded-xl p-space-lg flex flex-col justify-between transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 overflow-hidden">
+<!-- Accent Glow Flare -->
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all pointer-events-none"></div>
+<div>
+<div class="flex items-center justify-between w-full mb-space-md">
+<span class="font-label-caps text-label-caps px-2.5 py-1 rounded bg-secondary-container text-on-secondary-container uppercase tracking-wider font-extrabold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">groups</span>
+              YOUR DREAM XI
+            </span>
+<span class="font-label-caps text-label-caps text-primary px-2 py-0.5 rounded bg-surface-recessed flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-tertiary">military_tech</span>
+              96% SYNERGY
+            </span>
+</div>
+<div class="flex items-center gap-space-md mb-space-md">
+<!-- Team Crest Emblem -->
+<div class="w-14 h-14 rounded-lg bg-surface-container flex items-center justify-center shadow-inner relative flex-shrink-0">
+<span class="material-symbols-outlined text-[32px] text-primary">bolt</span>
+<span class="absolute -top-1.5 -right-1.5 bg-tertiary text-on-tertiary font-label-caps text-[9px] px-1 py-0.2 rounded font-extrabold shadow-sm">C</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-md text-headline-md text-text-chalk tracking-tight truncate group-hover:text-primary transition-colors">THUNDERBOLTS XI</span>
+<span class="font-body-sm text-body-sm text-text-slate">Captain: <strong class="text-text-chalk">V. Kohli (C)</strong> • VC: <strong class="text-text-chalk">J. Bumrah</strong></span>
+</div>
+</div>
+<!-- Composition Pill Bar -->
+<div class="bg-surface-recessed p-space-sm rounded-lg mb-space-md flex flex-col gap-1.5">
+<div class="flex justify-between items-center text-body-sm">
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">SQUAD ROSTER BALANCE</span>
+<span class="font-label-caps text-label-caps text-primary font-bold">11 / 11 SELECTED</span>
+</div>
+<!-- Progress Segment Meter -->
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden flex gap-0.5">
+<div class="h-full bg-secondary" style="width: 36%" title="4 Pure Batsmen"></div>
+<div class="h-full bg-warning-amber" style="width: 10%" title="1 Wicketkeeper"></div>
+<div class="h-full bg-tertiary" style="width: 27%" title="3 All-Rounders"></div>
+<div class="h-full bg-telemetry-blue" style="width: 27%" title="3 Strike Bowlers"></div>
+</div>
+<div class="flex justify-between font-label-caps text-[10px] text-text-subdued pt-0.5">
+<span class="text-secondary-fixed">4 BAT</span>
+<span class="text-warning-amber">1 WK</span>
+<span class="text-tertiary-fixed">3 AR</span>
+<span class="text-telemetry-blue">3 BOWL</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-space-sm pt-space-xs">
+<button class="flex-1 py-2.5 px-space-md bg-surface-container hover:bg-surface-bright text-text-chalk font-label-caps text-label-caps uppercase tracking-wider rounded transition-colors flex items-center justify-center gap-space-xs" type="button">
+<span class="material-symbols-outlined text-[16px]">edit_note</span>
+<span>EDIT LINEUP</span>
+</button>
+<button class="py-2.5 px-space-sm bg-primary/10 hover:bg-primary/20 text-primary rounded transition-colors" title="Quick Strategy Boost" type="button">
+<span class="material-symbols-outlined text-[18px]">auto_fix_high</span>
+</button>
+</div>
+</div>
+<!-- Card 2: CONTINUE MATCH (Active Match Live Node) -->
+<div class="group relative bg-surface-card hover:bg-surface-elevated rounded-xl p-space-lg flex flex-col justify-between transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 overflow-hidden">
+<!-- Live Action Pulse Flare -->
+<div class="absolute top-0 right-0 w-36 h-36 bg-warning-amber/10 rounded-full blur-2xl pointer-events-none group-hover:bg-warning-amber/20 transition-all"></div>
+<div>
+<div class="flex items-center justify-between w-full mb-space-md">
+<span class="font-label-caps text-label-caps px-2.5 py-1 rounded bg-wicket-red-container text-on-error uppercase tracking-wider font-extrabold flex items-center gap-1.5 animate-pulse">
+<span class="w-1.5 h-1.5 rounded-full bg-wicket-red"></span>
+              MATCH IN PROGRESS
+            </span>
+<span class="font-label-caps text-label-caps text-text-chalk px-2 py-0.5 rounded bg-surface-recessed font-mono">
+              T20 SUPER LEAGUE
+            </span>
+</div>
+<!-- Fixture Header -->
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-md text-title-md text-text-chalk font-extrabold">IND</span>
+<span class="font-label-caps text-label-caps text-text-subdued font-bold">vs</span>
+<span class="font-headline-md text-title-md text-text-slate font-extrabold">AUS</span>
+</div>
+<span class="font-label-caps text-label-caps text-secondary-fixed bg-surface-container px-2 py-0.5 rounded">CHASING TARGET</span>
+</div>
+<!-- Live Scoreboard Sub-Widget -->
+<div class="bg-surface-recessed p-space-md rounded-lg mb-space-md flex flex-col gap-space-xs">
+<div class="flex items-baseline justify-between">
+<span class="font-scoreboard-xl text-scoreboard-xl text-text-chalk leading-none tracking-tight">142<span class="text-wicket-red font-headline-lg">/3</span></span>
+<span class="font-scoreboard-md text-scoreboard-md text-text-slate">16.2 <span class="font-label-caps text-label-caps text-text-subdued font-normal">/ 20 OV</span></span>
+</div>
+<div class="flex items-center justify-between text-body-sm text-text-subdued pt-1">
+<span class="font-label-caps text-label-caps text-warning-amber">TARGET 178 RUNS</span>
+<span class="font-label-caps text-label-caps text-primary">NEED 36 RUNS IN 22 BALLS</span>
+</div>
+<!-- Over Ball Feed -->
+<div class="flex items-center gap-1.5 pt-2">
+<span class="font-label-caps text-[10px] text-text-subdued uppercase">THIS OVER:</span>
+<span class="w-5 h-5 rounded-full bg-surface-container flex items-center justify-center font-label-caps text-[10px] text-text-chalk font-bold">1</span>
+<span class="w-5 h-5 rounded-full bg-surface-container flex items-center justify-center font-label-caps text-[10px] text-text-chalk font-bold">4</span>
+<span class="w-5 h-5 rounded-full bg-wicket-red-container text-error flex items-center justify-center font-label-caps text-[10px] font-extrabold">W</span>
+<span class="w-5 h-5 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-label-caps text-[10px] font-extrabold shadow-sm">6</span>
+<span class="w-5 h-5 rounded-full bg-surface-elevated animate-pulse flex items-center justify-center font-label-caps text-[10px] text-primary font-bold">●</span>
+</div>
+</div>
+</div>
+<button class="w-full py-2.5 px-space-md bg-warning-amber text-surface-container-lowest font-headline-md text-body-bold uppercase tracking-wider rounded shadow-[0_4px_16px_rgba(245,158,11,0.25)] hover:shadow-[0_4px_24px_rgba(245,158,11,0.4)] transition-all flex items-center justify-center gap-space-xs font-bold" type="button">
+<span class="material-symbols-outlined text-[18px]">sports</span>
+<span>RESUME MATCH</span>
+</button>
+</div>
+<!-- Card 3: RECENT MATCH (Victory Record) -->
+<div class="group relative bg-surface-card hover:bg-surface-elevated rounded-xl p-space-lg flex flex-col justify-between transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 overflow-hidden">
+<!-- Victory Aura -->
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 pointer-events-none transition-all"></div>
+<div>
+<div class="flex items-center justify-between w-full mb-space-md">
+<span class="font-label-caps text-label-caps px-2.5 py-1 rounded bg-surface-container text-primary uppercase tracking-wider font-extrabold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary">trophy</span>
+              COMPLETED MATCH
+            </span>
+<span class="font-label-caps text-label-caps text-text-subdued px-2 py-0.5 rounded bg-surface-recessed font-mono">
+              ODI 50 OVERS
+            </span>
+</div>
+<div class="flex flex-col mb-space-sm">
+<span class="font-label-caps text-label-caps text-secondary-fixed uppercase tracking-widest font-extrabold mb-1">VICTORY BY 24 RUNS</span>
+<div class="flex items-center justify-between">
+<span class="font-headline-md text-title-md text-text-chalk">YOUR XI</span>
+<span class="font-scoreboard-md text-scoreboard-md text-text-chalk">312/7 <span class="text-body-sm text-text-subdued font-normal">(50.0)</span></span>
+</div>
+<div class="flex items-center justify-between text-text-slate">
+<span class="font-headline-md text-title-md text-text-slate">ENGLAND XI</span>
+<span class="font-scoreboard-md text-scoreboard-md text-text-slate">288 <span class="text-body-sm text-text-subdued font-normal">(48.2)</span></span>
+</div>
+</div>
+<!-- Player of the Match Spotlight -->
+<div class="bg-surface-recessed p-space-sm rounded-lg mb-space-md flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[20px] text-tertiary">star</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-label-caps text-[10px] text-tertiary uppercase tracking-wider font-bold">PLAYER OF MATCH</span>
+<span class="w-1 h-1 rounded-full bg-text-subdued"></span>
+<span class="font-label-caps text-[10px] text-text-subdued">BATTER</span>
+</div>
+<span class="font-body-bold text-body-bold text-text-chalk truncate">V. Kohli <span class="font-scoreboard-md text-body-sm text-secondary">89* (68)</span> &amp; 1 CTH</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="flex-1 py-2.5 px-space-md bg-surface-container hover:bg-surface-bright text-text-chalk font-label-caps text-label-caps uppercase tracking-wider rounded transition-colors flex items-center justify-center gap-space-xs" type="button">
+<span class="material-symbols-outlined text-[16px]">analytics</span>
+<span>FULL SCORECARD</span>
+</button>
+<button class="py-2.5 px-space-sm bg-surface-container hover:bg-surface-bright text-text-slate hover:text-text-chalk rounded transition-colors" title="Match Highlights" type="button">
+<span class="material-symbols-outlined text-[18px]">replay</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 3: Quick Play Format Carousel / Selector (5 Tactile Cards) -->
+<section class="w-full max-w-[1440px] mx-auto px-margin-desktop py-space-xl z-10">
+<div class="flex flex-col sm:flex-row sm:items-end justify-between gap-space-sm mb-space-lg">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-label-caps text-label-caps text-primary uppercase tracking-widest">TACTICAL ARENA</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-text-chalk tracking-tight uppercase">SELECT MATCH FORMAT</h2>
+<p class="font-body-base text-body-base text-text-slate">From frantic 10-over blitzes to grueling 5-day red ball attrition.</p>
+</div>
+<!-- Quick Category Toggle Pills -->
+<div class="flex items-center p-1 bg-surface-card rounded-lg gap-1">
+<button class="format-filter px-space-md py-1.5 rounded font-label-caps text-label-caps text-on-primary bg-primary uppercase font-bold transition-all" data-type="all" type="button">ALL FORMATS</button>
+<button class="format-filter px-space-md py-1.5 rounded font-label-caps text-label-caps text-text-slate hover:text-text-chalk uppercase font-bold transition-all" data-type="white" type="button">LIMITED OVERS</button>
+<button class="format-filter px-space-md py-1.5 rounded font-label-caps text-label-caps text-text-slate hover:text-text-chalk uppercase font-bold transition-all" data-type="red" type="button">TEST CRICKET</button>
+</div>
+</div>
+<!-- 5 Distinct Format Grid Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-space-md">
+<!-- Format 1: T10 SUPER SLAM -->
+<div class="group relative bg-surface-card hover:bg-surface-elevated rounded-xl p-space-md flex flex-col justify-between transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 overflow-hidden" data-ball="white">
+<!-- Ambient Color Top Edge -->
+<div class="h-1 w-full bg-gradient-to-r from-tertiary-fixed to-warning-amber rounded-full mb-space-md"></div>
+<div>
+<!-- Ball & Format Badge Row -->
+<div class="flex items-center justify-between mb-space-sm">
+<!-- White Kookaburra Ball Icon -->
+<div class="w-10 h-10 rounded-full bg-[#261F0A] flex items-center justify-center shadow-inner" title="White Kookaburra Ball">
+<svg class="w-6 h-6 text-tertiary" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<path d="M12 3a9 9 0 0 1 9 9M3 12a9 9 0 0 1 9 9" stroke-dasharray="2 2"></path>
+</svg>
+</div>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-[#261F0A] text-tertiary font-extrabold">T10 SLAM</span>
+</div>
+<h3 class="font-headline-md text-title-md text-text-chalk uppercase group-hover:text-tertiary transition-colors mb-1">SUPER SLAM</h3>
+<span class="font-scoreboard-md text-scoreboard-md text-tertiary block mb-space-sm">10 OVERS <span class="font-label-caps text-label-caps text-text-subdued font-normal">/ INNINGS</span></span>
+<p class="font-body-sm text-body-sm text-text-slate mb-space-md line-clamp-2">
+            Non-stop power hitting, maximum field restrictions, and aggressive death deliveries. 15 minute match.
+          </p>
+<div class="space-y-1.5 bg-surface-recessed p-space-sm rounded-lg mb-space-md">
+<div class="flex justify-between font-label-caps text-label-caps">
+<span class="text-text-subdued">PACE OF PLAY</span>
+<span class="text-tertiary font-bold">HYPER SPEED</span>
+</div>
+<div class="flex justify-between font-label-caps text-label-caps">
+<span class="text-text-subdued">POWERPLAY</span>
+<span class="text-text-chalk">3 OVERS</span>
+</div>
+<div class="flex justify-between font-label-caps text-label-caps">
+<span class="text-text-subdued">MAX PER BOWLER</span>
+<span class="text-text-chalk">2 OVERS</span>
+</div>
+</div>
+</div>
+<button class="w-full py-2 bg-surface-container group-hover:bg-tertiary group-hover:text-on-tertiary text-text-chalk font-label-caps text-label-caps uppercase tracking-wider rounded font-bold transition-all flex items-center justify-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">play_arrow</span>
+<span>START T10</span>
+</button>
+</div>
+<!-- Format 2: T20 WORLD CUP -->
+<div class="group relative bg-surface-card hover:bg-surface-elevated rounded-xl p-space-md flex flex-col justify-between transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 overflow-hidden" data-ball="white">
+<!-- Ambient Color Top Edge -->
+<div class="h-1 w-full bg-gradient-to-r from-primary to-secondary rounded-full mb-space-md"></div>
+<div>
+<!-- Ball & Format Badge Row -->
+<div class="flex items-center justify-between mb-space-sm">
+<!-- White Ball Icon -->
+<div class="w-10 h-10 rounded-full bg-[#0C2B1D] flex items-center justify-center shadow-inner" title="White Kookaburra Ball">
+<svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<path d="M6 6c3 3 3 9 0 12M18 6c-3 3-3 9 0 12"></path>
+</svg>
+</div>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-[#0C2B1D] text-primary font-extrabold">T20 CLASSIC</span>
+</div>
+<h3 class="font-headline-md text-title-md text-text-chalk uppercase group-hover:text-primary transition-colors mb-1">WORLD CUP T20</h3>
+<span class="font-scoreboard-md text-scoreboard-md text-primary block mb-space-sm">20 OVERS <span class="font-label-caps text-label-caps text-text-subdued font-normal">/ INNINGS</span></span>
+<p class="font-body-sm text-body-sm text-text-slate mb-space-md line-clamp-2">
+            The global gold standard. Strategic middle-over anchor shifts and electric death overs simulation.
+          </p>
+<div class="space-y-1.5 bg-surface-recessed p-space-sm rounded-lg mb-space-md">
+<div class="flex justify-between font-label-caps text-label-caps">
+<span class="text-text-subdued">PACE OF PLAY</span>
+<span class="text-primary font-bold">DYNAMIC STRATEGY</span>
+</div>
+<div class="flex justify-between font-label-caps text-label-caps">
+<span class="text-text-subdued">POWERPLAY</span>
+<span class="text-text-chalk">6 OVERS</span>
+</div>
+<div class="flex justify-between font-label-caps text-label-caps">
+<span class="text-text-subdued">MAX PER BOWLER</span>
+<span class="text-text-chalk">4 OVERS</span>
+</div>
+</div>
+</div>
+<button class="w-full py-2 bg-primary text-on-primary font-label-caps text-label-caps uppercase tracking-wider rounded font-bold shadow-[0_4px_12px_rgba(120,220,119,0.25)] hover:shadow-[0_4px_16px_rgba(120,220,119,0.4)] transition-all flex items-center justify-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">play_arrow</span>
+<span>START T20</span>
+</button>
+</div>
+<!-- Format 3: ODI CHAMPIONSHIP -->
+<div class="group relative bg-surface-card hover:bg-surface-elevated rounded-xl p-space-md flex flex-col justify-between transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 overflow-hidden" data-ball="white">
+<!-- Ambient Color Top Edge -->
+<div class="h-1 w-full bg-gradient-to-r from-telemetry-blue to-sky-300 rounded-full mb-space-md"></div>
+<div>
+<!-- Ball & Format Badge Row -->
+<div class="flex items-center justify-between mb-space-sm">
+<!-- White Dual-Ball Indicator -->
+<div class="w-10 h-10 rounded-full bg-[#0E2342] flex items-center justify-center shadow-inner" title="Two White Balls">
+<svg class="w-6 h-6 text-telemetry-blue" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="9" cy="12" r="7"></circle>
+<circle cx="15" cy="12" r="7" stroke-dasharray="2 2"></circle>
+</svg>
+</div>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-[#0E2342] text-telemetry-blue font-extrabold">ODI SHIELD</span>
+</div>
+<h3 class="font-headline-md text-title-md text-text-chalk uppercase group-hover:text-telemetry-blue transition-colors mb-1">CHAMPIONSHIP</h3>
+<span class="font-scoreboard-md text-scoreboard-md text-telemetry-blue block mb-space-sm">50 OVERS <span class="font-label-caps text-label-caps text-text-subdued font-normal">/ INNINGS</span></span>
+<p class="font-body-sm text-body-sm text-text-slate mb-space-md line-clamp-2">
+            The tactical craft. Strike rotation, 3-phase field restrictions, and building immense 300+ totals.
+          </p>
+<div class="space-y-1.5 bg-surface-recessed p-space-sm rounded-lg mb-space-md">
+<div class="flex justify-between font-label-caps text-label-caps">
+<span class="text-text-subdued">PACE OF PLAY</span>
+<span class="text-telemetry-blue font-bold">TACTICAL CRAFT</span>
+</div>
+<div class="flex justify-between font-label-caps text-label-caps">
+<span class="text-text-subdued">POWERPLAY</span>
+<span class="text-text-chalk">10 + 30 + 10 OVERS</span>
+</div>
+<div class="flex justify-between font-label-caps text-label-caps">
+<span class="text-text-subdued">MAX PER BOWLER</span>
+<span class="text-text-chalk">10 OVERS</span>
+</div>
+</div>
+</div>
+<button class="w-full py-2 bg-surface-container group-hover:bg-telemetry-blue group-hover:text-surface-container-lowest text-text-chalk font-label-caps text-label-caps uppercase tracking-wider rounded font-bold transition-all flex items-center justify-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">play_arrow</span>
+<span>START ODI</span>
+</button>
+</div>
+<!-- Format 4: TEST RED BALL -->
+<div class="group relative bg-surface-card hover:bg-surface-elevated rounded-xl p-space-md flex flex-col justify-between transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 overflow-hidden" data-ball="red">
+<!-- Ambient Color Top Edge -->
+<div class="h-1 w-full bg-gradient-to-r from-wicket-red to-error rounded-full mb-space-md"></div>
+<div>
+<!-- Ball & Format Badge Row -->
+<div class="flex items-center justify-between mb-space-sm">
+<!-- Red Leather Seam Ball Icon -->
+<div class="w-10 h-10 rounded-full bg-[#2E0F0F] flex items-center justify-center shadow-inner" title="Red Leather Dukes Ball">
+<svg class="w-6 h-6 text-wicket-red" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9" stroke="currentColor"></circle>
+<path d="M12 3v18" stroke="currentColor" stroke-width="2.5"></path>
+<path d="M9 7l6 2M9 11l6 2M9 15l6 2" stroke="currentColor" stroke-width="1.5"></path>
+</svg>
+</div>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-[#2E0F0F] text-wicket-red font-extrabold">RED BALL</span>
+</div>
+<h3 class="font-headline-md text-title-md text-text-chalk uppercase group-hover:text-wicket-red transition-colors mb-1">TEST RED BALL</h3>
+<span class="font-scoreboard-md text-scoreboard-md text-wicket-red block mb-space-sm">5 DAYS <span class="font-label-caps text-label-caps text-text-subdued font-normal">/ 2 INNINGS EA</span></span>
+<p class="font-body-sm text-body-sm text-text-slate mb-space-md line-clamp-2">
+            The purest crucible. Conventional &amp; reverse swing, crumbling pitch cracks, and slips cordon catches.
+          </p>
+<div class="space-y-1.5 bg-surface-recessed p-space-sm rounded-lg mb-space-md">
+<div class="flex justify-between font-label-caps text-label-caps">
+<span class="text-text-subdued">PACE OF PLAY</span>
+<span class="text-wicket-red font-bold">ENDURANCE WAR</span>
+</div>
+<div class="flex justify-between font-label-caps text-label-caps">
+<span class="text-text-subdued">BALL DECAY</span>
+<span class="text-text-chalk">80 OVERS RE-BALL</span>
+</div>
+<div class="flex justify-between font-label-caps text-label-caps">
+<span class="text-text-subdued">SESSIONS</span>
+<span class="text-text-chalk">3 PER DAY (90 OV)</span>
+</div>
+</div>
+</div>
+<button class="w-full py-2 bg-surface-container group-hover:bg-wicket-red group-hover:text-text-chalk text-text-chalk font-label-caps text-label-caps uppercase tracking-wider rounded font-bold transition-all flex items-center justify-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">play_arrow</span>
+<span>START TEST</span>
+</button>
+</div>
+<!-- Format 5: TEST PINK BALL -->
+<div class="group relative bg-surface-card hover:bg-surface-elevated rounded-xl p-space-md flex flex-col justify-between transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-1 overflow-hidden" data-ball="red">
+<!-- Ambient Color Top Edge -->
+<div class="h-1 w-full bg-gradient-to-r from-test-pink to-rose-400 rounded-full mb-space-md"></div>
+<div>
+<!-- Ball & Format Badge Row -->
+<div class="flex items-center justify-between mb-space-sm">
+<!-- Pink Kookaburra Ball Icon -->
+<div class="w-10 h-10 rounded-full bg-[#33101E] flex items-center justify-center shadow-inner" title="Pink Kookaburra Seam">
+<svg class="w-6 h-6 text-test-pink" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<path d="M12 3v18" stroke="currentColor" stroke-width="2.5"></path>
+<path d="M8 8l8 8M16 8l-8 8" stroke="currentColor" stroke-width="1.2"></path>
+</svg>
+</div>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-[#33101E] text-test-pink font-extrabold">DAY / NIGHT</span>
+</div>
+<h3 class="font-headline-md text-title-md text-text-chalk uppercase group-hover:text-test-pink transition-colors mb-1">PINK BALL TEST</h3>
+<span class="font-scoreboard-md text-scoreboard-md text-test-pink block mb-space-sm">FLOODLIGHTS <span class="font-label-caps text-label-caps text-text-subdued font-normal">/ TWILIGHT</span></span>
+<p class="font-body-sm text-body-sm text-text-slate mb-space-md line-clamp-2">
+            Dramatic dusk twilight swing acceleration. Heavy evening dew factor meets extra lacquered pink seam.
+          </p>
+<div class="space-y-1.5 bg-surface-recessed p-space-sm rounded-lg mb-space-md">
+<div class="flex justify-between font-label-caps text-label-caps">
+<span class="text-text-subdued">PACE OF PLAY</span>
+<span class="text-test-pink font-bold">ATMOSPHERIC DRAMA</span>
+</div>
+<div class="flex justify-between font-label-caps text-label-caps">
+<span class="text-text-subdued">TWILIGHT HOUR</span>
+<span class="text-text-chalk">SWING +35%</span>
+</div>
+<div class="flex justify-between font-label-caps text-label-caps">
+<span class="text-text-subdued">DEW FACTOR</span>
+<span class="text-text-chalk">GRIP -20% AT NIGHT</span>
+</div>
+</div>
+</div>
+<button class="w-full py-2 bg-surface-container group-hover:bg-test-pink group-hover:text-surface-container-lowest text-text-chalk font-label-caps text-label-caps uppercase tracking-wider rounded font-bold transition-all flex items-center justify-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">play_arrow</span>
+<span>START PINK TEST</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Section 4: Game Modes & Quick Challenges Bento -->
+<section class="w-full max-w-[1440px] mx-auto px-margin-desktop py-space-lg z-10">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- Left Bento: Quick Scenario Challenge -->
+<div class="lg:col-span-7 bg-surface-card rounded-xl p-space-lg relative overflow-hidden shadow-md flex flex-col justify-between">
+<div class="absolute -right-8 -bottom-8 w-60 h-60 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-tertiary">bolt</span>
+<span class="font-label-caps text-label-caps text-tertiary uppercase tracking-wider font-extrabold">DAILY MASTERCLASS SCENARIO</span>
+</div>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container text-text-slate">EXPIRES IN 07H 42M</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg text-text-chalk uppercase tracking-tight mb-space-xs">
+            THE GABBA HEIST • 2021 TRIBUTE
+          </h3>
+<p class="font-body-base text-body-base text-text-slate mb-space-md max-w-xl">
+            Day 5, Final Session: Australia have set 328 to win. You are on 296/7 with Rishabh Pant batting on 78*. Score 33 runs in the final 30 balls with 3 wickets remaining.
+          </p>
+<div class="grid grid-cols-3 gap-space-sm bg-surface-recessed p-space-md rounded-lg mb-space-lg max-w-lg">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">REQUIRED RUN RATE</span>
+<span class="font-scoreboard-md text-scoreboard-md text-warning-amber">6.60 RPO</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">WICKETS REMAINING</span>
+<span class="font-scoreboard-md text-scoreboard-md text-wicket-red">3 WICKETS</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">REWARD XP</span>
+<span class="font-scoreboard-md text-scoreboard-md text-primary">+2,500 XP</span>
+</div>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-space-md">
+<button class="px-space-lg py-3 bg-secondary-container hover:bg-secondary-fixed text-on-secondary-container font-headline-md text-body-bold uppercase tracking-wider rounded transition-all flex items-center gap-space-xs font-bold" type="button">
+<span class="material-symbols-outlined text-[20px]">play_circle</span>
+<span>ENTER SCENARIO CLUTCH</span>
+</button>
+<span class="font-label-caps text-label-caps text-text-subdued">1,402 MANAGERS SOLVED TODAY</span>
+</div>
+</div>
+<!-- Right Bento: Live Pitch Weather & AI Conditions -->
+<div class="lg:col-span-5 bg-surface-card rounded-xl p-space-lg relative overflow-hidden shadow-md flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-telemetry-blue">thermostat</span>
+<span class="font-label-caps text-label-caps text-telemetry-blue uppercase tracking-wider font-extrabold">LIVE TELEMETRY ENGINE</span>
+</div>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container text-primary font-mono">SIM ENGINE v2.4</span>
+</div>
+<h4 class="font-headline-md text-title-md text-text-chalk uppercase mb-space-xs">PITCH COMPOSITION MATRIX</h4>
+<p class="font-body-sm text-body-sm text-text-slate mb-space-md">Real-time dynamic degradation calculations based on over count.</p>
+<!-- SVG Radar Pitch Matrix -->
+<div class="bg-surface-recessed p-space-md rounded-lg mb-space-md flex items-center justify-between">
+<div class="space-y-2 flex-1 pr-space-md">
+<div>
+<div class="flex justify-between font-label-caps text-label-caps mb-1">
+<span class="text-text-slate">SEAM &amp; MOVEMENT</span>
+<span class="text-primary font-mono">78%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 78%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-label-caps text-label-caps mb-1">
+<span class="text-text-slate">BOUNCE &amp; CARRY</span>
+<span class="text-telemetry-blue font-mono">84%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-telemetry-blue" style="width: 84%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-label-caps text-label-caps mb-1">
+<span class="text-text-slate">SPIN &amp; TURN RATE</span>
+<span class="text-tertiary font-mono">42%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-tertiary" style="width: 42%"></div>
+</div>
+</div>
+</div>
+<!-- Mini Graphic Pitch Visualizer -->
+<div class="w-24 h-24 rounded-lg bg-surface-container flex flex-col items-center justify-center p-2 text-center flex-shrink-0 shadow-inner">
+<span class="material-symbols-outlined text-[30px] text-secondary">grass</span>
+<span class="font-label-caps text-[9px] text-text-slate uppercase mt-1 leading-tight">GREEN TOP DENSE GRASS</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between text-body-sm pt-space-xs text-text-subdued">
+<span class="font-label-caps text-label-caps">OPTIMAL TOSS STRATEGY:</span>
+<span class="font-label-caps text-label-caps text-secondary-fixed font-bold">BOWL FIRST (OVERCAST)</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 5: Offline Engine Status Bar & Quick Stats Strip -->
+<section class="w-full bg-surface-container-lowest mt-space-xl py-space-md z-10">
+<div class="max-w-[1440px] mx-auto px-margin-desktop flex flex-col md:flex-row items-center justify-between gap-space-md">
+<!-- Engine Status -->
+<div class="flex flex-wrap items-center gap-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+<span class="font-label-caps text-label-caps text-text-chalk uppercase tracking-widest font-extrabold">STANDALONE SIMULATION READY</span>
+</div>
+<span class="text-border-hairline hidden sm:inline">•</span>
+<span class="font-label-caps text-label-caps text-text-slate">OFFLINE ENGINE v2.4 ACTIVE</span>
+<span class="text-border-hairline hidden sm:inline">•</span>
+<span class="font-label-caps text-label-caps text-secondary-fixed">1,200+ INTERNATIONAL PLAYERS LOADED</span>
+</div>
+<!-- Quick Controls -->
+<div class="flex items-center gap-space-lg">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px] text-primary">battery_charging_full</span>
+<span class="font-label-caps text-label-caps text-text-slate">BATTERY EFFICIENT SIM</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px] text-telemetry-blue">cloud_off</span>
+<span class="font-label-caps text-label-caps text-text-slate">NO INTERNET REQUIRED</span>
+</div>
+<button class="font-label-caps text-label-caps text-tertiary hover:underline uppercase tracking-wider font-bold" type="button">
+          STORAGE: 42.4 MB
+        </button>
+</div>
+</div>
+</section>
+</div>
+<!-- Inline Interactive Script for Instant Feedback -->
+<script>
+  (function initHomeScreen() {
+    // Format filtering logic
+    const filterBtns = document.querySelectorAll('.format-filter');
+    const formatCards = document.querySelectorAll('[data-ball]');
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Reset button states
+        filterBtns.forEach(b => {
+          b.classList.remove('bg-primary', 'text-on-primary');
+          b.classList.add('text-text-slate');
+        });
+        btn.classList.add('bg-primary', 'text-on-primary');
+        btn.classList.remove('text-text-slate');
+
+        const filterType = btn.getAttribute('data-type');
+        formatCards.forEach(card => {
+          if (filterType === 'all') {
+            card.classList.remove('hidden');
+          } else if (filterType === 'white' && card.getAttribute('data-ball') === 'white') {
+            card.classList.remove('hidden');
+          } else if (filterType === 'red' && card.getAttribute('data-ball') === 'red') {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+      });
+    });
+
+    // Primary Play Action
+    const playBtn = document.getElementById('btn-play-cricket');
+    if (playBtn) {
+      playBtn.addEventListener('click', () => {
+        // Visual button reaction
+        playBtn.classList.add('scale-95');
+        setTimeout(() => playBtn.classList.remove('scale-95'), 150);
+      });
+    }
+  })();
+</script></main><footer class="w-full bg-surface-recessed border-t border-border-hairline py-space-md mt-auto"><div class="max-w-[1440px] mx-auto px-margin-desktop flex flex-col md:flex-row items-center justify-between gap-space-md"><div class="flex items-center gap-space-sm"><span class="font-label-caps text-label-caps text-text-subdued uppercase tracking-widest">© 2025 CRICKET DREAM XI BROADCAST ENGINE</span><span class="text-border-hairline">|</span><span class="font-label-caps text-label-caps text-primary tracking-widest">BUILD 2.4.0-TACTICAL</span></div><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs"><span class="w-1.5 h-1.5 rounded-full bg-telemetry-blue"></span><span class="font-label-caps text-label-caps text-text-slate">60 FPS</span></div><div class="flex items-center gap-space-xs"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span><span class="font-label-caps text-label-caps text-text-slate">SIM RUNNING</span></div><a class="font-label-caps text-label-caps text-text-subdued hover:text-text-chalk transition-colors" data-path="telemetry-status" href="#">TELEMETRY LOGS</a></div></div></footer></body></html>

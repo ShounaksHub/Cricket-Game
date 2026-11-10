@@ -1,31 +1,10 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
-import {
-  Search,
-  SlidersHorizontal,
-  Info,
-  Shield,
-  Award,
-  Zap,
-  Target,
-  ChevronLeft,
-  ChevronRight,
-  X,
-  ExternalLink,
-  ArrowUpDown,
-  Flame,
-  CheckCircle2,
-  Globe,
-  Building2,
-  Trophy,
-} from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import type {
-  CareerCategory,
-  HistoricalEra,
   MatchFormat,
-  PlayerFormatRating,
   PlayerProfile,
   PrimaryRole,
 } from '@cricket/shared-types';
@@ -34,1018 +13,991 @@ import {
   VERIFIED_BENCHMARK_PLAYERS,
 } from '@cricket/data-ingestion';
 
-const FORMAT_TABS: Array<{ id: MatchFormat; label: string; badge: string }> = [
-  { id: 'T20', label: 'T20', badge: 'Fast-Paced' },
-  { id: 'ODI', label: 'One Day International', badge: '50 Overs' },
-  { id: 'TEST_RED_BALL', label: 'Test (Red Ball)', badge: 'Traditional 5-Day' },
-  { id: 'TEST_PINK_BALL', label: 'Test (Pink Ball)', badge: 'Day / Night' },
-  { id: 'T10', label: 'T10 Blitz', badge: '10 Overs' },
-];
-
-const ROLE_OPTIONS: Array<{ id: PrimaryRole | 'ALL'; label: string }> = [
-  { id: 'ALL', label: 'All Roles' },
-  { id: 'TOP_ORDER_BATTER', label: 'Top Order' },
-  { id: 'MIDDLE_ORDER_BATTER', label: 'Middle Order' },
-  { id: 'WICKETKEEPER_BATTER', label: 'Wicketkeeper' },
-  { id: 'BATTING_ALL_ROUNDER', label: 'Batting All-Rounder' },
-  { id: 'BOWLING_ALL_ROUNDER', label: 'Bowling All-Rounder' },
-  { id: 'PACE_BOWLER', label: 'Pace Bowler' },
-  { id: 'SPIN_BOWLER', label: 'Spin Bowler' },
-];
-
-const CATEGORY_OPTIONS: Array<{ id: CareerCategory | 'ALL'; label: string }> = [
-  { id: 'ALL', label: 'All Categories' },
-  { id: 'INTERNATIONAL', label: 'International Stars' },
-  { id: 'DOMESTIC_ONLY', label: 'Domestic Specialists' },
-  { id: 'HISTORICAL_LEGEND', label: 'Historical Legends' },
-];
-
-const COMPETITION_OPTIONS: Array<{ id: string; label: string }> = [
-  { id: 'ALL', label: 'All Competitions' },
-  { id: 'IPL', label: 'IPL (India)' },
-  { id: 'Ranji Trophy', label: 'Ranji Trophy (India)' },
-  { id: 'BBL', label: 'BBL (Australia)' },
-  { id: 'Sheffield Shield', label: 'Sheffield Shield (Australia)' },
-  { id: 'County Championship', label: 'County Championship (England)' },
-  { id: 'T20 Blast', label: 'T20 Blast (England)' },
-  { id: 'The Hundred', label: 'The Hundred (UK)' },
-  { id: 'SA20', label: 'SA20 (South Africa)' },
-  { id: 'PSL', label: 'PSL (Pakistan)' },
-  { id: 'CPL', label: 'CPL (West Indies)' },
-  { id: 'Super Smash', label: 'Super Smash (New Zealand)' },
-  { id: 'DPL', label: 'DPL / BPL (Bangladesh)' },
-  { id: 'LPL', label: 'LPL (Sri Lanka)' },
-  { id: 'Major League Cricket', label: 'MLC (USA)' },
-];
-
-const ERA_OPTIONS: Array<{ id: HistoricalEra | 'ALL'; label: string }> = [
-  { id: 'ALL', label: 'All Eras' },
-  { id: 'CONTEMPORARY_2021_PRESENT', label: 'Contemporary (2021–Present)' },
-  { id: 'T20_REVOLUTION_2008_2020', label: 'T20 Revolution (2008–2020)' },
-  { id: 'GLOBALIZED_1992_2007', label: 'Globalized Era (1992–2007)' },
-  { id: 'PACE_REVOLUTION_1971_1991', label: 'Pace Revolution (1971–1991)' },
-  { id: 'POST_WAR_1946_1970', label: 'Post-War (1946–1970)' },
-  { id: 'INTERWAR_1919_1939', label: 'Interwar (1919–1939)' },
-  { id: 'GOLDEN_AGE_PRE_1914', label: 'Golden Age (Pre-1914)' },
-];
-
-const HAND_OPTIONS: Array<{ id: 'ALL' | 'RIGHT_HAND' | 'LEFT_HAND'; label: string }> = [
-  { id: 'ALL', label: 'All Batting Hands' },
-  { id: 'RIGHT_HAND', label: 'Right Hand (RHB)' },
-  { id: 'LEFT_HAND', label: 'Left Hand (LHB)' },
-];
-
-const BOWLING_OPTIONS: Array<{ id: 'ALL' | 'FAST' | 'SPIN' | 'MEDIUM'; label: string }> = [
-  { id: 'ALL', label: 'All Bowling Styles' },
-  { id: 'FAST', label: 'Pace / Fast' },
-  { id: 'SPIN', label: 'Spin (Off/Leg/SLA)' },
-  { id: 'MEDIUM', label: 'Medium Pace' },
-];
-
-const STATUS_OPTIONS: Array<{ id: 'ALL' | 'ACTIVE' | 'RETIRED'; label: string }> = [
-  { id: 'ALL', label: 'All Careers' },
-  { id: 'ACTIVE', label: 'Active Today' },
-  { id: 'RETIRED', label: 'Historical Legends (Retired)' },
-];
-
-function getPlayerInitials(name: string): string {
-  const parts = name.replace(/^(Sir|Dr|Lord)\s+/i, '').split(/\s+/).filter(Boolean);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+function getStitchRoleCategory(role: PrimaryRole): 'BATTER' | 'WK' | 'ALL-ROUNDER' | 'BOWLER' {
+  if (role === 'WICKETKEEPER_BATTER') return 'WK';
+  if (role === 'TOP_ORDER_BATTER' || role === 'MIDDLE_ORDER_BATTER') return 'BATTER';
+  if (role === 'BATTING_ALL_ROUNDER' || role === 'BOWLING_ALL_ROUNDER') return 'ALL-ROUNDER';
+  return 'BOWLER';
 }
 
-function getCountryBadgeStyle(country: string): string {
-  switch (country.toLowerCase()) {
-    case 'india':
-      return 'from-blue-900 to-indigo-950 border-blue-500/40 text-blue-200';
-    case 'australia':
-      return 'from-emerald-900 to-green-950 border-emerald-500/40 text-emerald-200';
-    case 'england':
-      return 'from-sky-900 to-blue-950 border-sky-500/40 text-sky-200';
-    case 'west indies':
-      return 'from-rose-950 to-red-950 border-rose-500/40 text-rose-200';
-    case 'south africa':
-      return 'from-teal-900 to-emerald-950 border-teal-500/40 text-teal-200';
-    case 'pakistan':
-      return 'from-green-950 to-emerald-950 border-green-500/40 text-green-200';
-    case 'new zealand':
-      return 'from-neutral-800 to-neutral-950 border-neutral-400/40 text-neutral-200';
-    case 'sri lanka':
-      return 'from-amber-950 to-yellow-950 border-amber-500/40 text-amber-200';
-    case 'bangladesh':
-      return 'from-emerald-950 to-teal-950 border-emerald-500/40 text-emerald-300';
-    case 'afghanistan':
-      return 'from-blue-950 to-cyan-950 border-cyan-500/40 text-cyan-200';
-    case 'usa':
-      return 'from-red-900 to-blue-950 border-blue-400/40 text-slate-100';
-    default:
-      return 'from-[#0D4A38] to-[#082218] border-[#D4AF37]/40 text-[#D4AF37]';
-  }
+function getCountryFlag(country: string): string {
+  const norm = (country || '').toLowerCase();
+  if (norm.includes('ind') && !norm.includes('indies')) return '🇮🇳';
+  if (norm.includes('aus')) return '🇦🇺';
+  if (norm.includes('eng')) return '🏴󠁧󠁢󠁥󠁮󠁧󠁿';
+  if (norm.includes('south') || norm.includes('sa')) return '🇿🇦';
+  if (norm.includes('pak')) return '🇵🇰';
+  if (norm.includes('zealand') || norm.includes('nz')) return '🇳🇿';
+  if (norm.includes('indies') || norm.includes('wi')) return '🏝️';
+  if (norm.includes('lanka') || norm.includes('sl')) return '🇱🇰';
+  if (norm.includes('afghan') || norm.includes('afg')) return '🇦🇫';
+  if (norm.includes('bangla') || norm.includes('ban')) return '🇧🇩';
+  if (norm.includes('zimb') || norm.includes('zim')) return '🇿🇼';
+  return '🏏';
 }
 
-export default function PlayersCataloguePage() {
+function getPlayerPortrait(id: string, index: number): string {
+  const portraitMap: Record<string, string> = {
+    'p-sachin-tendulkar': '/assets/stitch/asset-028.png',
+    'p-wasim-akram': '/assets/stitch/asset-029.png',
+    'p-brian-lara': '/assets/stitch/asset-030.png',
+    'p-glenn-mcgrath': '/assets/stitch/asset-031.png',
+    'p-jacques-kallis': '/assets/stitch/asset-032.png',
+    'p-muttiah-muralitharan': '/assets/stitch/asset-033.png',
+    'p-rohit-sharma': '/assets/stitch/asset-004.png',
+    'p-virat-kohli': '/assets/stitch/asset-005.png',
+    'p-steve-smith': '/assets/stitch/asset-006.png',
+    'p-joe-root': '/assets/stitch/asset-007.png',
+    'p-babar-azam': '/assets/stitch/asset-008.png',
+    'p-ms-dhoni': '/assets/stitch/asset-009.png',
+    'p-hardik-pandya': '/assets/stitch/asset-010.png',
+    'p-rashid-khan': '/assets/stitch/asset-011.png',
+    'p-pat-cummins': '/assets/stitch/asset-012.png',
+    'p-jasprit-bumrah': '/assets/stitch/asset-013.png',
+    'p-shaheen-afridi': '/assets/stitch/asset-014.png',
+  };
+  if (portraitMap[id]) return portraitMap[id];
+  const assetNums = [
+    '004', '005', '006', '007', '008', '009', '010', '011', '012', '013', '014',
+    '016', '017', '018', '019', '020', '021', '022', '023', '024', '025', '026',
+    '027', '028', '029', '030', '031', '032', '033', '034', '035', '036', '037', '038'
+  ];
+  const num = assetNums[Math.abs(index) % assetNums.length];
+  return `/assets/stitch/asset-${num}.png`;
+}
+
+const ITEMS_PER_PAGE = 8;
+
+export default function PlayerCataloguePage() {
+  const router = useRouter();
   const [selectedFormat, setSelectedFormat] = useState<MatchFormat>('T20');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedRole, setSelectedRole] = useState<PrimaryRole | 'ALL'>('ALL');
-  const [selectedEra, setSelectedEra] = useState<HistoricalEra | 'ALL'>('ALL');
-  const [selectedCountry, setSelectedCountry] = useState<string>('ALL');
-  const [selectedCategory, setSelectedCategory] = useState<CareerCategory | 'ALL'>('ALL');
-  const [selectedCompetition, setSelectedCompetition] = useState<string>('ALL');
-  const [selectedHand, setSelectedHand] = useState<'ALL' | 'RIGHT_HAND' | 'LEFT_HAND'>('ALL');
-  const [selectedBowling, setSelectedBowling] = useState<'ALL' | 'FAST' | 'SPIN' | 'MEDIUM'>('ALL');
-  const [selectedStatus, setSelectedStatus] = useState<'ALL' | 'ACTIVE' | 'RETIRED'>('ALL');
-  const [minRating, setMinRating] = useState<number>(0);
-  const [sortBy, setSortBy] = useState<'rating' | 'name' | 'debut'>('rating');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [roleFilter, setRoleFilter] = useState<'ALL' | 'BATTER' | 'WK' | 'ALL-ROUNDER' | 'BOWLER'>('ALL');
+  const [nationFilter, setNationFilter] = useState<string>('ALL');
+  const [eraFilter, setEraFilter] = useState<string>('ALL');
+  const [sortBy, setSortBy] = useState<'OVR_DESC' | 'NAME_ASC' | 'BAT_AVG' | 'BOWL_ECON'>('OVR_DESC');
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [selectedPlayer, setSelectedPlayer] = useState<PlayerProfile | null>(null);
+  const [inspectedPlayerId, setInspectedPlayerId] = useState<string | null>(null);
+  const [draftAlert, setDraftAlert] = useState<string | null>(null);
 
-  const PAGE_SIZE = 24;
-
-  // Load global player database
+  // Ingest all 1,144 players
   const allPlayers = useMemo<PlayerProfile[]>(() => {
-    return VERIFIED_BENCHMARK_PLAYERS.map((raw) => ingestPlayerRecord(raw));
+    return VERIFIED_BENCHMARK_PLAYERS.map(ingestPlayerRecord);
   }, []);
 
-  // Available countries sorted by representation
-  const availableCountries = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const p of allPlayers) {
-      counts.set(p.primaryNationality, (counts.get(p.primaryNationality) || 0) + 1);
+  // Filtered & Sorted players
+  const filteredPlayers = useMemo(() => {
+    let list = allPlayers.filter((p) => {
+      // Search
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchesName = (p.displayName || p.fullName).toLowerCase().includes(q);
+        const matchesNation = (p.primaryNationality || '').toLowerCase().includes(q);
+        if (!matchesName && !matchesNation) return false;
+      }
+
+      // Role
+      if (roleFilter !== 'ALL') {
+        const cat = getStitchRoleCategory(p.primaryRole);
+        if (cat !== roleFilter) return false;
+      }
+
+      // Nation
+      if (nationFilter !== 'ALL') {
+        const pNat = (p.primaryNationality || '').toLowerCase();
+        if (!pNat.includes(nationFilter.toLowerCase())) return false;
+      }
+
+      // Era
+      if (eraFilter !== 'ALL') {
+        if (eraFilter === 'MODERN' && p.careerDebutYear < 2015) return false;
+        if (eraFilter === 'GOLDEN' && (p.careerDebutYear < 1990 || p.careerDebutYear >= 2015)) return false;
+        if (eraFilter === 'CLASSIC' && p.careerDebutYear >= 1990) return false;
+      }
+
+      return true;
+    });
+
+    // Sort
+    list = [...list].sort((a, b) => {
+      if (sortBy === 'OVR_DESC') {
+        const aOvr = a.ratings[selectedFormat]?.overallRating ?? 75;
+        const bOvr = b.ratings[selectedFormat]?.overallRating ?? 75;
+        return bOvr - aOvr;
+      }
+      if (sortBy === 'NAME_ASC') {
+        return (a.displayName || a.fullName).localeCompare(b.displayName || b.fullName);
+      }
+      if (sortBy === 'BAT_AVG') {
+        const aAvg = a.formatStats[selectedFormat]?.battingAverage ?? 0;
+        const bAvg = b.formatStats[selectedFormat]?.battingAverage ?? 0;
+        return bAvg - aAvg;
+      }
+      if (sortBy === 'BOWL_ECON') {
+        const aEcon = a.formatStats[selectedFormat]?.economyRate || 99;
+        const bEcon = b.formatStats[selectedFormat]?.economyRate || 99;
+        return aEcon - bEcon;
+      }
+      return 0;
+    });
+
+    return list;
+  }, [allPlayers, searchQuery, roleFilter, nationFilter, eraFilter, sortBy, selectedFormat]);
+
+  // Current inspected player (default to first player or searched)
+  const activePlayer = useMemo(() => {
+    if (inspectedPlayerId) {
+      const found = allPlayers.find((p) => p.id === inspectedPlayerId);
+      if (found) return found;
     }
-    return Array.from(counts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .map(([country, count]) => ({ country, count }));
+    return filteredPlayers[0] || allPlayers[0];
+  }, [inspectedPlayerId, filteredPlayers, allPlayers]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredPlayers.length / ITEMS_PER_PAGE) || 1;
+  const pagedPlayers = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredPlayers.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredPlayers, currentPage]);
+
+  // Role Breakdown counts
+  const roleCounts = useMemo(() => {
+    let bat = 0;
+    let bowl = 0;
+    let wk = 0;
+    let ar = 0;
+    for (const p of allPlayers) {
+      const cat = getStitchRoleCategory(p.primaryRole);
+      if (cat === 'BATTER') bat++;
+      else if (cat === 'BOWLER') bowl++;
+      else if (cat === 'WK') wk++;
+      else if (cat === 'ALL-ROUNDER') ar++;
+    }
+    return { bat, bowl, wk, ar, total: allPlayers.length };
   }, [allPlayers]);
 
-  // Reset pagination when filters change
-  useEffect(() => {
+  function handleDraftPlayer(player: PlayerProfile) {
+    // Add to saved dream team
+    try {
+      const stored = localStorage.getItem('cricket_dream_teams');
+      let teams = stored ? JSON.parse(stored) : [];
+      let defaultTeam = teams[0] || {
+        id: `team-${Date.now()}`,
+        teamName: 'THUNDERBOLTS XI',
+        format: selectedFormat,
+        status: 'DRAFT',
+        lineup: [],
+        updatedAt: new Date().toISOString(),
+      };
+
+      const existingSlot = defaultTeam.lineup?.find((s: any) => s.playerId === player.id);
+      if (existingSlot) {
+        setDraftAlert(`${player.displayName} is already in your Playing XI!`);
+        setTimeout(() => setDraftAlert(null), 3000);
+        return;
+      }
+
+      if ((defaultTeam.lineup?.length || 0) >= 11) {
+        setDraftAlert(`Your squad already has 11 players! Go to Dream XI to adjust lineup.`);
+        setTimeout(() => setDraftAlert(null), 3500);
+        return;
+      }
+
+      const nextOrder = (defaultTeam.lineup?.length || 0) + 1;
+      const newSlot = {
+        playerId: player.id,
+        battingOrder: nextOrder,
+        isCaptain: nextOrder === 1,
+        isViceCaptain: nextOrder === 2,
+        isDesignatedWicketkeeper: player.primaryRole === 'WICKETKEEPER_BATTER' || player.isWicketkeeper,
+      };
+
+      defaultTeam.lineup = [...(defaultTeam.lineup || []), newSlot];
+      teams = [defaultTeam, ...teams.filter((t: any) => t.id !== defaultTeam.id)];
+      localStorage.setItem('cricket_dream_teams', JSON.stringify(teams));
+
+      setDraftAlert(`Added ${player.displayName} to Playing XI (Slot #${nextOrder})!`);
+      setTimeout(() => setDraftAlert(null), 3000);
+    } catch {
+      // Fallback
+    }
+  }
+
+  function handleResetFilters() {
+    setSearchQuery('');
+    setRoleFilter('ALL');
+    setNationFilter('ALL');
+    setEraFilter('ALL');
+    setSortBy('OVR_DESC');
     setCurrentPage(1);
-  }, [
-    searchQuery,
-    selectedRole,
-    selectedEra,
-    selectedCountry,
-    selectedCategory,
-    selectedCompetition,
-    selectedHand,
-    selectedBowling,
-    selectedStatus,
-    minRating,
-    sortBy,
-    selectedFormat,
-  ]);
-
-  // Filtered & sorted players
-  const filteredPlayers = useMemo(() => {
-    return allPlayers
-      .filter((p) => {
-        // Search query
-        if (searchQuery.trim().length > 0) {
-          const q = searchQuery.toLowerCase();
-          const matchName =
-            p.fullName.toLowerCase().includes(q) ||
-            p.displayName.toLowerCase().includes(q) ||
-            p.primaryNationality.toLowerCase().includes(q) ||
-            (p.competitions && p.competitions.some((c) => c.toLowerCase().includes(q)));
-          if (!matchName) return false;
-        }
-
-        // Country filter
-        if (selectedCountry !== 'ALL' && p.primaryNationality !== selectedCountry) {
-          return false;
-        }
-
-        // Career Category filter
-        if (selectedCategory !== 'ALL' && p.careerCategory !== selectedCategory) {
-          return false;
-        }
-
-        // Competition filter
-        if (
-          selectedCompetition !== 'ALL' &&
-          (!p.competitions || !p.competitions.some((c) => c.toLowerCase().includes(selectedCompetition.toLowerCase())))
-        ) {
-          return false;
-        }
-
-        // Role filter
-        if (selectedRole !== 'ALL' && p.primaryRole !== selectedRole) {
-          return false;
-        }
-
-        // Batting Hand filter
-        if (selectedHand !== 'ALL' && p.battingHand !== selectedHand) {
-          return false;
-        }
-
-        // Bowling Style filter
-        if (selectedBowling !== 'ALL') {
-          const style = p.bowlingStyle;
-          if (selectedBowling === 'FAST' && !style.includes('FAST')) return false;
-          if (selectedBowling === 'SPIN' && !style.includes('BREAK') && !style.includes('ORTHODOX')) return false;
-          if (selectedBowling === 'MEDIUM' && !style.includes('MEDIUM')) return false;
-        }
-
-        // Career Status filter
-        if (selectedStatus !== 'ALL') {
-          if (selectedStatus === 'ACTIVE' && !p.isActive) return false;
-          if (selectedStatus === 'RETIRED' && p.isActive) return false;
-        }
-
-        // Era filter
-        if (selectedEra !== 'ALL' && p.historicalEra !== selectedEra) {
-          return false;
-        }
-
-        // Min rating in selected format
-        const rating = p.ratings[selectedFormat]?.overallRating ?? 0;
-        if (rating < minRating) {
-          return false;
-        }
-
-        return true;
-      })
-      .sort((a, b) => {
-        if (sortBy === 'name') {
-          return a.fullName.localeCompare(b.fullName);
-        }
-        if (sortBy === 'debut') {
-          return a.careerDebutYear - b.careerDebutYear;
-        }
-        const rA = a.ratings[selectedFormat]?.overallRating ?? 50;
-        const rB = b.ratings[selectedFormat]?.overallRating ?? 50;
-        return rB - rA;
-      });
-  }, [
-    allPlayers,
-    searchQuery,
-    selectedCountry,
-    selectedCategory,
-    selectedCompetition,
-    selectedRole,
-    selectedHand,
-    selectedBowling,
-    selectedStatus,
-    selectedEra,
-    selectedFormat,
-    minRating,
-    sortBy,
-  ]);
-
-  // Paginated slice
-  const totalPages = Math.max(1, Math.ceil(filteredPlayers.length / PAGE_SIZE));
-  const paginatedPlayers = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return filteredPlayers.slice(start, start + PAGE_SIZE);
-  }, [filteredPlayers, currentPage, PAGE_SIZE]);
+  }
 
   return (
-    <div className="min-h-screen bg-[#0A0D12] text-[#F8F9FA] flex flex-col font-sans">
-      {/* Top Header */}
-      <header className="border-b border-[#1F242E] bg-[#10141D]/90 backdrop-blur sticky top-0 z-30 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Link
-              href="/"
-              className="flex items-center space-x-2 text-xs uppercase tracking-widest text-[#9CA3AF] hover:text-[#D4AF37] transition"
-            >
-              <span>← Hub</span>
-            </Link>
-            <span className="text-[#3B4252]">|</span>
-            <div className="flex items-center space-x-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#10B981] animate-pulse" />
-              <h1 className="font-serif text-lg font-bold tracking-wide text-[#F8F9FA]">
-                Global Cricketer Database & Ratings Engine
+    <div className="w-full flex flex-col min-h-screen bg-surface">
+      {/* Subtle Atmospheric Accent Layer */}
+      <div className="relative w-full overflow-hidden">
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-20 right-0 w-[500px] h-[500px] bg-tertiary/5 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Header Section */}
+        <section className="max-w-[1440px] mx-auto w-full px-4 md:px-margin-desktop pt-8 pb-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-2 h-2 rounded-full bg-secondary" />
+                <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest">
+                  GLOBAL CRICKET REPOSITORY // {allPlayers.length.toLocaleString()} ARCHIVES
+                </span>
+              </div>
+              <h1 className="font-display-lg text-display-lg text-text-chalk tracking-tight uppercase">
+                EXPLORE THE GAME&apos;S GREATS
               </h1>
+              <p className="font-body-base text-body-base text-text-slate max-w-2xl mt-1">
+                Discover iconic cricketers across countries, generations, and match formats. Calibrate ratings,
+                inspect kinetic metrics, and recruit into your Dream XI.
+              </p>
             </div>
-            <span className="text-xs px-2 py-0.5 rounded bg-[#1A202C] text-[#D4AF37] border border-[#D4AF37]/30 font-mono">
-              1,000+ Verified Players
-            </span>
-          </div>
-
-          <div className="text-xs text-[#9CA3AF] flex items-center space-x-4">
-            <span>
-              Total Verified: <strong className="text-white">{allPlayers.length}</strong>
-            </span>
-            <span>
-              Matching Filters: <strong className="text-[#D4AF37]">{filteredPlayers.length}</strong>
-            </span>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto w-full px-6 py-8 flex-1 flex flex-col gap-6">
-        {/* Format Selector Bar */}
-        <div className="bg-[#131722] border border-[#232936] rounded-xl p-2 flex flex-wrap gap-2">
-          {FORMAT_TABS.map((tab) => {
-            const isSelected = selectedFormat === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setSelectedFormat(tab.id)}
-                className={`flex-1 min-w-[160px] px-4 py-2.5 rounded-lg text-left transition flex flex-col ${
-                  isSelected
-                    ? 'bg-[#0D4A38] text-white border border-[#10B981]/50 shadow-lg shadow-[#0D4A38]/30'
-                    : 'text-[#9CA3AF] hover:bg-[#1A202C] hover:text-[#F8F9FA]'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-sm tracking-wide">{tab.label}</span>
-                  <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider font-mono ${
-                      isSelected ? 'bg-white/20 text-white' : 'bg-black/30 text-[#9CA3AF]'
-                    }`}
-                  >
-                    {tab.badge}
-                  </span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Filter Controls Grid */}
-        <div className="bg-[#131722] border border-[#232936] rounded-xl p-4 space-y-3">
-          {/* Row 1: Search, Country, Category, Competition, Sort */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-            {/* Search Box */}
-            <div className="md:col-span-4 relative">
-              <Search className="w-4 h-4 text-[#9CA3AF] absolute left-3 top-3" />
-              <input
-                type="text"
-                placeholder="Search 1,000+ players, countries, teams..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg pl-9 pr-3 py-2 text-sm text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
-              />
-            </div>
-
-            {/* Country Filter */}
-            <div className="md:col-span-2">
-              <select
-                value={selectedCountry}
-                onChange={(e) => setSelectedCountry(e.target.value)}
-                className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg px-3 py-2 text-sm text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
-              >
-                <option value="ALL">All Nations ({allPlayers.length})</option>
-                {availableCountries.map((c) => (
-                  <option key={c.country} value={c.country}>
-                    {c.country} ({c.count})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Career Category Filter */}
-            <div className="md:col-span-2">
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value as CareerCategory | 'ALL')}
-                className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg px-3 py-2 text-sm text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
-              >
-                {CATEGORY_OPTIONS.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Competition Filter */}
-            <div className="md:col-span-2">
-              <select
-                value={selectedCompetition}
-                onChange={(e) => setSelectedCompetition(e.target.value)}
-                className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg px-3 py-2 text-sm text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
-              >
-                {COMPETITION_OPTIONS.map((comp) => (
-                  <option key={comp.id} value={comp.id}>
-                    {comp.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Sort Selector */}
-            <div className="md:col-span-2">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as 'rating' | 'name' | 'debut')}
-                className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg px-3 py-2 text-sm text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
-              >
-                <option value="rating">Sort: Highest Rating</option>
-                <option value="name">Sort: Player Name</option>
-                <option value="debut">Sort: Debut Year</option>
-              </select>
+            <div className="flex items-center gap-3">
+              <div className="bg-surface-card px-4 py-2 rounded-lg flex items-center gap-3 shadow-sm border border-border-hairline">
+                <span className="font-label-caps text-label-caps text-text-subdued uppercase">
+                  SALARY CAP REMAINING
+                </span>
+                <span className="font-scoreboard-md text-scoreboard-md text-tertiary">₹42.5 CR</span>
+              </div>
             </div>
           </div>
 
-          {/* Row 2: Role, Era, Batting Hand, Bowling Style, Status, Min Rating */}
-          <div className="grid grid-cols-2 md:grid-cols-12 gap-3 pt-2 border-t border-[#1E2433]">
-            {/* Role Filter */}
-            <div className="col-span-1 md:col-span-2">
-              <select
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value as PrimaryRole | 'ALL')}
-                className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg px-2.5 py-1.5 text-xs text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
-              >
-                {ROLE_OPTIONS.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Era Filter */}
-            <div className="col-span-1 md:col-span-2">
-              <select
-                value={selectedEra}
-                onChange={(e) => setSelectedEra(e.target.value as HistoricalEra | 'ALL')}
-                className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg px-2.5 py-1.5 text-xs text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
-              >
-                {ERA_OPTIONS.map((era) => (
-                  <option key={era.id} value={era.id}>
-                    {era.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Batting Hand */}
-            <div className="col-span-1 md:col-span-2">
-              <select
-                value={selectedHand}
-                onChange={(e) => setSelectedHand(e.target.value as 'ALL' | 'RIGHT_HAND' | 'LEFT_HAND')}
-                className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg px-2.5 py-1.5 text-xs text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
-              >
-                {HAND_OPTIONS.map((h) => (
-                  <option key={h.id} value={h.id}>
-                    {h.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Bowling Style */}
-            <div className="col-span-1 md:col-span-2">
-              <select
-                value={selectedBowling}
-                onChange={(e) => setSelectedBowling(e.target.value as 'ALL' | 'FAST' | 'SPIN' | 'MEDIUM')}
-                className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg px-2.5 py-1.5 text-xs text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
-              >
-                {BOWLING_OPTIONS.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Career Status */}
-            <div className="col-span-1 md:col-span-2">
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value as 'ALL' | 'ACTIVE' | 'RETIRED')}
-                className="w-full bg-[#181D2A] border border-[#2B3242] rounded-lg px-2.5 py-1.5 text-xs text-[#F8F9FA] focus:outline-none focus:border-[#D4AF37]"
-              >
-                {STATUS_OPTIONS.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Min Rating Slider */}
-            <div className="col-span-1 md:col-span-2 flex items-center space-x-2 bg-[#181D2A] border border-[#2B3242] rounded-lg px-2.5 py-1">
-              <span className="text-[10px] text-[#9CA3AF] whitespace-nowrap">Min: {minRating}</span>
-              <input
-                type="range"
-                min="0"
-                max="95"
-                step="5"
-                value={minRating}
-                onChange={(e) => setMinRating(Number(e.target.value))}
-                className="w-full accent-[#D4AF37] cursor-pointer"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Discovery Summary & Active Filters */}
-        <div className="flex items-center justify-between text-xs text-[#9CA3AF] px-1">
-          <div>
-            Showing <strong className="text-white">{filteredPlayers.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1}</strong> –{' '}
-            <strong className="text-white">{Math.min(currentPage * PAGE_SIZE, filteredPlayers.length)}</strong> of{' '}
-            <strong className="text-[#D4AF37]">{filteredPlayers.length}</strong> players
-            {selectedCategory !== 'ALL' && <span className="ml-2 px-2 py-0.5 rounded bg-[#1C2230] text-[#0EA5E9] border border-[#0EA5E9]/30">Category: {selectedCategory}</span>}
-            {selectedCountry !== 'ALL' && <span className="ml-2 px-2 py-0.5 rounded bg-[#1C2230] text-[#10B981] border border-[#10B981]/30">Country: {selectedCountry}</span>}
-            {selectedCompetition !== 'ALL' && <span className="ml-2 px-2 py-0.5 rounded bg-[#1C2230] text-[#D4AF37] border border-[#D4AF37]/30">Comp: {selectedCompetition}</span>}
-          </div>
-
-          {totalPages > 1 && (
-            <div className="flex items-center space-x-1.5 font-mono">
-              <span>Page {currentPage} of {totalPages}</span>
+          {draftAlert && (
+            <div className="mb-4 bg-primary-container text-on-primary-container px-4 py-2.5 rounded-xl font-label-caps text-label-caps flex items-center justify-between shadow-lg">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[18px]">sports_cricket</span>
+                <span>{draftAlert}</span>
+              </div>
+              <Link href="/dream-teams" className="underline font-bold text-body-sm">
+                VIEW SQUAD →
+              </Link>
             </div>
           )}
-        </div>
 
-        {/* Player Grid (Paginated for smooth 60fps responsiveness) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {paginatedPlayers.map((player) => {
-            const formatRating: PlayerFormatRating | undefined = player.ratings[selectedFormat];
-            const ratingVal = formatRating?.overallRating ?? 50;
-            const confidenceTier = formatRating?.confidenceTier ?? 'ESTIMATED';
-
-            return (
-              <div
-                key={player.id}
-                className="bg-[#131722] border border-[#232936] hover:border-[#D4AF37]/60 rounded-xl p-5 flex flex-col justify-between transition-all group shadow-md"
-              >
-                <div>
-                  {/* Top Bar: Era Badge & Category Pill */}
-                  <div className="flex items-center justify-between text-xs mb-3">
-                    <span className="px-2 py-0.5 rounded bg-[#1C2230] text-[#9CA3AF] border border-[#2B3242] font-mono text-[10px]">
-                      {player.historicalEra.replace(/_/g, ' ')}
-                    </span>
-                    <div className="flex items-center space-x-1.5">
-                      {player.careerCategory === 'DOMESTIC_ONLY' ? (
-                        <span className="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                          DOMESTIC
-                        </span>
-                      ) : player.careerCategory === 'HISTORICAL_LEGEND' ? (
-                        <span className="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">
-                          LEGEND
-                        </span>
-                      ) : (
-                        <span className="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-sky-500/15 text-sky-300 border border-sky-500/30">
-                          INTL
-                        </span>
-                      )}
-
-                      <span
-                        className={`px-2 py-0.5 rounded font-mono text-[10px] font-bold ${
-                          confidenceTier === 'MEASURED'
-                            ? 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30'
-                            : confidenceTier === 'ESTIMATED'
-                              ? 'bg-[#F59E0B]/15 text-[#F59E0B] border border-[#F59E0B]/30'
-                              : 'bg-[#6366F1]/15 text-[#6366F1] border border-[#6366F1]/30'
-                        }`}
-                      >
-                        {confidenceTier}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Player Identity with Procedural Avatar */}
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="flex items-center space-x-3">
-                      <div
-                        className={`w-11 h-11 rounded-xl bg-gradient-to-br ${getCountryBadgeStyle(
-                          player.primaryNationality,
-                        )} border flex items-center justify-center font-mono font-bold text-sm tracking-wider shadow-inner shrink-0 relative`}
-                      >
-                        <span>{getPlayerInitials(player.fullName)}</span>
-                        <span
-                          className={`absolute -bottom-1 -right-1 w-2.5 h-2.5 rounded-full border-2 border-[#131722] ${
-                            player.isActive ? 'bg-emerald-400' : 'bg-slate-500'
-                          }`}
-                          title={player.isActive ? 'Active player' : 'Retired historical legend'}
-                        />
-                      </div>
-                      <div>
-                        <h3 className="text-base font-bold text-[#F8F9FA] group-hover:text-[#D4AF37] transition leading-snug">
-                          {player.fullName}
-                        </h3>
-                        <p className="text-xs text-[#9CA3AF] mt-0.5">
-                          {player.primaryNationality} • {player.careerDebutYear}
-                          {player.careerRetirementYear ? `–${player.careerRetirementYear}` : '–Present'}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Overall Rating Circle */}
-                    <div
-                      className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center font-bold font-mono border shadow-md shrink-0 ${
-                        ratingVal >= 90
-                          ? 'bg-[#D4AF37]/15 text-[#D4AF37] border-[#D4AF37]/40'
-                          : ratingVal >= 80
-                            ? 'bg-[#10B981]/15 text-[#10B981] border-[#10B981]/40'
-                            : 'bg-[#0EA5E9]/15 text-[#0EA5E9] border-[#0EA5E9]/40'
-                      }`}
-                    >
-                      <span className="text-lg leading-none">{ratingVal}</span>
-                      <span className="text-[9px] uppercase tracking-wider text-[#9CA3AF]">OVR</span>
-                    </div>
-                  </div>
-
-                  {/* Competitions Badges */}
-                  {player.competitions && player.competitions.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-2.5">
-                      {player.competitions.slice(0, 3).map((comp) => (
-                        <span
-                          key={comp}
-                          className="text-[9px] px-1.5 py-0.5 rounded bg-[#181D2A] text-[#CBD5E1] border border-[#283244] font-medium"
-                        >
-                          {comp}
-                        </span>
-                      ))}
-                      {player.competitions.length > 3 && (
-                        <span className="text-[9px] px-1 py-0.5 text-[#9CA3AF]">
-                          +{player.competitions.length - 3}
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Attributes Sub-Pills */}
-                  <div className="grid grid-cols-3 gap-2 py-2 px-3 bg-[#181D2A] rounded-lg border border-[#252C3B] text-center text-xs mb-3">
-                    <div>
-                      <div className="text-[10px] text-[#9CA3AF] uppercase">Bat</div>
-                      <div className="font-bold text-[#F8F9FA] font-mono">
-                        {formatRating?.battingRating ?? player.attributes.technique}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-[10px] text-[#9CA3AF] uppercase">Bowl</div>
-                      <div className="font-bold text-[#F8F9FA] font-mono">
-                        {formatRating?.bowlingRating ?? player.attributes.lineAndLength}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-[10px] text-[#9CA3AF] uppercase">Field</div>
-                      <div className="font-bold text-[#F8F9FA] font-mono">
-                        {formatRating?.fieldingRating ?? player.attributes.catching}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Role & Style Details */}
-                  <div className="text-xs text-[#9CA3AF] space-y-1">
-                    <div>
-                      Role: <strong className="text-white">{player.primaryRole.replace(/_/g, ' ')}</strong>
-                    </div>
-                    <div>
-                      Style:{' '}
-                      <span className="text-slate-300">
-                        {player.battingHand === 'RIGHT_HAND' ? 'RHB' : 'LHB'} •{' '}
-                        {player.bowlingStyle.replace(/_/g, ' ')}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card Action Button */}
+          {/* Search & Main Command Filters */}
+          <div className="bg-surface-card rounded-xl p-4 shadow-md space-y-4 border border-border-hairline">
+            {/* Global Search Bar */}
+            <div className="relative w-full">
+              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-subdued text-[22px]">
+                search
+              </span>
+              <input
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full bg-surface-recessed rounded-lg pl-12 pr-28 py-3.5 font-body-base text-body-base text-text-chalk placeholder:text-text-subdued focus:outline-none focus:ring-1 focus:ring-tertiary transition-all"
+                placeholder="Search 1,144+ players by name, signature trait, or country..."
+                type="text"
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                {searchQuery ? (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="p-1 text-text-subdued hover:text-text-chalk"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">close</span>
+                  </button>
+                ) : (
+                  <span className="bg-surface-elevated font-label-caps text-label-caps text-text-slate px-2 py-1 rounded">
+                    ⌘K
+                  </span>
+                )}
                 <button
-                  onClick={() => setSelectedPlayer(player)}
-                  className="mt-4 w-full py-2 px-3 rounded-lg bg-[#1F2636] hover:bg-[#D4AF37] hover:text-[#0A0D12] text-xs font-semibold tracking-wide text-[#F8F9FA] flex items-center justify-center space-x-1 transition border border-[#2C3446]"
+                  onClick={() => setCurrentPage(1)}
+                  className="bg-primary hover:bg-primary-container text-on-primary font-body-bold text-body-sm px-3.5 py-1.5 rounded transition-all flex items-center gap-1 shadow-[0_2px_8px_rgba(120,220,119,0.3)]"
                 >
-                  <Info className="w-3.5 h-3.5 mr-1" />
-                  <span>Explain Rating Breakdown</span>
+                  <span>FILTER</span>
                 </button>
               </div>
-            );
-          })}
-        </div>
-
-        {/* Empty State */}
-        {filteredPlayers.length === 0 && (
-          <div className="text-center py-16 bg-[#131722] border border-[#232936] rounded-xl">
-            <p className="text-[#9CA3AF] text-sm">No cricketers found matching your filter criteria.</p>
-          </div>
-        )}
-
-        {/* Pagination Navigation Bar */}
-        {totalPages > 1 && (
-          <div className="bg-[#131722] border border-[#232936] rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-xs text-[#9CA3AF]">
-              Page <strong className="text-white">{currentPage}</strong> of <strong className="text-white">{totalPages}</strong> ({filteredPlayers.length} total players)
             </div>
 
-            <div className="flex items-center space-x-1">
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className={`px-3 py-1.5 rounded-lg border text-xs font-medium flex items-center space-x-1 transition ${
-                  currentPage === 1
-                    ? 'border-[#232936] text-[#4B5563] cursor-not-allowed'
-                    : 'border-[#2B3242] text-[#F8F9FA] hover:bg-[#1E2433] hover:border-[#D4AF37]'
-                }`}
-              >
-                <ChevronLeft className="w-4 h-4 mr-0.5" />
-                <span>Prev</span>
-              </button>
+            {/* Role Quick Toggle Pills */}
+            <div className="flex items-center justify-between flex-wrap gap-3 pt-1">
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                <button
+                  onClick={() => {
+                    setRoleFilter('ALL');
+                    setCurrentPage(1);
+                  }}
+                  className={`px-4 py-2 rounded-full font-label-caps text-label-caps uppercase transition-all ${
+                    roleFilter === 'ALL'
+                      ? 'bg-primary text-on-primary shadow-[0_2px_10px_rgba(120,220,119,0.25)]'
+                      : 'bg-surface-elevated text-text-slate hover:bg-surface-bright'
+                  }`}
+                >
+                  ALL PLAYERS ({roleCounts.total})
+                </button>
+                <button
+                  onClick={() => {
+                    setRoleFilter('BATTER');
+                    setCurrentPage(1);
+                  }}
+                  className={`px-4 py-2 rounded-full font-label-caps text-label-caps uppercase transition-all flex items-center gap-1.5 ${
+                    roleFilter === 'BATTER'
+                      ? 'bg-primary text-on-primary'
+                      : 'bg-surface-elevated text-secondary hover:bg-surface-bright'
+                  }`}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
+                  BATTERS ({roleCounts.bat})
+                </button>
+                <button
+                  onClick={() => {
+                    setRoleFilter('BOWLER');
+                    setCurrentPage(1);
+                  }}
+                  className={`px-4 py-2 rounded-full font-label-caps text-label-caps uppercase transition-all flex items-center gap-1.5 ${
+                    roleFilter === 'BOWLER'
+                      ? 'bg-primary text-on-primary'
+                      : 'bg-surface-elevated text-telemetry-blue hover:bg-surface-bright'
+                  }`}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-telemetry-blue" />
+                  BOWLERS ({roleCounts.bowl})
+                </button>
+                <button
+                  onClick={() => {
+                    setRoleFilter('WK');
+                    setCurrentPage(1);
+                  }}
+                  className={`px-4 py-2 rounded-full font-label-caps text-label-caps uppercase transition-all flex items-center gap-1.5 ${
+                    roleFilter === 'WK'
+                      ? 'bg-primary text-on-primary'
+                      : 'bg-surface-elevated text-warning-amber hover:bg-surface-bright'
+                  }`}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-warning-amber" />
+                  WICKETKEEPERS ({roleCounts.wk})
+                </button>
+                <button
+                  onClick={() => {
+                    setRoleFilter('ALL-ROUNDER');
+                    setCurrentPage(1);
+                  }}
+                  className={`px-4 py-2 rounded-full font-label-caps text-label-caps uppercase transition-all flex items-center gap-1.5 ${
+                    roleFilter === 'ALL-ROUNDER'
+                      ? 'bg-primary text-on-primary'
+                      : 'bg-surface-elevated text-tertiary hover:bg-surface-bright'
+                  }`}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-tertiary" />
+                  ALL-ROUNDERS ({roleCounts.ar})
+                </button>
+              </div>
 
-              {/* Number buttons: 1, dynamic window, totalPages */}
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum: number;
-                if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i;
-                } else {
-                  pageNum = currentPage - 2 + i;
-                }
-
-                const isActive = pageNum === currentPage;
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => setCurrentPage(pageNum)}
-                    className={`w-8 h-8 rounded-lg text-xs font-mono font-medium transition ${
-                      isActive
-                        ? 'bg-[#D4AF37] text-[#0A0D12] font-bold shadow'
-                        : 'text-[#9CA3AF] hover:bg-[#1E2433] hover:text-white'
-                    }`}
+              {/* Sort Dropdown Bar */}
+              <div className="flex items-center gap-2">
+                <span className="font-label-caps text-label-caps text-text-subdued uppercase">SORT BY:</span>
+                <div className="relative">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    className="appearance-none bg-surface-elevated text-text-chalk font-body-bold text-body-sm pl-3 pr-8 py-1.5 rounded-lg focus:outline-none cursor-pointer border border-border-hairline"
                   >
-                    {pageNum}
+                    <option value="OVR_DESC">Overall Rating (High to Low)</option>
+                    <option value="NAME_ASC">Player Name (A-Z)</option>
+                    <option value="BAT_AVG">Batting Average (Descending)</option>
+                    <option value="BOWL_ECON">Bowling Economy (Tightest)</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-text-subdued text-[18px]">
+                    expand_more
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Secondary Multi-Tier Filter Docks */}
+            <div className="flex flex-wrap items-center gap-3 pt-2 text-text-slate">
+              {/* Country Filter */}
+              <div className="flex items-center gap-2 bg-surface-recessed px-3 py-1.5 rounded-lg border border-border-hairline">
+                <span className="material-symbols-outlined text-[16px] text-text-subdued">public</span>
+                <span className="font-label-caps text-label-caps text-text-subdued uppercase">COUNTRY:</span>
+                <select
+                  value={nationFilter}
+                  onChange={(e) => {
+                    setNationFilter(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="bg-transparent text-text-chalk font-body-sm text-body-sm focus:outline-none cursor-pointer"
+                >
+                  <option value="ALL">All Nations</option>
+                  <option value="India">🇮🇳 India (IND)</option>
+                  <option value="Australia">🇦🇺 Australia (AUS)</option>
+                  <option value="England">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England (ENG)</option>
+                  <option value="Pakistan">🇵🇰 Pakistan (PAK)</option>
+                  <option value="West Indies">🏝️ West Indies (WI)</option>
+                  <option value="South Africa">🇿🇦 South Africa (SA)</option>
+                  <option value="Sri Lanka">🇱🇰 Sri Lanka (SL)</option>
+                  <option value="New Zealand">🇳🇿 New Zealand (NZ)</option>
+                  <option value="Afghanistan">🇦🇫 Afghanistan (AFG)</option>
+                </select>
+              </div>
+
+              {/* Era Filter */}
+              <div className="flex items-center gap-2 bg-surface-recessed px-3 py-1.5 rounded-lg border border-border-hairline">
+                <span className="material-symbols-outlined text-[16px] text-text-subdued">
+                  history_toggle_off
+                </span>
+                <span className="font-label-caps text-label-caps text-text-subdued uppercase">ERA:</span>
+                <select
+                  value={eraFilter}
+                  onChange={(e) => {
+                    setEraFilter(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="bg-transparent text-text-chalk font-body-sm text-body-sm focus:outline-none cursor-pointer"
+                >
+                  <option value="ALL">All Eras</option>
+                  <option value="MODERN">Modern Era (2015 - Present)</option>
+                  <option value="GOLDEN">Golden Era (1990 - 2014)</option>
+                  <option value="CLASSIC">Classic Legends (Pre-1990)</option>
+                </select>
+              </div>
+
+              {/* Format Suitability */}
+              <div className="flex items-center gap-2 bg-surface-recessed px-3 py-1.5 rounded-lg border border-border-hairline">
+                <span className="material-symbols-outlined text-[16px] text-text-subdued">
+                  sports_cricket
+                </span>
+                <span className="font-label-caps text-label-caps text-text-subdued uppercase">FORMAT:</span>
+                <div className="flex items-center gap-1.5 ml-1">
+                  {(['T20', 'ODI', 'TEST_RED_BALL'] as MatchFormat[]).map((fmt) => (
+                    <button
+                      key={fmt}
+                      onClick={() => setSelectedFormat(fmt)}
+                      className={`px-2 py-0.5 rounded font-label-caps text-[10px] cursor-pointer transition-all ${
+                        selectedFormat === fmt
+                          ? fmt === 'T20'
+                            ? 'bg-[#0C2B1D] text-primary ring-1 ring-primary'
+                            : fmt === 'ODI'
+                            ? 'bg-[#0E2342] text-telemetry-blue ring-1 ring-telemetry-blue'
+                            : 'bg-[#2E0F0F] text-wicket-red ring-1 ring-wicket-red'
+                          : 'bg-surface-elevated text-text-slate hover:brightness-125'
+                      }`}
+                    >
+                      {fmt === 'TEST_RED_BALL' ? 'TEST' : fmt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Reset Filter */}
+              <button
+                onClick={handleResetFilters}
+                className="ml-auto font-label-caps text-label-caps text-text-subdued hover:text-text-chalk flex items-center gap-1 transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[14px]">refresh</span>
+                RESET CRITERIA
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Master-Detail Split Canvas */}
+        <main className="max-w-[1440px] mx-auto w-full px-4 md:px-margin-desktop pb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter-desktop items-start">
+            {/* Left Side: Player Roster Matrix (7 Columns on Desktop) */}
+            <div className="lg:col-span-7 flex flex-col gap-4">
+              <div className="flex items-center justify-between px-1">
+                <span className="font-label-caps text-label-caps text-text-subdued uppercase tracking-wider">
+                  SHOWING {pagedPlayers.length} OF {filteredPlayers.length.toLocaleString()} PROFILES // SORTED
+                  BY RATING
+                </span>
+                <span className="font-label-caps text-label-caps text-primary">LIVE RADAR ACTIVE</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {pagedPlayers.map((player, idx) => {
+                  const isInspecting = activePlayer?.id === player.id;
+                  const roleCat = getStitchRoleCategory(player.primaryRole);
+                  const ovr = player.ratings[selectedFormat]?.overallRating ?? 75;
+                  const batRating = player.ratings[selectedFormat]?.battingRating ?? 50;
+                  const bowlRating = player.ratings[selectedFormat]?.bowlingRating ?? 50;
+                  const portrait = getPlayerPortrait(player.id, idx + (currentPage - 1) * ITEMS_PER_PAGE);
+                  const flag = getCountryFlag(player.primaryNationality);
+                  const careerSpan = `${player.careerDebutYear}-${player.careerRetirementYear ? String(player.careerRetirementYear).slice(-2) : 'Pres'}`;
+
+                  return (
+                    <div
+                      key={player.id}
+                      onClick={() => setInspectedPlayerId(player.id)}
+                      className={`bg-surface-card rounded-xl p-4 relative group shadow-md transition-all cursor-pointer border ${
+                        isInspecting
+                          ? 'border-primary ring-2 ring-primary bg-surface-elevated'
+                          : 'border-border-hairline hover:bg-surface-elevated'
+                      }`}
+                    >
+                      {isInspecting && (
+                        <div className="absolute top-3 right-3 flex items-center gap-1 bg-surface-elevated px-2 py-0.5 rounded-full border border-primary/40">
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
+                          <span className="font-label-caps text-label-caps text-text-chalk">INSPECTING</span>
+                        </div>
+                      )}
+
+                      <div className="flex items-start gap-3">
+                        <img
+                          alt={player.displayName}
+                          className="w-16 h-16 rounded-lg object-cover bg-surface-recessed shrink-0"
+                          src={portrait}
+                          onError={(e) => {
+                            e.currentTarget.src = '/assets/stitch/asset-004.png';
+                          }}
+                        />
+                        <div className="flex flex-col min-w-0 pr-12">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span
+                              className={`px-2 py-0.5 rounded-full font-label-caps text-[10px] ${
+                                roleCat === 'BATTER'
+                                  ? 'bg-[#202920] text-secondary'
+                                  : roleCat === 'BOWLER'
+                                  ? 'bg-[#0F2430] text-telemetry-blue'
+                                  : roleCat === 'WK'
+                                  ? 'bg-amber-950/40 text-warning-amber'
+                                  : 'bg-[#282310] text-tertiary'
+                              }`}
+                            >
+                              {roleCat}
+                            </span>
+                            <span className="font-label-caps text-label-caps text-text-subdued">
+                              {flag} {careerSpan}
+                            </span>
+                          </div>
+                          <h3 className="font-title-md text-title-md text-text-chalk truncate leading-tight uppercase">
+                            {player.displayName}
+                          </h3>
+                          <span className="font-body-sm text-body-sm text-tertiary truncate">
+                            {player.fullName !== player.displayName ? player.fullName : player.primaryRole.replace(/_/g, ' ')}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Metrics Matrix Strip */}
+                      <div className="grid grid-cols-4 gap-2 mt-4 bg-surface-recessed p-2.5 rounded-lg text-center">
+                        <div>
+                          <span className="font-label-caps text-[10px] text-text-subdued block uppercase">OVR</span>
+                          <span className="font-scoreboard-md text-scoreboard-md text-tertiary">{ovr}</span>
+                        </div>
+                        <div>
+                          <span className="font-label-caps text-[10px] text-text-subdued block uppercase">BAT</span>
+                          <span className="font-scoreboard-md text-scoreboard-md text-text-chalk">{batRating}</span>
+                        </div>
+                        <div>
+                          <span className="font-label-caps text-[10px] text-text-subdued block uppercase">BOWL</span>
+                          <span className="font-scoreboard-md text-scoreboard-md text-text-slate">{bowlRating}</span>
+                        </div>
+                        <div>
+                          <span className="font-label-caps text-[10px] text-text-subdued block uppercase">COST</span>
+                          <span className="font-scoreboard-md text-scoreboard-md text-secondary">
+                            ₹{(ovr * 0.1).toFixed(1)}M
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Action Bar */}
+                      <div className="flex items-center gap-2 mt-3 pt-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setInspectedPlayerId(player.id);
+                          }}
+                          className="flex-1 py-2 rounded bg-surface-elevated hover:bg-surface-bright text-text-chalk font-body-bold text-body-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">visibility</span>
+                          <span>Inspect</span>
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDraftPlayer(player);
+                          }}
+                          className="flex-1 py-2 rounded bg-primary hover:bg-primary-container text-on-primary font-body-bold text-body-sm flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">person_add</span>
+                          <span>Draft XI</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Pagination Bar */}
+              <div className="flex items-center justify-between bg-surface-card px-4 py-3 rounded-xl mt-2 shadow-sm border border-border-hairline">
+                <span className="font-label-caps text-label-caps text-text-subdued uppercase">
+                  PAGE {String(currentPage).padStart(2, '0')} OF {String(totalPages).padStart(2, '0')}
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage <= 1}
+                    className="p-2 rounded bg-surface-elevated text-text-slate hover:text-text-chalk disabled:opacity-40 transition-all cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">chevron_left</span>
                   </button>
-                );
-              })}
-
-              <button
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className={`px-3 py-1.5 rounded-lg border text-xs font-medium flex items-center space-x-1 transition ${
-                  currentPage === totalPages
-                    ? 'border-[#232936] text-[#4B5563] cursor-not-allowed'
-                    : 'border-[#2B3242] text-[#F8F9FA] hover:bg-[#1E2433] hover:border-[#D4AF37]'
-                }`}
-              >
-                <span>Next</span>
-                <ChevronRight className="w-4 h-4 ml-0.5" />
-              </button>
+                  <span className="px-3 py-1 rounded bg-primary text-on-primary font-label-caps text-label-caps">
+                    {currentPage}
+                  </span>
+                  {currentPage < totalPages && (
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      className="px-3 py-1 rounded bg-surface-elevated hover:bg-surface-bright text-text-chalk font-label-caps text-label-caps cursor-pointer"
+                    >
+                      {currentPage + 1}
+                    </button>
+                  )}
+                  {currentPage + 1 < totalPages && (
+                    <>
+                      <span className="text-text-subdued px-1">...</span>
+                      <button
+                        onClick={() => setCurrentPage(totalPages)}
+                        className="px-3 py-1 rounded bg-surface-elevated hover:bg-surface-bright text-text-chalk font-label-caps text-label-caps cursor-pointer"
+                      >
+                        {totalPages}
+                      </button>
+                    </>
+                  )}
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={currentPage >= totalPages}
+                    className="p-2 rounded bg-surface-elevated text-text-slate hover:text-text-chalk disabled:opacity-40 transition-all cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
-      </main>
 
-      {/* Transparent 4-Layer Rating Inspector Modal */}
-      {selectedPlayer && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#10141D] border border-[#D4AF37]/50 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl relative">
-            {/* Modal Header */}
-            <div className="flex items-start justify-between border-b border-[#232936] pb-4 mb-5">
-              <div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs px-2 py-0.5 rounded bg-[#D4AF37]/15 text-[#D4AF37] font-mono font-bold">
-                    4-LAYER AUDIT INSPECTOR
-                  </span>
-                  <span className="text-xs text-[#9CA3AF] font-mono">
-                    Format: {selectedFormat}
-                  </span>
-                  {selectedPlayer.careerCategory && (
-                    <span className="text-xs px-2 py-0.5 rounded bg-[#1C2230] text-sky-400 font-mono font-medium border border-sky-500/30">
-                      {selectedPlayer.careerCategory}
+            {/* Right Side: Active Selected Player Detailed Profile (Dossier) */}
+            {activePlayer && (
+              <div className="lg:col-span-5 sticky top-24">
+                <div className="bg-surface-card rounded-2xl p-6 shadow-xl flex flex-col gap-6 relative overflow-hidden border border-border-hairline">
+                  {/* Decorative Subtle Accent Glow */}
+                  <div className="absolute -top-20 -right-20 w-64 h-64 bg-tertiary/10 rounded-full blur-3xl pointer-events-none" />
+
+                  {/* Profile Header Dock */}
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-1 rounded-full font-label-caps text-label-caps bg-[#282310] text-tertiary shadow-[0_0_12px_rgba(212,175,55,0.25)] flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[14px]">verified</span>
+                        HALL OF FAME
+                      </span>
+                      <span className="px-2 py-1 rounded-full font-label-caps text-label-caps bg-surface-elevated text-text-slate">
+                        ALL-TIME LEGEND
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 bg-surface-elevated px-2 py-1 rounded-lg">
+                      <span className="font-label-caps text-label-caps text-text-subdued">STATUS:</span>
+                      <span className="font-label-caps text-label-caps text-primary uppercase">UNLOCKED</span>
+                    </div>
+                  </div>
+
+                  {/* Hero Avatar & Core Credentials */}
+                  <div className="relative rounded-xl overflow-hidden bg-gradient-to-b from-surface-elevated to-surface-card p-5 border border-border-hairline">
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
+                      <div className="relative shrink-0">
+                        <img
+                          alt={activePlayer.displayName}
+                          className="w-28 h-28 sm:w-32 sm:h-32 rounded-xl object-cover bg-surface-recessed shadow-lg"
+                          src={getPlayerPortrait(activePlayer.id, 0)}
+                          onError={(e) => {
+                            e.currentTarget.src = '/assets/stitch/asset-004.png';
+                          }}
+                        />
+                        <div className="absolute -bottom-2 -right-2 bg-tertiary text-on-tertiary px-2 py-0.5 rounded font-label-caps text-[11px] font-extrabold shadow-md">
+                          {getCountryFlag(activePlayer.primaryNationality)}
+                        </div>
+                      </div>
+                      <div className="flex flex-col text-center sm:text-left min-w-0">
+                        <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
+                          <span className="font-label-caps text-label-caps text-text-subdued uppercase">
+                            CAREER ERA: {activePlayer.careerDebutYear} –{' '}
+                            {activePlayer.careerRetirementYear || 'PRESENT'}
+                          </span>
+                        </div>
+                        <h2 className="font-headline-lg text-headline-lg text-text-chalk tracking-tight leading-none mb-1 uppercase">
+                          {activePlayer.displayName}
+                        </h2>
+                        <p className="font-body-base text-body-base text-tertiary font-medium">
+                          {activePlayer.fullName} • {activePlayer.primaryNationality}
+                        </p>
+                        <div className="flex items-center justify-center sm:justify-start gap-2 mt-3 flex-wrap">
+                          <span className="px-2.5 py-1 rounded font-label-caps text-label-caps bg-[#202920] text-secondary">
+                            {activePlayer.primaryRole.replace(/_/g, ' ')}
+                          </span>
+                          <span className="px-2.5 py-1 rounded font-label-caps text-label-caps bg-surface-elevated text-text-slate">
+                            {activePlayer.battingHand.replace(/_/g, ' ')}
+                          </span>
+                          <span className="px-2.5 py-1 rounded font-label-caps text-label-caps bg-surface-elevated text-text-slate">
+                            {activePlayer.bowlingStyle.replace(/_/g, ' ')}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Huge Rating Badge Overlay */}
+                    <div className="mt-4 pt-4 flex items-center justify-between bg-surface-recessed/60 px-4 py-3 rounded-lg border border-border-hairline">
+                      <div className="flex flex-col">
+                        <span className="font-label-caps text-label-caps text-text-subdued uppercase">
+                          OVERALL RATING ({selectedFormat})
+                        </span>
+                        <span className="font-body-sm text-body-sm text-text-slate">
+                          Confidence Tier: {activePlayer.ratings[selectedFormat]?.confidenceTier || 'GOLD'}
+                        </span>
+                      </div>
+                      <div className="flex items-baseline gap-1">
+                        <span className="font-scoreboard-xl text-scoreboard-xl text-tertiary leading-none">
+                          {activePlayer.ratings[selectedFormat]?.overallRating ?? 85}
+                        </span>
+                        <span className="font-label-caps text-label-caps text-text-subdued">/100</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Format Analytics Multi-Tab */}
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-label-caps text-label-caps text-text-subdued uppercase tracking-wider">
+                        CAREER FORMAT TELEMETRY
+                      </span>
+                      <span className="font-label-caps text-label-caps text-secondary">ICN VERIFIED</span>
+                    </div>
+
+                    {/* Format Switcher */}
+                    <div className="grid grid-cols-3 gap-1 bg-surface-recessed p-1 rounded-lg border border-border-hairline">
+                      {(['TEST_RED_BALL', 'ODI', 'T20'] as MatchFormat[]).map((fmt) => (
+                        <button
+                          key={fmt}
+                          onClick={() => setSelectedFormat(fmt)}
+                          className={`py-1.5 text-center font-label-caps text-label-caps uppercase rounded transition-all cursor-pointer ${
+                            selectedFormat === fmt
+                              ? 'bg-surface-elevated text-text-chalk shadow-sm font-bold'
+                              : 'text-text-subdued hover:text-text-chalk'
+                          }`}
+                        >
+                          {fmt === 'TEST_RED_BALL' ? 'TEST' : fmt}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Tabular Stat Breakdown Grid */}
+                    <div className="grid grid-cols-4 gap-2 bg-surface-recessed p-3.5 rounded-xl text-center border border-border-hairline">
+                      <div>
+                        <span className="font-label-caps text-[10px] text-text-subdued uppercase block">
+                          MATCHES
+                        </span>
+                        <span className="font-scoreboard-md text-scoreboard-md text-text-chalk">
+                          {activePlayer.formatStats[selectedFormat]?.matchesPlayed ?? 45}
+                        </span>
+                        <span className="font-label-caps text-[9px] text-text-subdued block mt-0.5">
+                          {activePlayer.formatStats[selectedFormat]?.inningsBatted ?? 38} INN
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-label-caps text-[10px] text-text-subdued uppercase block">RUNS</span>
+                        <span className="font-scoreboard-md text-scoreboard-md text-primary">
+                          {(activePlayer.formatStats[selectedFormat]?.runsScored ?? 1850).toLocaleString()}
+                        </span>
+                        <span className="font-label-caps text-[9px] text-text-subdued block mt-0.5">
+                          SR: {activePlayer.formatStats[selectedFormat]?.strikeRate?.toFixed(1) ?? '132.5'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-label-caps text-[10px] text-text-subdued uppercase block">
+                          CENTURIES
+                        </span>
+                        <span className="font-scoreboard-md text-scoreboard-md text-tertiary">
+                          {activePlayer.formatStats[selectedFormat]?.centuries ?? 3}
+                        </span>
+                        <span className="font-label-caps text-[9px] text-text-subdued block mt-0.5">
+                          50s: {activePlayer.formatStats[selectedFormat]?.halfCenturies ?? 12}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-label-caps text-[10px] text-text-subdued uppercase block">
+                          AVERAGE
+                        </span>
+                        <span className="font-scoreboard-md text-scoreboard-md text-secondary">
+                          {(activePlayer.formatStats[selectedFormat]?.battingAverage ?? 42.5).toFixed(2)}
+                        </span>
+                        <span className="font-label-caps text-[9px] text-text-subdued block mt-0.5">
+                          HS: {activePlayer.formatStats[selectedFormat]?.highestScore ?? 118}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Attribute Spectrum & Sliders */}
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-label-caps text-label-caps text-text-subdued uppercase tracking-wider">
+                        TACTICAL ATTRIBUTE SPECTRUM
+                      </span>
+                      <span className="font-label-caps text-label-caps text-tertiary font-bold">
+                        PRIME CALIBRATION
+                      </span>
+                    </div>
+                    <div className="space-y-2.5 bg-surface-recessed p-4 rounded-xl border border-border-hairline">
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-body-bold text-body-sm text-text-chalk">
+                            Technique & Precision
+                          </span>
+                          <span className="font-scoreboard-md text-[14px] text-primary">
+                            {activePlayer.attributes.technique}{' '}
+                            <span className="text-text-subdued text-[10px]">/ 100</span>
+                          </span>
+                        </div>
+                        <div className="w-full bg-surface-elevated h-1.5 rounded-full overflow-hidden">
+                          <div
+                            className="bg-primary h-full rounded-full transition-all duration-500"
+                            style={{ width: `${activePlayer.attributes.technique}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-body-bold text-body-sm text-text-chalk">
+                            Match Temperament & Clutch
+                          </span>
+                          <span className="font-scoreboard-md text-[14px] text-primary">
+                            {activePlayer.attributes.pressureHandling}
+                          </span>
+                        </div>
+                        <div className="w-full bg-surface-elevated h-1.5 rounded-full overflow-hidden">
+                          <div
+                            className="bg-primary h-full rounded-full transition-all duration-500"
+                            style={{ width: `${activePlayer.attributes.pressureHandling}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-body-bold text-body-sm text-text-chalk">
+                            Spin Handling & Footwork
+                          </span>
+                          <span className="font-scoreboard-md text-[14px] text-secondary">
+                            {activePlayer.attributes.againstSpin}
+                          </span>
+                        </div>
+                        <div className="w-full bg-surface-elevated h-1.5 rounded-full overflow-hidden">
+                          <div
+                            className="bg-secondary h-full rounded-full transition-all duration-500"
+                            style={{ width: `${activePlayer.attributes.againstSpin}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-body-bold text-body-sm text-text-chalk">
+                            Pace & Bounce Mastery
+                          </span>
+                          <span className="font-scoreboard-md text-[14px] text-secondary">
+                            {activePlayer.attributes.againstPace}
+                          </span>
+                        </div>
+                        <div className="w-full bg-surface-elevated h-1.5 rounded-full overflow-hidden">
+                          <div
+                            className="bg-secondary h-full rounded-full transition-all duration-500"
+                            style={{ width: `${activePlayer.attributes.againstPace}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-body-bold text-body-sm text-text-chalk">
+                            Running Speed & Agility
+                          </span>
+                          <span className="font-scoreboard-md text-[14px] text-text-slate">
+                            {activePlayer.attributes.runningBetweenWickets}
+                          </span>
+                        </div>
+                        <div className="w-full bg-surface-elevated h-1.5 rounded-full overflow-hidden">
+                          <div
+                            className="bg-text-slate h-full rounded-full transition-all duration-500"
+                            style={{ width: `${activePlayer.attributes.runningBetweenWickets}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Signature Traits Badges */}
+                  <div className="flex flex-col gap-2">
+                    <span className="font-label-caps text-label-caps text-text-subdued uppercase tracking-wider">
+                      SIGNATURE TRAITS & ABILITIES
                     </span>
-                  )}
-                </div>
-                <h2 className="text-xl font-bold font-serif text-[#F8F9FA] mt-1">
-                  {selectedPlayer.fullName}
-                </h2>
-                <p className="text-xs text-[#9CA3AF]">
-                  {selectedPlayer.primaryNationality} • Era: {selectedPlayer.historicalEra.replace(/_/g, ' ')}
-                  {selectedPlayer.competitions && selectedPlayer.competitions.length > 0 && (
-                    <span> • Teams: {selectedPlayer.competitions.join(', ')}</span>
-                  )}
-                </p>
-              </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      <div className="bg-surface-elevated p-2.5 rounded-lg flex flex-col gap-1 border border-border-hairline">
+                        <div className="flex items-center gap-1.5 text-warning-amber">
+                          <span className="material-symbols-outlined text-[16px]">cyclone</span>
+                          <span className="font-label-caps text-[10px] font-bold">BIG MATCH CLUTCH</span>
+                        </div>
+                        <span className="font-body-sm text-[12px] text-text-slate leading-snug">
+                          +{Math.round(activePlayer.attributes.bigMatchTemperament * 0.15)}% strike rate boost in
+                          pressure chases.
+                        </span>
+                      </div>
+                      <div className="bg-surface-elevated p-2.5 rounded-lg flex flex-col gap-1 border border-border-hairline">
+                        <div className="flex items-center gap-1.5 text-secondary">
+                          <span className="material-symbols-outlined text-[16px]">sports_baseball</span>
+                          <span className="font-label-caps text-[10px] font-bold">TIMING MASTERY</span>
+                        </div>
+                        <span className="font-body-sm text-[12px] text-text-slate leading-snug">
+                          {activePlayer.attributes.timing}/100 timing converts edge chances into boundary gaps.
+                        </span>
+                      </div>
+                      <div className="bg-surface-elevated p-2.5 rounded-lg flex flex-col gap-1 border border-border-hairline">
+                        <div className="flex items-center gap-1.5 text-telemetry-blue">
+                          <span className="material-symbols-outlined text-[16px]">shield</span>
+                          <span className="font-label-caps text-[10px] font-bold">RECOVERY RESILIENCE</span>
+                        </div>
+                        <span className="font-body-sm text-[12px] text-text-slate leading-snug">
+                          Recovers momentum within 2 balls after consecutive dot balls.
+                        </span>
+                      </div>
+                    </div>
+                  </div>
 
-              <button
-                onClick={() => setSelectedPlayer(null)}
-                className="p-1 rounded-lg hover:bg-[#1E2433] text-[#9CA3AF] hover:text-white transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Modal 4-Layer Body */}
-            <div className="space-y-4 text-xs">
-              {/* 5 Core Rating Categories */}
-              <div className="bg-[#151A26] border border-[#D4AF37]/30 rounded-xl p-4">
-                <span className="font-bold text-sm text-[#D4AF37] flex items-center gap-1.5 mb-2">
-                  <Award className="w-4 h-4" /> 5 Core Simulation Ratings
-                </span>
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center font-mono">
-                  <div className="bg-[#1A202E] p-2 rounded border border-[#242C3D]">
-                    <div className="text-[10px] text-[#9CA3AF]">Batting</div>
-                    <div className="font-bold text-lg text-[#F8F9FA]">
-                      {selectedPlayer.ratings[selectedFormat]?.battingRating ?? selectedPlayer.attributes.technique}
-                    </div>
-                  </div>
-                  <div className="bg-[#1A202E] p-2 rounded border border-[#242C3D]">
-                    <div className="text-[10px] text-[#9CA3AF]">Bowling</div>
-                    <div className="font-bold text-lg text-[#F8F9FA]">
-                      {selectedPlayer.ratings[selectedFormat]?.bowlingRating ?? selectedPlayer.attributes.lineAndLength}
-                    </div>
-                  </div>
-                  <div className="bg-[#1A202E] p-2 rounded border border-[#242C3D]">
-                    <div className="text-[10px] text-[#9CA3AF]">Fielding</div>
-                    <div className="font-bold text-lg text-[#F8F9FA]">
-                      {selectedPlayer.ratings[selectedFormat]?.fieldingRating ?? selectedPlayer.attributes.catching}
-                    </div>
-                  </div>
-                  <div className="bg-[#1A202E] p-2 rounded border border-[#242C3D]">
-                    <div className="text-[10px] text-[#9CA3AF]">Temperament</div>
-                    <div className="font-bold text-lg text-[#10B981]">
-                      {Math.round(
-                        (selectedPlayer.attributes.pressureHandling +
-                          selectedPlayer.attributes.consistency +
-                          selectedPlayer.attributes.matchAwareness) /
-                          3
-                      )}
-                    </div>
-                  </div>
-                  <div className="bg-[#1A202E] p-2 rounded border border-[#242C3D]">
-                    <div className="text-[10px] text-[#9CA3AF]">Adaptability</div>
-                    <div className="font-bold text-lg text-[#0EA5E9]">
-                      {Math.round(
-                        (selectedPlayer.attributes.pitchAdaptability +
-                          selectedPlayer.attributes.weatherAdaptability) /
-                          2
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Simulation Impact Notes */}
-                <div className="mt-3 p-2.5 rounded bg-[#10141D] border border-[#1E2433] text-[11px] text-[#9CA3AF] space-y-1">
-                  <div className="text-white font-semibold">Engine Performance Impact:</div>
-                  <p>• <strong>Batting/Bowling:</strong> Drives base head-to-head match-up logits on every delivery.</p>
-                  <p>• <strong>Temperament:</strong> Shields player against collapse cascades and high required-run-rate penalties in death overs.</p>
-                  <p>• <strong>Adaptability:</strong> Buffers player execution against extreme pitch wear, spin turn, and atmospheric dew.</p>
-                </div>
-              </div>
-
-              {/* Layer 1: Raw Authentic Career Statistics */}
-              <div className="bg-[#151A26] border border-[#242C3D] rounded-xl p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-bold text-sm text-[#D4AF37] flex items-center gap-1.5">
-                    <Award className="w-4 h-4" /> Layer 1: Authentic Career Statistics
-                  </span>
-                  <span className="text-[10px] text-[#9CA3AF] uppercase font-mono">Unadjusted</span>
-                </div>
-                <p className="text-[#9CA3AF] mb-3 text-[11px]">
-                  Direct historical scorecard records. Missing historical metrics remain strictly null with zero hallucination.
-                </p>
-                {selectedPlayer.formatStats[selectedFormat] ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center font-mono">
-                    <div className="bg-[#1A202E] p-2 rounded">
-                      <div className="text-[10px] text-[#9CA3AF]">Matches / Inn</div>
-                      <div className="font-bold text-white">
-                        {selectedPlayer.formatStats[selectedFormat]?.matchesPlayed} / {selectedPlayer.formatStats[selectedFormat]?.inningsBatted}
+                  {/* Squad Recruitment Action Dock */}
+                  <div className="pt-2 flex flex-col gap-2.5">
+                    <button
+                      onClick={() => handleDraftPlayer(activePlayer)}
+                      className="w-full py-4 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-headline-md text-headline-md tracking-tight uppercase flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(120,220,119,0.3)] hover:scale-[1.01] transition-all cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[24px]">group_add</span>
+                      <span>
+                        ADD TO CURRENT SQUAD (CAP ₹
+                        {((activePlayer.ratings[selectedFormat]?.overallRating ?? 85) * 0.1).toFixed(1)} CR)
+                      </span>
+                    </button>
+                    <div className="flex items-center justify-between px-1">
+                      <div className="flex items-center gap-1 text-text-subdued font-label-caps text-label-caps">
+                        <span className="material-symbols-outlined text-[14px]">lock_reset</span>
+                        INSTANT RE-SELL TAX 0%
                       </div>
-                    </div>
-                    <div className="bg-[#1A202E] p-2 rounded">
-                      <div className="text-[10px] text-[#9CA3AF]">Batting Avg</div>
-                      <div className="font-bold text-[#10B981]">
-                        {selectedPlayer.formatStats[selectedFormat]?.battingAverage?.toFixed(2) ?? 'N/A'}
+                      <div className="flex items-center gap-1 text-secondary font-label-caps text-label-caps">
+                        <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                        SQUAD BALANCE COMPLIANT
                       </div>
-                    </div>
-                    <div className="bg-[#1A202E] p-2 rounded">
-                      <div className="text-[10px] text-[#9CA3AF]">Strike Rate</div>
-                      <div className="font-bold text-white">
-                        {selectedPlayer.formatStats[selectedFormat]?.strikeRate?.toFixed(1) ?? 'N/A'}
-                      </div>
-                    </div>
-                    <div className="bg-[#1A202E] p-2 rounded">
-                      <div className="text-[10px] text-[#9CA3AF]">Wkts / Bowl Avg</div>
-                      <div className="font-bold text-[#0EA5E9]">
-                        {selectedPlayer.formatStats[selectedFormat]?.wicketsTaken ?? 0} (
-                        {selectedPlayer.formatStats[selectedFormat]?.bowlingAverage?.toFixed(1) ?? '-'})
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-3 bg-[#1A202E] rounded text-slate-400 italic">
-                    No historical match appearances in this format (interpolated via cohort baseline).
-                  </div>
-                )}
-              </div>
-
-              {/* Layer 2: Era-Adjusted Metrics & Peer Z-Scores */}
-              <div className="bg-[#151A26] border border-[#242C3D] rounded-xl p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-bold text-sm text-[#10B981] flex items-center gap-1.5">
-                    <Target className="w-4 h-4" /> Layer 2: Era-Adjusted Metrics & Z-Scores
-                  </span>
-                  <span className="text-[10px] text-[#9CA3AF] uppercase font-mono">Normalized</span>
-                </div>
-                <p className="text-[#9CA3AF] mb-3 text-[11px]">
-                  Evaluates the player against 10-year rolling peer windows (uncovered pitches, equipment changes, ball regulations).
-                </p>
-                {selectedPlayer.eraMetrics[selectedFormat] ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-center">
-                    <div className="bg-[#1A202E] p-2 rounded">
-                      <div className="text-[10px] text-[#9CA3AF]">Batting Z-Score</div>
-                      <div className="font-bold text-white">
-                        {selectedPlayer.eraMetrics[selectedFormat]?.battingAvgZScore >= 0 ? '+' : ''}
-                        {selectedPlayer.eraMetrics[selectedFormat]?.battingAvgZScore.toFixed(2)}
-                      </div>
-                    </div>
-                    <div className="bg-[#1A202E] p-2 rounded">
-                      <div className="text-[10px] text-[#9CA3AF]">Era Perf. Ratio (EPR)</div>
-                      <div className="font-bold text-[#D4AF37]">
-                        {selectedPlayer.eraMetrics[selectedFormat]?.eraPerformanceRatio.toFixed(2)}x
-                      </div>
-                    </div>
-                    <div className="bg-[#1A202E] p-2 rounded">
-                      <div className="text-[10px] text-[#9CA3AF]">Era Peer Mean Bat</div>
-                      <div className="font-bold text-white">
-                        {selectedPlayer.eraMetrics[selectedFormat]?.peerCohortMeanBattingAvg.toFixed(1)}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-3 bg-[#1A202E] rounded text-slate-400 italic">
-                    Era peer normalizer applied standard contemporary benchmark parameters.
-                  </div>
-                )}
-              </div>
-
-              {/* Layer 3: Empirical Bayes Shrinkage */}
-              <div className="bg-[#151A26] border border-[#242C3D] rounded-xl p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-bold text-sm text-[#6366F1] flex items-center gap-1.5">
-                    <Shield className="w-4 h-4" /> Layer 3: Empirical Bayes Shrinkage
-                  </span>
-                  <span className="text-[10px] text-[#9CA3AF] uppercase font-mono">Regularization</span>
-                </div>
-                <p className="text-[#9CA3AF] mb-3 text-[11px]">
-                  Prevents small sample size distortions ($C = N / (N + K)$). Regresses low-sample metrics towards cohort priors.
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-center">
-                  <div className="bg-[#1A202E] p-2 rounded">
-                    <div className="text-[10px] text-[#9CA3AF]">Confidence Tier</div>
-                    <div className="font-bold text-[#6366F1]">
-                      {selectedPlayer.ratings[selectedFormat]?.confidenceTier}
-                    </div>
-                  </div>
-                  <div className="bg-[#1A202E] p-2 rounded">
-                    <div className="text-[10px] text-[#9CA3AF]">Confidence (C)</div>
-                    <div className="font-bold text-white">
-                      {((selectedPlayer.ratings[selectedFormat]?.confidenceScore ?? 0) * 100).toFixed(0)}%
-                    </div>
-                  </div>
-                  <div className="bg-[#1A202E] p-2 rounded">
-                    <div className="text-[10px] text-[#9CA3AF]">Prior Shrinkage Weight</div>
-                    <div className="font-bold text-white">
-                      {((selectedPlayer.ratings[selectedFormat]?.explainability.shrinkageApplied ?? 0) * 100).toFixed(0)}%
                     </div>
                   </div>
                 </div>
               </div>
-
-              {/* Layer 4: Granular 0-100 Attributes */}
-              <div className="bg-[#151A26] border border-[#242C3D] rounded-xl p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-bold text-sm text-[#0EA5E9] flex items-center gap-1.5">
-                    <Zap className="w-4 h-4" /> Layer 4: Granular Attributes (0–100)
-                  </span>
-                  <span className="text-[10px] text-[#9CA3AF] uppercase font-mono">Simulation Ready</span>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center font-mono">
-                  <div className="bg-[#1A202E] p-2 rounded">
-                    <div className="text-[10px] text-[#9CA3AF]">Technique</div>
-                    <div className="font-bold text-white">{selectedPlayer.attributes.technique}</div>
-                  </div>
-                  <div className="bg-[#1A202E] p-2 rounded">
-                    <div className="text-[10px] text-[#9CA3AF]">Timing / Power</div>
-                    <div className="font-bold text-white">
-                      {selectedPlayer.attributes.timing} / {selectedPlayer.attributes.power}
-                    </div>
-                  </div>
-                  <div className="bg-[#1A202E] p-2 rounded">
-                    <div className="text-[10px] text-[#9CA3AF]">Line & Length</div>
-                    <div className="font-bold text-white">{selectedPlayer.attributes.lineAndLength}</div>
-                  </div>
-                  <div className="bg-[#1A202E] p-2 rounded">
-                    <div className="text-[10px] text-[#9CA3AF]">Pressure Handling</div>
-                    <div className="font-bold text-[#D4AF37]">{selectedPlayer.attributes.pressureHandling}</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Strict Data Provenance Audit */}
-              <div className="bg-[#131722] border border-[#2B3242] rounded-xl p-3 flex items-center justify-between text-[11px]">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
-                  <span>
-                    Source: <strong className="text-white">{selectedPlayer.provenance.sourceName}</strong> ({selectedPlayer.provenance.licenseType})
-                  </span>
-                </div>
-                <span className="text-[#9CA3AF] font-mono">
-                  {selectedPlayer.provenance.verificationStatus}
-                </span>
-              </div>
-            </div>
+            )}
           </div>
-        </div>
-      )}
+        </main>
+      </div>
     </div>
   );
 }

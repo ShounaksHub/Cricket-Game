@@ -2,21 +2,304 @@
 
 @layer base {
   :root {
-    --bg-canvas: #0E1013;
-    --surface-card: #181B20;
-    --surface-elevated: #22262E;
-    --border-hairline: #2E3440;
-    --pitch-emerald: #0D4A38;
-    --trophy-gold: #D4AF37;
-    --text-chalk: #F8F9FA;
-    --text-muted: #9CA3AF;
-    --cricket-red: #C92A2A;
+    --color-surface: #101410;
+    --color-surface-dim: #101410;
+    --color-surface-bright: #363a35;
+    --color-surface-container-lowest: #0b0f0b;
+    --color-surface-container-low: #191d18;
+    --color-surface-container: #1d211c;
+    --color-surface-container-high: #272b26;
+    --color-surface-container-highest: #323631;
+    --color-on-surface: #e0e4dc;
+    --color-on-surface-variant: #becab9;
+    --color-inverse-surface: #e0e4dc;
+    --color-inverse-on-surface: #2d312d;
+    --color-outline: #899484;
+    --color-outline-variant: #3f4a3c;
+    --color-surface-tint: #78dc77;
+    --color-primary: #78dc77;
+    --color-on-primary: #00390a;
+    --color-primary-container: #4caf50;
+    --color-on-primary-container: #003c0b;
+    --color-inverse-primary: #006e1c;
+    --color-secondary: #a9d55f;
+    --color-on-secondary: #233600;
+    --color-secondary-container: #537802;
+    --color-on-secondary-container: #d3ff87;
+    --color-tertiary: #e9c349;
+    --color-on-tertiary: #3c2f00;
+    --color-tertiary-container: #cca72f;
+    --color-on-tertiary-container: #4e3d00;
+    --color-error: #ffb4ab;
+    --color-on-error: #690005;
+    --color-error-container: #93000a;
+    --color-on-error-container: #ffdad6;
+    --color-primary-fixed: #94f990;
+    --color-primary-fixed-dim: #78dc77;
+    --color-on-primary-fixed: #002204;
+    --color-on-primary-fixed-variant: #005313;
+    --color-secondary-fixed: #c5f177;
+    --color-secondary-fixed-dim: #a9d55f;
+    --color-on-secondary-fixed: #131f00;
+    --color-on-secondary-fixed-variant: #354e00;
+    --color-tertiary-fixed: #ffe088;
+    --color-tertiary-fixed-dim: #e9c349;
+    --color-on-tertiary-fixed: #241a00;
+    --color-on-tertiary-fixed-variant: #574500;
+    --color-background: #101410;
+    --color-on-background: #e0e4dc;
+    --color-surface-variant: #323631;
+    --color-surface-card: #181f19;
+    --color-surface-elevated: #202920;
+    --color-surface-recessed: #0c0f0c;
+    --color-border-hairline: #303a31;
+    --color-border-focus: #435144;
+    --color-text-chalk: #f4f5f0;
+    --color-text-slate: #a2aaa1;
+    --color-text-subdued: #6b756c;
+    --color-wicket-red: #c92a2a;
+    --color-wicket-red-container: #3d0d0d;
+    --color-test-pink: #e64980;
+    --color-warning-amber: #f59e0b;
+    --color-telemetry-blue: #38bdf8;
   }
 
-  body {
-    background-color: var(--bg-canvas);
-    color: var(--text-chalk);
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-surface);
+    color: var(--color-on-surface);
+    font-family: var(--font-inter, 'Inter', -apple-system, sans-serif);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+
+  /* Hide scrollbar for Stitch immersive broadcast HUD */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@theme {
+  --color-surface: #101410;
+  --color-surface-dim: #101410;
+  --color-surface-bright: #363a35;
+  --color-surface-container-lowest: #0b0f0b;
+  --color-surface-container-low: #191d18;
+  --color-surface-container: #1d211c;
+  --color-surface-container-high: #272b26;
+  --color-surface-container-highest: #323631;
+  --color-on-surface: #e0e4dc;
+  --color-on-surface-variant: #becab9;
+  --color-inverse-surface: #e0e4dc;
+  --color-inverse-on-surface: #2d312d;
+  --color-outline: #899484;
+  --color-outline-variant: #3f4a3c;
+  --color-surface-tint: #78dc77;
+  --color-primary: #78dc77;
+  --color-on-primary: #00390a;
+  --color-primary-container: #4caf50;
+  --color-on-primary-container: #003c0b;
+  --color-inverse-primary: #006e1c;
+  --color-secondary: #a9d55f;
+  --color-on-secondary: #233600;
+  --color-secondary-container: #537802;
+  --color-on-secondary-container: #d3ff87;
+  --color-tertiary: #e9c349;
+  --color-on-tertiary: #3c2f00;
+  --color-tertiary-container: #cca72f;
+  --color-on-tertiary-container: #4e3d00;
+  --color-error: #ffb4ab;
+  --color-on-error: #690005;
+  --color-error-container: #93000a;
+  --color-on-error-container: #ffdad6;
+  --color-primary-fixed: #94f990;
+  --color-primary-fixed-dim: #78dc77;
+  --color-on-primary-fixed: #002204;
+  --color-on-primary-fixed-variant: #005313;
+  --color-secondary-fixed: #c5f177;
+  --color-secondary-fixed-dim: #a9d55f;
+  --color-on-secondary-fixed: #131f00;
+  --color-on-secondary-fixed-variant: #354e00;
+  --color-tertiary-fixed: #ffe088;
+  --color-tertiary-fixed-dim: #e9c349;
+  --color-on-tertiary-fixed: #241a00;
+  --color-on-tertiary-fixed-variant: #574500;
+  --color-background: #101410;
+  --color-on-background: #e0e4dc;
+  --color-surface-variant: #323631;
+  --color-surface-card: #181f19;
+  --color-surface-elevated: #202920;
+  --color-surface-recessed: #0c0f0c;
+  --color-border-hairline: #303a31;
+  --color-border-focus: #435144;
+  --color-text-chalk: #f4f5f0;
+  --color-text-slate: #a2aaa1;
+  --color-text-subdued: #6b756c;
+  --color-wicket-red: #c92a2a;
+  --color-wicket-red-container: #3d0d0d;
+  --color-test-pink: #e64980;
+  --color-warning-amber: #f59e0b;
+  --color-telemetry-blue: #38bdf8;
+
+  --spacing-space-xs: 0.25rem;
+  --spacing-space-sm: 0.5rem;
+  --spacing-space-md: 1rem;
+  --spacing-space-lg: 1.5rem;
+  --spacing-space-xl: 2rem;
+  --spacing-gutter: 1rem;
+  --spacing-gutter-desktop: 1.5rem;
+  --spacing-margin: 1rem;
+  --spacing-margin-desktop: 2rem;
+}
+
+/* Tabular Numbers & Strict Metrics */
+.tabular-nums,
+.font-scoreboard-xl,
+.font-scoreboard-md,
+.font-label-caps,
+.text-scoreboard-xl,
+.text-scoreboard-md,
+.text-label-caps {
+  font-feature-settings: 'tnum' 1, 'cv02' 1, 'cv03' 1, 'cv04' 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Material Symbols Outlined Icon Styling */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Stitch Typography Classes */
+.font-display-lg {
+  font-family: var(--font-manrope, 'Manrope', sans-serif);
+  font-weight: 800;
+}
+.text-display-lg {
+  font-size: 48px;
+  line-height: 56px;
+  letter-spacing: -0.02em;
+}
+@media (max-width: 768px) {
+  .text-display-lg {
+    font-size: 32px;
+    line-height: 38px;
+    letter-spacing: -0.02em;
+  }
+}
+
+.font-headline-lg {
+  font-family: var(--font-manrope, 'Manrope', sans-serif);
+  font-weight: 700;
+}
+.text-headline-lg {
+  font-size: 32px;
+  line-height: 40px;
+  letter-spacing: -0.015em;
+}
+@media (max-width: 768px) {
+  .text-headline-lg {
+    font-size: 26px;
+    line-height: 32px;
+    letter-spacing: -0.015em;
+  }
+}
+
+.font-headline-md {
+  font-family: var(--font-manrope, 'Manrope', sans-serif);
+  font-weight: 700;
+}
+.text-headline-md {
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: -0.01em;
+}
+
+.font-title-md {
+  font-family: var(--font-manrope, 'Manrope', sans-serif);
+  font-weight: 600;
+}
+.text-title-md {
+  font-size: 18px;
+  line-height: 26px;
+  letter-spacing: -0.005em;
+}
+
+.font-body-base {
+  font-family: var(--font-inter, 'Inter', sans-serif);
+  font-weight: 400;
+}
+.text-body-base {
+  font-size: 15px;
+  line-height: 22px;
+  letter-spacing: 0;
+}
+
+.font-body-bold {
+  font-family: var(--font-inter, 'Inter', sans-serif);
+  font-weight: 600;
+}
+.text-body-bold {
+  font-size: 15px;
+  line-height: 22px;
+  letter-spacing: 0;
+}
+
+.font-body-sm {
+  font-family: var(--font-inter, 'Inter', sans-serif);
+  font-weight: 400;
+}
+.text-body-sm {
+  font-size: 13px;
+  line-height: 18px;
+  letter-spacing: 0;
+}
+
+.font-scoreboard-xl {
+  font-family: var(--font-jetbrains, 'JetBrains Mono', monospace);
+  font-weight: 800;
+}
+.text-scoreboard-xl {
+  font-size: 42px;
+  line-height: 44px;
+  letter-spacing: -0.03em;
+}
+@media (max-width: 768px) {
+  .text-scoreboard-xl {
+    font-size: 32px;
+    line-height: 34px;
+    letter-spacing: -0.03em;
+  }
+}
+
+.font-scoreboard-md {
+  font-family: var(--font-jetbrains, 'JetBrains Mono', monospace);
+  font-weight: 700;
+}
+.text-scoreboard-md {
+  font-size: 20px;
+  line-height: 24px;
+  letter-spacing: -0.02em;
+}
+
+.font-label-caps {
+  font-family: var(--font-jetbrains, 'JetBrains Mono', monospace);
+  font-weight: 700;
+}
+.text-label-caps {
+  font-size: 11px;
+  line-height: 14px;
+  letter-spacing: 0.06em;
 }

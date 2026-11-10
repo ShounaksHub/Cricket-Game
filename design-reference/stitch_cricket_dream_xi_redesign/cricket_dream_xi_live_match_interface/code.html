@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@700;800&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"primary-container":"#4caf50","error":"#ffb4ab","secondary":"#a9d55f","warning-amber":"#f59e0b","wicket-red":"#c92a2a","on-error":"#690005","on-primary":"#00390a","surface":"#101410","tertiary-fixed-dim":"#e9c349","surface-card":"#181f19","surface-dim":"#101410","on-tertiary":"#3c2f00","surface-container-high":"#272b26","telemetry-blue":"#38bdf8","on-secondary":"#233600","inverse-on-surface":"#2d312d","border-focus":"#435144","wicket-red-container":"#3d0d0d","primary":"#78dc77","text-slate":"#a2aaa1","tertiary-fixed":"#ffe088","surface-variant":"#323631","on-primary-container":"#003c0b","on-background":"#e0e4dc","on-surface":"#e0e4dc","outline":"#899484","outline-variant":"#3f4a3c","on-surface-variant":"#becab9","on-secondary-fixed":"#131f00","error-container":"#93000a","surface-container":"#1d211c","text-chalk":"#f4f5f0","on-secondary-container":"#d3ff87","surface-bright":"#363a35","surface-container-highest":"#323631","inverse-primary":"#006e1c","secondary-fixed":"#c5f177","on-tertiary-fixed-variant":"#574500","border-hairline":"#303a31","on-primary-fixed-variant":"#005313","tertiary-container":"#cca72f","on-tertiary-fixed":"#241a00","surface-container-low":"#191d18","on-tertiary-container":"#4e3d00","on-primary-fixed":"#002204","background":"#101410","surface-tint":"#78dc77","on-secondary-fixed-variant":"#354e00","surface-container-lowest":"#0b0f0b","secondary-container":"#537802","secondary-fixed-dim":"#a9d55f","tertiary":"#e9c349","test-pink":"#e64980","primary-fixed":"#94f990","surface-recessed":"#0c0f0c","primary-fixed-dim":"#78dc77","text-subdued":"#6b756c","on-error-container":"#ffdad6","surface-elevated":"#202920","inverse-surface":"#e0e4dc"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-xl":"2rem","space-md":"1rem","gutter-desktop":"1.5rem","margin-desktop":"2rem","gutter":"1rem","space-xs":"0.25rem","space-sm":"0.5rem","space-lg":"1.5rem","margin":"1rem"},"fontFamily":{"headline-lg":["Manrope"],"headline-md":["Manrope"],"body-base":["Inter"],"scoreboard-xl-mobile":["JetBrains Mono"],"display-lg-mobile":["Manrope"],"label-caps":["JetBrains Mono"],"title-md":["Manrope"],"display-lg":["Manrope"],"body-bold":["Inter"],"headline-lg-mobile":["Manrope"],"body-sm":["Inter"],"scoreboard-md":["JetBrains Mono"],"scoreboard-xl":["JetBrains Mono"]},"fontSize":{"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.015em","fontWeight":"700"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.01em","fontWeight":"700"}],"body-base":["15px",{"lineHeight":"22px","letterSpacing":"0","fontWeight":"400"}],"scoreboard-xl-mobile":["32px",{"lineHeight":"34px","letterSpacing":"-0.03em","fontWeight":"800"}],"display-lg-mobile":["32px",{"lineHeight":"38px","letterSpacing":"-0.02em","fontWeight":"800"}],"label-caps":["11px",{"lineHeight":"14px","letterSpacing":"0.06em","fontWeight":"700"}],"title-md":["18px",{"lineHeight":"26px","letterSpacing":"-0.005em","fontWeight":"600"}],"display-lg":["48px",{"lineHeight":"56px","letterSpacing":"-0.02em","fontWeight":"800"}],"body-bold":["15px",{"lineHeight":"22px","letterSpacing":"0","fontWeight":"600"}],"headline-lg-mobile":["26px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"700"}],"body-sm":["13px",{"lineHeight":"18px","letterSpacing":"0","fontWeight":"400"}],"scoreboard-md":["20px",{"lineHeight":"24px","letterSpacing":"-0.02em","fontWeight":"700"}],"scoreboard-xl":["42px",{"lineHeight":"44px","letterSpacing":"-0.03em","fontWeight":"800"}]}}}};</script></head><body class="bg-surface font-body-base text-body-base text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl border-b border-border-hairline shadow-[0_4px_24px_rgba(0,0,0,0.5)]"><div class="h-20 max-w-[1440px] mx-auto px-margin-desktop flex items-center justify-between"><div class="flex items-center gap-space-md"><a class="flex items-center gap-space-sm group focus:outline-none" data-path="home" href="#"><img alt="Cricket Dream XI Official Logo" class="h-8 w-auto object-contain transition-transform group-hover:scale-105" src="https://lh3.googleusercontent.com/aida/ALJJyrDjO6jMwR_yUbtfW9pdyFkOewwppX6HI79sy9wxVoRr-B_A80uid5C5lmoldsHCV_RKYrCJSJoLESMlUIo8Kr3A81UphQzKt-YBzfbxyd9kSTENhTuHq4ALAgzYiWEC1E5Nlr3SfWsfFXMGcTwdayHjg3YoguhQfJwVsRsUFj_4-B9U0lGzEyee2GLtsSKWEH4WF-WqaEV7JEc311vnv1SzmYjzQur9dsxdjkpem7bq"/><div class="flex flex-col"><span class="font-headline-md text-title-md text-text-chalk tracking-tight leading-none group-hover:text-primary transition-colors">DREAM XI</span><span class="font-label-caps text-label-caps text-text-subdued uppercase tracking-widest">CHAMPIONSHIP</span></div></a></div><nav class="hidden lg:flex items-center gap-space-xs" data-active-classes="bg-surface-elevated text-text-chalk border-b-2 border-primary shadow-[0_0_12px_rgba(76,175,80,0.2)]"><a class="px-space-md py-space-sm rounded-t-lg font-headline-md text-title-md tracking-wider text-text-slate hover:bg-surface-elevated hover:text-on-surface transition-all" data-path="home" href="#">HOME</a><a class="px-space-md py-space-sm rounded-t-lg font-headline-md text-title-md tracking-wider text-text-slate hover:bg-surface-elevated hover:text-on-surface transition-all" data-path="dream-xi" href="#">DREAM XI</a><a class="px-space-md py-space-sm rounded-t-lg font-headline-md text-title-md tracking-wider text-text-slate hover:bg-surface-elevated hover:text-on-surface transition-all" data-path="players" href="#">PLAYERS</a><a class="px-space-md py-space-sm rounded-t-lg font-headline-md text-title-md tracking-wider text-text-slate hover:bg-surface-elevated hover:text-on-surface transition-all" data-path="my-cricket" href="#">MY CRICKET</a></nav><div class="flex items-center gap-space-md"><div class="hidden sm:flex items-center gap-space-xs px-space-sm py-space-xs bg-surface-container rounded-full border border-border-hairline"><span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span><span class="font-label-caps text-label-caps text-primary tracking-widest uppercase">OFFLINE READY</span></div><button aria-label="Audio Settings" class="p-space-xs rounded-lg text-text-slate hover:text-text-chalk hover:bg-surface-elevated transition-all flex items-center justify-center" type="button"><span class="material-symbols-outlined text-[20px]">volume_up</span></button><button aria-label="Game Settings" class="p-space-xs rounded-lg text-text-slate hover:text-text-chalk hover:bg-surface-elevated transition-all flex items-center justify-center" type="button"><span class="material-symbols-outlined text-[20px]">settings</span></button><div class="relative flex items-center pl-space-xs border-l border-border-hairline"><div class="relative cursor-pointer group"><img alt="Profile" class="w-9 h-9 rounded-full object-cover ring-2 ring-border-focus group-hover:ring-primary transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCilyxany21uh98skrT0SXMocCZgmyqA5xJ225uPT7xqGNSzNdeS0KFWpZlwRowaJE6XtopqpP4rKJx0POK4p8z80ukvzK6VD6isdiKkE-LAI73pBa-bYWDkqA9gDCuBvte5zP11J3hcq_dhtvHWDIXjewHVSkIyIw_S55_UXFf7NNSv6Ih8tIJF7twP74ukCFyE5OUohz1ROWKWxX-n7KUcmwLXyGLcxQXK4s0JhtD"/><span class="absolute -bottom-1 -right-1 bg-tertiary text-on-tertiary font-label-caps text-[9px] px-1 rounded-sm leading-tight font-extrabold shadow-[0_0_8px_rgba(233,195,73,0.4)]" title="Captain Rank">C</span></div></div></div></div></header><main class="w-full pt-20 bg-surface min-h-[calc(100vh-80px)] flex flex-col"><div class="flex flex-col w-full">
+<!-- ZONE A: TOP BROADCAST HUD SCOREBOARD -->
+<section class="w-full bg-surface-card shadow-xl relative z-20">
+<div class="max-w-[1440px] mx-auto px-margin-desktop py-space-sm flex flex-col gap-space-sm">
+<!-- Primary Live Ribbon: Match Score, Live Equation & Control State -->
+<div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md">
+<!-- Score & Teams Capsule -->
+<div class="flex items-center gap-space-lg flex-wrap sm:flex-nowrap">
+<!-- Opponent Target Flag -->
+<div class="flex items-center gap-space-sm bg-surface-recessed px-space-md py-space-xs rounded">
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">1ST INN</span>
+<div class="flex items-baseline gap-1">
+<span class="font-headline-md text-title-md text-text-chalk">AUS</span>
+<span class="font-scoreboard-md text-scoreboard-md text-text-slate">178/7</span>
+</div>
+<span class="font-label-caps text-label-caps text-text-subdued">(20.0)</span>
+</div>
+<!-- Chasing Live Unit (Primary) -->
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="w-2.5 h-2.5 rounded-full bg-wicket-red animate-ping"></span>
+<span class="font-display-lg text-headline-lg text-primary tracking-tight">IND</span>
+</div>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-scoreboard-xl text-scoreboard-xl text-text-chalk font-extrabold tracking-tighter">142<span class="text-wicket-red">/3</span></span>
+<span class="font-scoreboard-md text-scoreboard-md text-text-slate">16.2 <span class="font-label-caps text-label-caps text-text-subdued">/ 20 OV</span></span>
+</div>
+</div>
+<!-- Over Matrix Tracker -->
+<div class="flex items-center gap-space-xs bg-surface-recessed px-space-sm py-1 rounded">
+<span class="font-label-caps text-label-caps text-text-subdued mr-1">OV 17</span>
+<span class="w-7 h-7 rounded flex items-center justify-center font-scoreboard-md text-body-sm bg-surface-container text-text-chalk">1</span>
+<span class="w-7 h-7 rounded flex items-center justify-center font-scoreboard-md text-body-sm bg-primary-container text-on-primary-container font-bold">4</span>
+<span class="w-7 h-7 rounded flex items-center justify-center font-scoreboard-md text-body-sm bg-wicket-red-container text-wicket-red font-bold">W</span>
+<span class="w-7 h-7 rounded flex items-center justify-center font-scoreboard-md text-body-sm bg-tertiary-container text-on-tertiary font-bold">6</span>
+<span class="w-7 h-7 rounded flex items-center justify-center font-scoreboard-md text-body-sm bg-surface-container text-text-subdued">•</span>
+<span class="w-7 h-7 rounded flex items-center justify-center font-scoreboard-md text-body-sm bg-surface-elevated text-primary animate-pulse font-extrabold">_</span>
+</div>
+</div>
+<!-- Tactical Equation Status Pill -->
+<div class="flex items-center gap-space-md flex-wrap lg:flex-nowrap">
+<div class="flex items-center bg-surface-container-high px-space-md py-space-xs rounded gap-space-md shadow-md">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">TARGET</span>
+<span class="font-scoreboard-md text-scoreboard-md text-tertiary">179</span>
+</div>
+<div class="h-8 w-px bg-surface-variant"></div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">REQUIRED</span>
+<span class="font-body-bold text-body-bold text-text-chalk">37 <span class="text-text-subdued font-normal">off 22b</span></span>
+</div>
+<div class="h-8 w-px bg-surface-variant"></div>
+<div class="flex items-center gap-space-sm">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">REQ RR</span>
+<span class="font-scoreboard-md text-scoreboard-md text-warning-amber">10.09</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">CURR RR</span>
+<span class="font-scoreboard-md text-scoreboard-md text-secondary">8.70</span>
+</div>
+</div>
+</div>
+<!-- Playstyle Engine Switcher -->
+<div class="flex items-center bg-surface-recessed p-1 rounded gap-1">
+<button class="px-space-sm py-1 rounded font-label-caps text-label-caps text-text-subdued hover:text-text-chalk transition-colors uppercase">
+              QUICK SIM
+            </button>
+<button class="px-space-sm py-1 rounded font-label-caps text-label-caps bg-primary text-on-primary font-bold shadow-md uppercase flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-on-primary"></span>
+              TACTICAL HUD
+            </button>
+</div>
+</div>
+</div>
+<!-- Real-time Broadcast Telemetry Ticker -->
+<div class="flex items-center justify-between bg-surface-recessed px-space-md py-1 rounded overflow-hidden">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="font-label-caps text-label-caps text-wicket-red uppercase tracking-wider font-extrabold flex items-center gap-1 shrink-0">
+<span class="material-symbols-outlined text-[14px]">sports_cricket</span> 16.2 REPLAY
+          </span>
+<p class="font-body-sm text-body-sm text-text-chalk truncate">
+<span class="text-text-slate">Cummins to Kohli:</span> <strong class="text-tertiary">MAXIMUM!</strong> Stepped 2 paces down the track, hammered through the line over long-on into the member tier. (98m, Exit Vel: 146 km/h)
+          </p>
+</div>
+<div class="hidden md:flex items-center gap-space-md shrink-0">
+<span class="font-label-caps text-label-caps text-telemetry-blue flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">air</span> WIND 14 KM/H OUT
+          </span>
+<span class="font-label-caps text-label-caps text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">altitude</span> DEW INDEX LOW
+          </span>
+</div>
+</div>
+</div>
+</section>
+<!-- MATCH ENGINE COCKPIT (ZONE B & ZONE C COMBINED GRID) -->
+<div class="w-full max-w-[1440px] mx-auto px-margin-desktop py-space-md flex-1 grid grid-cols-1 xl:grid-cols-12 gap-space-md">
+<!-- LEFT HUD: LIVE BATSMEN, BOWLER SENSORS & FORM (3 Cols) -->
+<div class="xl:col-span-3 flex flex-col gap-space-md order-2 xl:order-1">
+<!-- Striker Profile Card -->
+<div class="bg-surface-card rounded p-space-md flex flex-col gap-space-sm relative overflow-hidden shadow-lg">
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-label-caps text-label-caps text-primary uppercase">STRIKER ON PITCH</span>
+</div>
+<span class="font-label-caps text-label-caps bg-surface-elevated text-secondary px-2 py-0.5 rounded">FORM 96</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<img class="w-12 h-12 rounded object-cover shrink-0" data-alt="Intense close-up portrait of master batsman Virat Kohli in Indian national cricket jersey, dusk floodlit stadium background, determined tactical expression, sports editorial photography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCT5pxrDABn_OkkRGxJ9HvOi5-kEZRUEznsK9MMNTq_wCnP_CbIq_w_D93SvCV9fHYrnlr9oLwHDRCJPIu6SgHP_GES1qvCeKHZb2C0grzbWd2_eV9k3fnfPVmlK4QKdIK-S8erW5OBxS6l5pJ5WRr0eXoJt0ceipKqq4ca4HW9abIM6Vpo-11rygb-xMpBd5e57taKFW2TvHQhyUROofnixlQbF7VNUehv-AmNQkJV"/>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-md text-title-md text-text-chalk truncate">Virat Kohli</span>
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">RHB • ANCHOR / ACCEL</span>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2 bg-surface-recessed p-space-xs rounded text-center">
+<div>
+<span class="font-label-caps text-label-caps text-text-subdued block">RUNS (B)</span>
+<span class="font-scoreboard-md text-scoreboard-md text-text-chalk">58<span class="text-primary font-normal text-body-sm">*</span> <span class="font-label-caps text-label-caps text-text-subdued">(36)</span></span>
+</div>
+<div>
+<span class="font-label-caps text-label-caps text-text-subdued block">S/R</span>
+<span class="font-scoreboard-md text-scoreboard-md text-secondary">161.1</span>
+</div>
+<div>
+<span class="font-label-caps text-label-caps text-text-subdued block">4s / 6s</span>
+<span class="font-scoreboard-md text-scoreboard-md text-tertiary">5 / 3</span>
+</div>
+</div>
+<!-- Batting Confidence Gauge -->
+<div class="flex flex-col gap-1">
+<div class="flex justify-between font-label-caps text-label-caps text-text-subdued">
+<span>TIMING ZONE</span>
+<span class="text-primary">LOCKED IN (94%)</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 94%"></div>
+</div>
+</div>
+</div>
+<!-- Non-Striker Profile Card -->
+<div class="bg-surface-card rounded p-space-md flex flex-col gap-space-sm shadow-md">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">NON-STRIKER</span>
+<span class="font-label-caps text-label-caps bg-surface-elevated text-text-slate px-2 py-0.5 rounded">FORM 88</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<img class="w-10 h-10 rounded object-cover shrink-0" data-alt="Profile portrait of cricket power-hitter Hardik Pandya wearing blue team kit, stadium spotlights reflected in visor, hyper-focused broadcast sports portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXgk294nuHmNJ_Z8AZ3Sj_fBPw260lLLXbOnLvSMXxSTfx1khsMzBz7f01lCwYKaW7cB8lO5Sl1CbE_B4TELrAu3SlZQTFt4RVpBxgXZiBQoBFHJ8Vnf45fQ0CV3xbN7GyHT82EyaQGRArMyoN-iQpYAefcmQLLmPfQYnp30XMdPadomGi2fi8faoZvJr8BuOfS47RjmVcSXV3Z3vOdSQ2wWHcyadHR4bgiJUx97mw"/>
+<div class="flex flex-col min-w-0">
+<span class="font-body-bold text-body-bold text-text-chalk truncate">Hardik Pandya</span>
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">RHB • FINISHER</span>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2 bg-surface-recessed p-space-xs rounded text-center">
+<div>
+<span class="font-label-caps text-label-caps text-text-subdued block">RUNS (B)</span>
+<span class="font-scoreboard-md text-scoreboard-md text-text-chalk">14<span class="text-text-subdued font-normal text-body-sm">*</span> <span class="font-label-caps text-label-caps text-text-subdued">(8)</span></span>
+</div>
+<div>
+<span class="font-label-caps text-label-caps text-text-subdued block">S/R</span>
+<span class="font-scoreboard-md text-scoreboard-md text-text-slate">175.0</span>
+</div>
+<div>
+<span class="font-label-caps text-label-caps text-text-subdued block">4s / 6s</span>
+<span class="font-scoreboard-md text-scoreboard-md text-text-slate">1 / 1</span>
+</div>
+</div>
+</div>
+<!-- Active Bowler Telemetry Deck -->
+<div class="bg-surface-card rounded p-space-md flex flex-col gap-space-sm shadow-lg">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-telemetry-blue uppercase flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">sports_baseball</span> CURRENT BOWLER
+          </span>
+<span class="font-label-caps text-label-caps text-wicket-red bg-wicket-red-container px-2 py-0.5 rounded font-bold">SPELL: 2/28</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<img class="w-10 h-10 rounded object-cover shrink-0" data-alt="Portrait of Australian fast bowler Pat Cummins wiping sweat during high pressure cricket match, wearing Australian yellow uniform under nighttime LED stadium floodlights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2qMf6YjZl5xJm72jTGEpihYxZ0RRb39PMd99hTz83ecUGrQvBvLnL8bkm_oder9RH5YoUZ2aDR9hqLBuyN14Li_wn2Xg5PqB_wldU72QI-qJ9LiAdl0MuGMc1ZG7lfz2XX3pfHvdpsaAqU4faItvfNACtDgW3v4r-3VhBl4VNrWAUVKnhXUWcSrNBR1VVjzlgv8u989Dpvcit4JwGZXVWpdk_1t1x29dPX579A_f8"/>
+<div class="flex flex-col min-w-0">
+<span class="font-body-bold text-body-bold text-text-chalk truncate">Pat Cummins (C)</span>
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">R-FAST SEAM • 3.2 OV</span>
+</div>
+</div>
+<!-- Live Pitch Sensors -->
+<div class="bg-surface-recessed p-space-xs rounded flex flex-col gap-space-xs">
+<div class="flex justify-between items-center text-body-sm">
+<span class="font-label-caps text-label-caps text-text-subdued">LAST DELIVERY</span>
+<span class="font-scoreboard-md text-scoreboard-md text-text-chalk">142.4 <span class="font-label-caps text-label-caps text-telemetry-blue">KM/H</span></span>
+</div>
+<div class="flex justify-between items-center text-body-sm">
+<span class="font-label-caps text-label-caps text-text-subdued">DEVIATION</span>
+<span class="font-label-caps text-label-caps text-warning-amber">1.8° IN-CUTTER</span>
+</div>
+<div class="flex justify-between items-center text-body-sm">
+<span class="font-label-caps text-label-caps text-text-subdued">LENGTH SPRAY</span>
+<span class="font-label-caps text-label-caps text-secondary">GOOD LENGTH (5.8m)</span>
+</div>
+<!-- Bowler Stamina Gauge -->
+<div class="flex flex-col gap-1 mt-1">
+<div class="flex justify-between font-label-caps text-label-caps text-text-subdued">
+<span>REMAINING STAMINA</span>
+<span class="text-text-slate">62%</span>
+</div>
+<div class="w-full h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="bg-warning-amber h-full rounded-full" style="width: 62%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Win Probability Sparkline Card -->
+<div class="bg-surface-card rounded p-space-md flex flex-col gap-space-xs shadow-md">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">REAL-TIME WIN INDEX</span>
+<span class="font-scoreboard-md text-scoreboard-md text-primary">IND 68%</span>
+</div>
+<div class="w-full h-10 flex items-end gap-1 pt-1">
+<div class="flex-1 bg-surface-container h-[40%] rounded-t-sm"></div>
+<div class="flex-1 bg-surface-container h-[45%] rounded-t-sm"></div>
+<div class="flex-1 bg-surface-container h-[35%] rounded-t-sm"></div>
+<div class="flex-1 bg-surface-container h-[50%] rounded-t-sm"></div>
+<div class="flex-1 bg-wicket-red/80 h-[28%] rounded-t-sm" title="Wicket fell: 16.3"></div>
+<div class="flex-1 bg-tertiary h-[72%] rounded-t-sm" title="Kohli Six: 16.4"></div>
+<div class="flex-1 bg-primary h-[68%] rounded-t-sm"></div>
+</div>
+<div class="flex justify-between font-label-caps text-label-caps text-text-subdued">
+<span>OV 14</span>
+<span>OV 15</span>
+<span>OV 16</span>
+<span class="text-text-chalk">NOW</span>
+</div>
+</div>
+</div>
+<!-- ZONE B: CENTER TACTICAL FIELD VISUALIZATION CANVAS (6 Cols) -->
+<div class="xl:col-span-6 flex flex-col gap-space-md order-1 xl:order-2">
+<!-- Ground Oval Visualizer -->
+<div class="w-full bg-surface-container-lowest rounded p-space-md relative overflow-hidden flex flex-col items-center justify-between min-h-[460px] shadow-2xl">
+<!-- Pitch Header Overhead Info -->
+<div class="w-full flex items-center justify-between z-10">
+<div class="flex items-center gap-space-xs bg-surface/80 backdrop-blur px-space-sm py-1 rounded">
+<span class="material-symbols-outlined text-[16px] text-primary">stadium</span>
+<span class="font-label-caps text-label-caps text-text-chalk">MELBOURNE CRICKET GROUND</span>
+</div>
+<div class="flex items-center gap-space-xs bg-surface/80 backdrop-blur px-space-sm py-1 rounded">
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">FIELD SETUP:</span>
+<span class="font-label-caps text-label-caps text-tertiary">DEFENSIVE RING (5 OUT)</span>
+</div>
+</div>
+<!-- 2D STYLIZED PITCH / OVAL GRAPHIC (Inline SVG Visualizer) -->
+<div class="relative w-full max-w-[480px] aspect-square my-2 flex items-center justify-center">
+<svg class="w-full h-full" fill="none" viewbox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+<!-- Outfield Base -->
+<ellipse cx="250" cy="250" fill="#141E14" rx="240" ry="240"></ellipse>
+<!-- Deep Boundary Rope -->
+<ellipse cx="250" cy="250" rx="232" ry="232" stroke="#303A31" stroke-dasharray="4 4" stroke-width="2"></ellipse>
+<!-- 30-Yard Inner Ring -->
+<ellipse cx="250" cy="250" rx="145" ry="145" stroke="#435144" stroke-width="1.5"></ellipse>
+<text fill="#6B756C" font-family="JetBrains Mono" font-size="10" font-weight="700" letter-spacing="1" x="255" y="115">30-YD CIRCLE</text>
+<!-- Center Pitch Strip -->
+<rect fill="#2A3327" height="140" rx="2" width="24" x="238" y="180"></rect>
+<!-- Bowling Crease Lines -->
+<line stroke="#78DC77" stroke-width="1.5" x1="234" x2="266" y1="200" y2="200"></line>
+<line stroke="#78DC77" stroke-width="1.5" x1="234" x2="266" y1="300" y2="300"></line>
+<!-- Wickets -->
+<circle cx="250" cy="198" fill="#E9C349" r="2.5"></circle>
+<circle cx="250" cy="302" fill="#E9C349" r="2.5"></circle>
+<!-- Dynamic Shot Spray: Recent Kohli Six Trajectory over Mid-Wicket -->
+<path class="animate-pulse" d="M 250 295 Q 160 210 90 120" stroke="#E9C349" stroke-dasharray="6 4" stroke-linecap="round" stroke-width="3"></path>
+<circle cx="90" cy="120" fill="#E9C349" r="5"></circle>
+<text fill="#E9C349" font-family="JetBrains Mono" font-size="11" font-weight="800" x="50" y="110">6 (98M)</text>
+<!-- Striker Marker (Kohli) -->
+<circle cx="250" cy="292" fill="#78DC77" r="6"></circle>
+<circle cx="250" cy="292" opacity="0.6" r="10" stroke="#78DC77" stroke-width="1"></circle>
+<text fill="#F4F5F0" font-family="Manrope" font-size="10" font-weight="700" x="262" y="296">KOHLI (58*)</text>
+<!-- Non-Striker Marker (Pandya) -->
+<circle cx="242" cy="204" fill="#A9D55F" r="5"></circle>
+<text fill="#A2AAA1" font-family="Manrope" font-size="9" font-weight="600" x="175" y="208">PANDYA (14*)</text>
+<!-- Bowler Marker (Cummins Run-up Trail) -->
+<line stroke="#38BDF8" stroke-dasharray="2 3" stroke-linecap="round" stroke-width="2" x1="250" x2="250" y1="140" y2="192"></line>
+<circle cx="250" cy="192" fill="#38BDF8" r="5"></circle>
+<text fill="#38BDF8" font-family="Manrope" font-size="9" font-weight="700" x="258" y="188">CUMMINS</text>
+<!-- Tactical Fielders Placements (Australian 11) -->
+<!-- Deep Mid-Wicket -->
+<g transform="translate(110, 140)">
+<circle cx="0" cy="0" fill="#C92A2A" r="4.5"></circle>
+<text fill="#BECAB9" font-family="JetBrains Mono" font-size="8" x="7" y="3">DEEP MID-WKT</text>
+</g>
+<!-- Long-On -->
+<g transform="translate(190, 80)">
+<circle cx="0" cy="0" fill="#C92A2A" r="4.5"></circle>
+<text fill="#BECAB9" font-family="JetBrains Mono" font-size="8" x="7" y="3">LONG-ON</text>
+</g>
+<!-- Long-Off -->
+<g transform="translate(310, 80)">
+<circle cx="0" cy="0" fill="#C92A2A" r="4.5"></circle>
+<text fill="#BECAB9" font-family="JetBrains Mono" font-size="8" x="7" y="3">LONG-OFF</text>
+</g>
+<!-- Deep Cover / Sweeper -->
+<g transform="translate(410, 200)">
+<circle cx="0" cy="0" fill="#C92A2A" r="4.5"></circle>
+<text fill="#BECAB9" font-family="JetBrains Mono" font-size="8" x="-70" y="3">SWEEPER COVER</text>
+</g>
+<!-- Point -->
+<g transform="translate(360, 270)">
+<circle cx="0" cy="0" fill="#C92A2A" r="4"></circle>
+<text fill="#6B756C" font-family="JetBrains Mono" font-size="8" x="7" y="3">POINT</text>
+</g>
+<!-- Mid-Off (Inner Ring) -->
+<g transform="translate(295, 230)">
+<circle cx="0" cy="0" fill="#C92A2A" r="4"></circle>
+<text fill="#6B756C" font-family="JetBrains Mono" font-size="8" x="6" y="3">MID-OFF</text>
+</g>
+<!-- Extra Cover (Inner Ring) -->
+<g transform="translate(325, 255)">
+<circle cx="0" cy="0" fill="#C92A2A" r="4"></circle>
+<text fill="#6B756C" font-family="JetBrains Mono" font-size="8" x="6" y="3">COVER</text>
+</g>
+<!-- Square Leg (Inner Ring) -->
+<g transform="translate(155, 305)">
+<circle cx="0" cy="0" fill="#C92A2A" r="4"></circle>
+<text fill="#6B756C" font-family="JetBrains Mono" font-size="8" x="-65" y="3">SQ. LEG</text>
+</g>
+<!-- Deep Fine Leg -->
+<g transform="translate(115, 390)">
+<circle cx="0" cy="0" fill="#C92A2A" r="4.5"></circle>
+<text fill="#BECAB9" font-family="JetBrains Mono" font-size="8" x="7" y="3">DEEP FINE LEG</text>
+</g>
+<!-- Wicket Keeper -->
+<g transform="translate(250, 335)">
+<circle cx="0" cy="0" fill="#F59E0B" r="5"></circle>
+<text fill="#F59E0B" font-family="JetBrains Mono" font-size="8" font-weight="700" x="8" y="3">WK (CAREY)</text>
+</g>
+<!-- First Slip -->
+<g transform="translate(270, 330)">
+<circle cx="0" cy="0" fill="#C92A2A" r="4"></circle>
+<text fill="#6B756C" font-family="JetBrains Mono" font-size="8" x="6" y="3">SLIP</text>
+</g>
+</svg>
+</div>
+<!-- Field Overlay Legend & Gaps Analyzer -->
+<div class="w-full flex items-center justify-between z-10 pt-space-xs bg-surface/90 px-space-md py-1 rounded">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-1">
+<span class="w-2.5 h-2.5 rounded-full bg-wicket-red"></span>
+<span class="font-label-caps text-label-caps text-text-subdued">AUSTRALIA FIELD (11)</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+<span class="font-label-caps text-label-caps text-text-subdued">BATTER CREASE</span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary">warning</span>
+<span class="font-label-caps text-label-caps text-tertiary">VACANT GAP: COVERS &amp; MID-WICKET TIGHT</span>
+</div>
+</div>
+</div>
+<!-- Historical Over Progression Matrix (Zone B Footer) -->
+<div class="bg-surface-card rounded p-space-sm flex items-center justify-between text-body-sm shadow-md">
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">LAST 3 OVERS</span>
+<div class="flex items-center gap-space-lg">
+<div class="flex items-center gap-1">
+<span class="font-label-caps text-label-caps text-text-slate">OV 15 (Starc):</span>
+<span class="font-scoreboard-md text-body-sm text-text-chalk">2 • 1 4 1 1</span>
+<span class="font-label-caps text-label-caps text-secondary ml-1">[9]</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="font-label-caps text-label-caps text-text-slate">OV 16 (Zampa):</span>
+<span class="font-scoreboard-md text-body-sm text-text-chalk">1 6 1 • 2 1</span>
+<span class="font-label-caps text-label-caps text-secondary ml-1">[11]</span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<span class="font-label-caps text-label-caps text-text-subdued">PARTNERSHIP:</span>
+<span class="font-scoreboard-md text-scoreboard-md text-primary">34 <span class="font-label-caps text-label-caps text-text-subdued">(18b)</span></span>
+</div>
+</div>
+</div>
+<!-- RIGHT HUD: ZONE C BATTING DECISION CONTROLS & ACTION TRIGGER (3 Cols) -->
+<div class="xl:col-span-3 flex flex-col gap-space-md order-3">
+<!-- TACTICAL COMMAND DECK -->
+<div class="bg-surface-card rounded p-space-md flex flex-col gap-space-md shadow-xl">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-primary">tune</span>
+<span class="font-headline-md text-title-md text-text-chalk">Shot Intent</span>
+</div>
+<span class="font-label-caps text-label-caps text-primary bg-surface-elevated px-2 py-0.5 rounded font-bold">BALL 16.3</span>
+</div>
+<!-- 4-Level Intent Selector Matrix -->
+<div class="grid grid-cols-2 gap-space-xs" id="intent-selector">
+<button class="intent-btn p-space-sm rounded bg-surface-container hover:bg-surface-elevated flex flex-col text-left transition-all" data-power="20%" data-risk="LOW">
+<span class="font-label-caps text-label-caps text-text-subdued">SAFE</span>
+<span class="font-body-bold text-body-sm text-text-chalk">DEFEND / ROTATE</span>
+<span class="font-label-caps text-[9px] text-secondary mt-1">RISK: 8% • SINGLE: 75%</span>
+</button>
+<button class="intent-btn p-space-sm rounded bg-surface-elevated ring-1 ring-primary flex flex-col text-left transition-all shadow-md" data-power="55%" data-risk="MED">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-primary">RECOMMENDED</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+</div>
+<span class="font-body-bold text-body-sm text-text-chalk">CONTROLLED STROKE</span>
+<span class="font-label-caps text-[9px] text-primary mt-1">RISK: 24% • GAP FIND: 68%</span>
+</button>
+<button class="intent-btn p-space-sm rounded bg-surface-container hover:bg-surface-elevated flex flex-col text-left transition-all" data-power="80%" data-risk="HIGH">
+<span class="font-label-caps text-label-caps text-warning-amber">ATTACK</span>
+<span class="font-body-bold text-body-sm text-text-chalk">AGGRESSIVE DRIVE</span>
+<span class="font-label-caps text-[9px] text-warning-amber mt-1">RISK: 42% • BOUNDARY: 48%</span>
+</button>
+<button class="intent-btn p-space-sm rounded bg-surface-container hover:bg-surface-elevated flex flex-col text-left transition-all" data-power="100%" data-risk="EXTREME">
+<span class="font-label-caps text-label-caps text-wicket-red">MAXIMUM POWER</span>
+<span class="font-body-bold text-body-sm text-text-chalk">LOFTED SLOG</span>
+<span class="font-label-caps text-[9px] text-wicket-red mt-1">RISK: 65% • SIX: 40%</span>
+</button>
+</div>
+<!-- Target Sector Directional Compass Selector -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">TARGET GROUND SECTOR</span>
+<span class="font-label-caps text-label-caps text-secondary font-bold" id="selected-sector-label">V-ARC / STRAIGHT</span>
+</div>
+<div class="grid grid-cols-4 gap-1">
+<button class="sector-btn py-space-xs rounded bg-surface-container hover:bg-surface-elevated font-label-caps text-label-caps text-text-slate hover:text-text-chalk text-center transition-all" data-sector="OFF-SIDE">
+              OFF-SIDE
+            </button>
+<button class="sector-btn py-space-xs rounded bg-primary text-on-primary font-label-caps text-label-caps font-bold text-center shadow-sm" data-sector="V-ARC / STRAIGHT">
+              V-ARC
+            </button>
+<button class="sector-btn py-space-xs rounded bg-surface-container hover:bg-surface-elevated font-label-caps text-label-caps text-text-slate hover:text-text-chalk text-center transition-all" data-sector="LEG-SIDE">
+              LEG-SIDE
+            </button>
+<button class="sector-btn py-space-xs rounded bg-surface-container hover:bg-surface-elevated font-label-caps text-label-caps text-text-slate hover:text-text-chalk text-center transition-all" data-sector="BEHIND SQ">
+              BEHIND SQ
+            </button>
+</div>
+</div>
+<!-- Running Between Wickets Aggression -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-text-subdued uppercase">RUNNING AGGRESSION</span>
+<span class="font-label-caps text-label-caps text-warning-amber">SHARP DOUBLE</span>
+</div>
+<div class="grid grid-cols-3 gap-1 bg-surface-recessed p-1 rounded">
+<button class="py-1 rounded font-label-caps text-label-caps text-text-subdued hover:text-text-chalk text-center uppercase">
+              SAFE
+            </button>
+<button class="py-1 rounded font-label-caps text-label-caps bg-surface-elevated text-warning-amber font-bold text-center uppercase shadow-sm">
+              SHARP 2
+            </button>
+<button class="py-1 rounded font-label-caps text-label-caps text-text-subdued hover:text-text-chalk text-center uppercase">
+              PUSH LIMIT
+            </button>
+</div>
+</div>
+<!-- Tactical Strike Power Indicator Dial -->
+<div class="bg-surface-recessed p-space-sm rounded flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-tertiary">bolt</span>
+<span class="font-label-caps text-label-caps text-text-chalk">PROJECTED EXIT VELOCITY</span>
+</div>
+<span class="font-scoreboard-md text-scoreboard-md text-tertiary">138 KM/H</span>
+</div>
+<!-- PRIMARY EXECUTION ACTION TRIGGER -->
+<button class="w-full py-space-md px-space-lg rounded bg-primary text-on-primary font-headline-md text-title-md hover:bg-primary-container active:scale-[0.98] transition-all flex items-center justify-center gap-space-sm shadow-[0_4px_24px_rgba(76,175,80,0.3)]" id="simulate-ball-btn">
+<span class="material-symbols-outlined text-[24px]">play_circle</span>
+<span>TAKE STRIKE • NEXT BALL</span>
+<span class="font-label-caps text-label-caps bg-on-primary/20 px-2 py-0.5 rounded text-on-primary ml-1">[SPACE]</span>
+</button>
+</div>
+<!-- Quick Substitutions & Tactical Calling Cards -->
+<div class="bg-surface-card rounded p-space-sm flex items-center justify-between text-body-sm shadow-md">
+<button class="flex items-center gap-1 font-label-caps text-label-caps text-text-slate hover:text-text-chalk px-2 py-1 rounded bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[16px]">security</span> DEFENSIVE SHIFT
+        </button>
+<button class="flex items-center gap-1 font-label-caps text-label-caps text-text-slate hover:text-text-chalk px-2 py-1 rounded bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[16px]">hourglass_empty</span> DRINKS BREAK
+        </button>
+<button class="flex items-center gap-1 font-label-caps text-label-caps text-wicket-red hover:text-text-chalk px-2 py-1 rounded bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[16px]">flag</span> DRS REVIEW
+        </button>
+</div>
+</div>
+</div>
+<!-- INLINE CLIENT MICRO-INTERACTIONS -->
+<script>
+    (function initMatchHUD() {
+      // Intent Selection Toggle
+      const intentButtons = document.querySelectorAll('.intent-btn');
+      intentButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          intentButtons.forEach(b => {
+            b.classList.remove('bg-surface-elevated', 'ring-1', 'ring-primary', 'shadow-md');
+            b.classList.add('bg-surface-container');
+          });
+          btn.classList.remove('bg-surface-container');
+          btn.classList.add('bg-surface-elevated', 'ring-1', 'ring-primary', 'shadow-md');
+        });
+      });
+
+      // Target Sector Dial Toggle
+      const sectorButtons = document.querySelectorAll('.sector-btn');
+      const sectorLabel = document.getElementById('selected-sector-label');
+      sectorButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          sectorButtons.forEach(b => {
+            b.classList.remove('bg-primary', 'text-on-primary', 'font-bold', 'shadow-sm');
+            b.classList.add('bg-surface-container', 'text-text-slate');
+          });
+          btn.classList.remove('bg-surface-container', 'text-text-slate');
+          btn.classList.add('bg-primary', 'text-on-primary', 'font-bold', 'shadow-sm');
+          if (sectorLabel) {
+            sectorLabel.textContent = btn.getAttribute('data-sector');
+          }
+        });
+      });
+
+      // Keyboard Shortcut listener (Space to Simulate Next Ball)
+      const simButton = document.getElementById('simulate-ball-btn');
+      window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT') {
+          e.preventDefault();
+          if (simButton) {
+            simButton.classList.add('scale-95');
+            setTimeout(() => simButton.classList.remove('scale-95'), 150);
+            simButton.click();
+          }
+        }
+      });
+    })();
+  </script>
+</div></main><footer class="w-full bg-surface-recessed border-t border-border-hairline py-space-md mt-auto"><div class="max-w-[1440px] mx-auto px-margin-desktop flex flex-col md:flex-row items-center justify-between gap-space-md"><div class="flex items-center gap-space-sm"><span class="font-label-caps text-label-caps text-text-subdued uppercase tracking-widest">© 2025 CRICKET DREAM XI BROADCAST ENGINE</span><span class="text-border-hairline">|</span><span class="font-label-caps text-label-caps text-primary tracking-widest">BUILD 2.4.0-TACTICAL</span></div><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs"><span class="w-1.5 h-1.5 rounded-full bg-telemetry-blue"></span><span class="font-label-caps text-label-caps text-text-slate">60 FPS</span></div><div class="flex items-center gap-space-xs"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span><span class="font-label-caps text-label-caps text-text-slate">SIM RUNNING</span></div><a class="font-label-caps text-label-caps text-text-subdued hover:text-text-chalk transition-colors" data-path="telemetry-status" href="#">TELEMETRY LOGS</a></div></div></footer></body></html>
