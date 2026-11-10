@@ -181,6 +181,61 @@ export function calculateOutcomeLogits(input: OutcomeCalculationInput): OutcomeL
       break;
   }
 
+  // 5.1 Bowler Pace Strategy & Intensity
+  if (tactics.bowlingPaceStrategy) {
+    switch (tactics.bowlingPaceStrategy) {
+      case 'FULL_PACE':
+        logits.DOT += 0.25;
+        logits.WICKET += 0.25;
+        logits.FOUR += 0.15; // Edge carrying to boundary
+        break;
+      case 'EFFORT_BALL':
+        logits.WICKET += 0.35;
+        logits.NO_BALL += 0.1;
+        logits.FOUR += 0.2;
+        break;
+      case 'CONTROLLED':
+        logits.DOT += 0.3;
+        logits.WIDE -= 0.2;
+        logits.NO_BALL -= 0.15;
+        logits.FOUR -= 0.2;
+        break;
+      case 'VARIATION_FOCUS':
+        logits.DOT += 0.2;
+        logits.WICKET += 0.2;
+        logits.RUN_1 -= 0.15;
+        break;
+      case 'CONSERVE':
+        logits.RUN_1 += 0.25;
+        logits.DOT -= 0.15;
+        logits.WICKET -= 0.2;
+        break;
+    }
+  }
+
+  // 5.2 Bowling Tactical Intent
+  if (tactics.bowlingIntent) {
+    switch (tactics.bowlingIntent) {
+      case 'ATTACKING':
+      case 'WICKET_TAKING':
+        logits.WICKET += 0.35;
+        logits.FOUR += 0.25;
+        logits.SIX += 0.15;
+        logits.DOT += 0.15;
+        break;
+      case 'CONTAINMENT':
+      case 'DEFENSIVE':
+        logits.FOUR -= 0.35;
+        logits.SIX -= 0.3;
+        logits.RUN_1 += 0.2;
+        logits.DOT += 0.2;
+        logits.WICKET -= 0.25;
+        break;
+      case 'BALANCED':
+        break;
+    }
+  }
+
   // 6. Match Context Dynamics (Powerplay, Death Overs, Required Rate)
   if (context.isPowerplay) {
     logits.FOUR += 0.25;

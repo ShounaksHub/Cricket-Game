@@ -61,6 +61,20 @@ export type BowlingVariation =
   | 'FLIPPER'
   | 'CUTTER';
 
+export type BowlingPaceStrategy =
+  | 'FULL_PACE'
+  | 'CONTROLLED'
+  | 'EFFORT_BALL'
+  | 'VARIATION_FOCUS'
+  | 'CONSERVE';
+
+export type BowlingIntent =
+  | 'ATTACKING'
+  | 'CONTAINMENT'
+  | 'BALANCED'
+  | 'WICKET_TAKING'
+  | 'DEFENSIVE';
+
 export type FieldPreset =
   | 'ATTACKING_CLOSE_CATCHERS'
   | 'BALANCED_RING'
@@ -73,6 +87,9 @@ export interface TacticalDeliveryAction {
   readonly bowlerLength: BowlingLength;
   readonly bowlerVariation: BowlingVariation;
   readonly fieldPreset: FieldPreset;
+  readonly bowlingPaceStrategy?: BowlingPaceStrategy;
+  readonly bowlingIntent?: BowlingIntent;
+  readonly nextBowlerPlayerId?: string;
   readonly takeNewBall?: boolean;
   readonly declareInnings?: boolean;
   readonly enforceFollowOn?: boolean;

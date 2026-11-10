@@ -61,6 +61,8 @@ import {
   type BowlingLength,
   type BowlingLine,
   type BowlingVariation,
+  type BowlingPaceStrategy,
+  type BowlingIntent,
   type FieldPreset,
   type TacticalDeliveryAction,
   type ReplayVerificationReport,
@@ -198,7 +200,10 @@ export default function MatchSimulationPage() {
   const [userLine, setUserLine] = useState<BowlingLine>('OUTSIDE_OFF');
   const [userVariation, setUserVariation] = useState<BowlingVariation>('STOCK');
   const [userField, setUserField] = useState<FieldPreset>('BALANCED_RING');
-  const [isAIOptimized, setIsAIOptimized] = useState<boolean>(true);
+  const [userPaceStrategy, setUserPaceStrategy] = useState<BowlingPaceStrategy>('FULL_PACE');
+  const [userBowlingIntent, setUserBowlingIntent] = useState<BowlingIntent>('ATTACKING');
+  const [userNominatedBowlerId, setUserNominatedBowlerId] = useState<string>('');
+  const [isAIOptimized, setIsAIOptimized] = useState<boolean>(false);
   const [userTeamName, setUserTeamName] = useState<string>('User Dream XI');
   const [aiTeamName, setAiTeamName] = useState<string>('AI World XI');
   const [aiDifficulty, setAiDifficulty] = useState<AIDifficulty>('MEDIUM');
@@ -758,12 +763,18 @@ export default function MatchSimulationPage() {
     const isUserBatting = currentInnings?.battingTeamId === 'user-team';
     const isUserBowling = currentInnings?.bowlingTeamId === 'user-team';
 
+    // The fundamental principle: The USER manages their own Dream XI. The OPPONENT is managed entirely by CPU AI.
+    // When user's team is batting: User controls batter intent; CPU controls bowler line/length/variation/field.
+    // When user's team is bowling: User controls bowling pace, line, length, variation, intent, field & bowler; CPU controls batter intent.
     const action: TacticalDeliveryAction = {
-      batterIntent: isUserBatting && !isAIOptimized ? userIntent : aiAction.batterIntent,
-      bowlerLength: isUserBowling && !isAIOptimized ? userLength : aiAction.bowlerLength,
-      bowlerLine: isUserBowling && !isAIOptimized ? userLine : aiAction.bowlerLine,
-      bowlerVariation: isUserBowling && !isAIOptimized ? userVariation : aiAction.bowlerVariation,
-      fieldPreset: isUserBowling && !isAIOptimized ? userField : aiAction.fieldPreset,
+      batterIntent: isUserBatting ? userIntent : aiAction.batterIntent,
+      bowlerLength: isUserBowling ? userLength : aiAction.bowlerLength,
+      bowlerLine: isUserBowling ? userLine : aiAction.bowlerLine,
+      bowlerVariation: isUserBowling ? userVariation : aiAction.bowlerVariation,
+      fieldPreset: isUserBowling ? userField : aiAction.fieldPreset,
+      bowlingPaceStrategy: isUserBowling ? userPaceStrategy : aiAction.bowlingPaceStrategy,
+      bowlingIntent: isUserBowling ? userBowlingIntent : aiAction.bowlingIntent,
+      nextBowlerPlayerId: isUserBowling && userNominatedBowlerId ? userNominatedBowlerId : undefined,
     };
 
     const { nextState, event } = stepDelivery(state, action, prng);
@@ -826,26 +837,28 @@ export default function MatchSimulationPage() {
     }
   }
 
-  // Get current active event for score & visualizer
+  // Authoritative match score derived directly from the single source of truth: liveState
   const currentEvent: DeliveryEvent | undefined =
     visibleEvents.length > 0 ? visibleEvents[visibleEvents.length - 1] : undefined;
 
-  const currentInningsEvents = currentEvent
-    ? visibleEvents.filter((e) => e.inningsNumber === currentEvent.inningsNumber)
-    : [];
+  const activeInningsNumber = liveState ? liveState.currentInningsIndex + 1 : (currentEvent?.inningsNumber ?? 1);
+  const activeInnings = liveState?.innings[activeInningsNumber - 1];
 
-  const currentRuns = currentInningsEvents.reduce((sum, e) => sum + e.scorecardDelta.totalRuns, 0);
-  const currentWickets = currentInningsEvents.filter((e) => e.dismissal !== null && e.dismissal !== undefined).length;
-  const legalBalls = currentInningsEvents.filter((e) => e.extras.wides === 0 && e.extras.noBalls === 0).length;
-  const oversFormatted = `${Math.floor(legalBalls / 6)}.${legalBalls % 6}`;
+  // Derive scores from authoritative activeInnings state
+  const currentRuns = activeInnings?.totalRuns ?? (currentEvent ? currentEvent.scorecardDelta.totalRuns : 0);
+  const currentWickets = activeInnings?.totalWickets ?? (currentEvent ? currentEvent.scorecardDelta.totalWickets : 0);
+  const legalBalls = activeInnings
+    ? activeInnings.completedOvers * 6 + activeInnings.legalBallsInCurrentOver
+    : 0;
+  const oversFormatted = activeInnings
+    ? `${activeInnings.completedOvers}.${activeInnings.legalBallsInCurrentOver}`
+    : '0.0';
   const runRate = legalBalls > 0 ? ((currentRuns / legalBalls) * 6).toFixed(2) : '0.00';
 
   // Dynamic format & target metrics
-  const activeInningsNumber = currentEvent?.inningsNumber ?? 1;
   const isTestFormat = format === 'TEST_RED_BALL' || format === 'TEST_PINK_BALL';
   const formatMaxOvers = format === 'T10' ? 10 : format === 'ODI' ? 50 : format === 'T20' ? 20 : 9999;
   const totalInningsBalls = formatMaxOvers * 6;
-  const activeInnings = liveState?.innings[activeInningsNumber - 1];
   const targetRuns = activeInnings?.targetRuns;
   const runsRemaining = targetRuns !== undefined ? Math.max(0, targetRuns - currentRuns) : 0;
   const ballsRemaining = !isTestFormat ? Math.max(0, totalInningsBalls - legalBalls) : 0;
@@ -904,6 +917,15 @@ export default function MatchSimulationPage() {
   const strikerId = activeInnings?.strikerPlayerId;
   const nonStrikerId = activeInnings?.nonStrikerPlayerId;
   const bowlerId = activeInnings?.currentBowlerPlayerId;
+
+  // Real-time team ownership evaluation
+  const isUserBatting = activeInnings?.battingTeamId === 'user-team';
+  const isUserBowling = activeInnings?.bowlingTeamId === 'user-team';
+
+  // Eligible user bowlers for dynamic bowling changes
+  const userBowlingSlots = liveState && isUserBowling
+    ? (liveState.config.team1.id === 'user-team' ? liveState.config.team1.lineup : liveState.config.team2.lineup)
+    : [];
 
   const strikerStats = strikerId ? activeInnings?.batters.get(strikerId) : undefined;
   const nonStrikerStats = nonStrikerId ? activeInnings?.batters.get(nonStrikerId) : undefined;
@@ -1949,7 +1971,7 @@ export default function MatchSimulationPage() {
                     <>
                       <span className="text-text-slate">{bowlerName} to {strikerName}: </span>
                       <strong className="text-tertiary">{currentEvent.outcome}! </strong>
-                      {currentEvent.scorecardDelta.totalRuns} run(s) scored. {currentEvent.dismissal ? `Dismissal: ${currentEvent.dismissal.mode}` : ''}
+                      {currentEvent.runsBat + currentEvent.extras.wides + currentEvent.extras.noBalls + currentEvent.extras.byes + currentEvent.extras.legByes} run(s) scored on this delivery. {currentEvent.dismissal ? `Dismissal: ${currentEvent.dismissal.mode}` : ''}
                     </>
                   ) : (
                     'Match in progress. Select tactical batter intent and step delivery.'
@@ -2194,97 +2216,293 @@ export default function MatchSimulationPage() {
 
             {/* RIGHT HUD: TACTICAL WHEEL & STEPPER ACTION (3 Cols) */}
             <div className="xl:col-span-3 flex flex-col gap-space-md order-3">
-              {/* Tactical Batter Intent Selector */}
-              <div className="bg-surface-card rounded-xl p-space-md shadow-lg border border-border-hairline flex flex-col gap-space-sm">
-                <span className="font-label-caps text-label-caps text-text-subdued uppercase font-bold">
-                  BATTER TACTICAL INTENT
+              {/* Tactical Status Tag */}
+              <div className="bg-surface-elevated rounded-xl p-3 border border-border-hairline shadow-md flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className={`w-3 h-3 rounded-full ${isUserBatting ? 'bg-primary animate-pulse' : 'bg-telemetry-blue animate-pulse'}`} />
+                  <span className="font-label-caps text-xs font-extrabold uppercase tracking-wider text-text-chalk">
+                    {isUserBatting ? 'USER BATTING COCKPIT' : 'USER BOWLING COMMAND'}
+                  </span>
+                </div>
+                <span className="font-label-caps text-[10px] text-text-subdued px-2 py-0.5 rounded bg-surface-recessed border border-border-hairline uppercase">
+                  {isUserBatting ? 'CPU BOWLING' : 'CPU BATTING'}
                 </span>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { id: 'DEFEND', label: 'DEFENSIVE', icon: 'shield' },
-                    { id: 'ROTATE_STRIKE', label: 'ROTATE', icon: 'sync' },
-                    { id: 'AGGRESSIVE', label: 'ATTACK', icon: 'sports_baseball' },
-                    { id: 'MAXIMUM_POWER', label: 'CARNAGE', icon: 'bolt' },
-                  ].map((m) => {
-                    const active = userIntent === m.id;
-                    return (
-                      <button
-                        key={m.id}
-                        onClick={() => setUserIntent(m.id as BatterIntent)}
-                        className={`p-2.5 rounded-lg font-label-caps text-label-caps uppercase font-bold flex flex-col items-center justify-center gap-1 transition-all border cursor-pointer ${
-                          active
-                            ? 'bg-primary text-on-primary border-primary shadow-md'
-                            : 'bg-surface-recessed text-text-slate border-border-hairline hover:bg-surface-elevated hover:text-text-chalk'
-                        }`}
-                        type="button"
+              </div>
+
+              {/* USER BATTING COCKPIT (Shown only when user is batting) */}
+              {isUserBatting ? (
+                <div className="bg-surface-card rounded-xl p-space-md shadow-lg border border-border-hairline flex flex-col gap-space-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="font-label-caps text-label-caps text-primary uppercase font-bold flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[16px]">sports_baseball</span>
+                      YOUR BATTER TACTICAL INTENT
+                    </span>
+                    <span className="font-label-caps text-[10px] text-text-subdued uppercase">DIRECT CONTROL</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { id: 'DEFEND', label: 'DEFENSIVE', icon: 'shield', desc: 'Solid Block' },
+                      { id: 'ROTATE_STRIKE', label: 'ROTATE', icon: 'sync', desc: 'Singles & Twos' },
+                      { id: 'AGGRESSIVE', label: 'ATTACK', icon: 'sports_baseball', desc: 'Boundary Hunt' },
+                      { id: 'MAXIMUM_POWER', label: 'CARNAGE', icon: 'bolt', desc: 'Six Or Out' },
+                    ].map((m) => {
+                      const active = userIntent === m.id;
+                      return (
+                        <button
+                          key={m.id}
+                          onClick={() => setUserIntent(m.id as BatterIntent)}
+                          className={`p-2.5 rounded-lg font-label-caps text-label-caps uppercase font-bold flex flex-col items-center justify-center gap-1 transition-all border cursor-pointer ${
+                            active
+                              ? 'bg-primary text-on-primary border-primary shadow-md'
+                              : 'bg-surface-recessed text-text-slate border-border-hairline hover:bg-surface-elevated hover:text-text-chalk'
+                          }`}
+                          type="button"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">{m.icon}</span>
+                          <span>{m.label}</span>
+                          <span className="text-[9px] font-normal lowercase opacity-75">{m.desc}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* CPU Bowler Plan (Read-Only Information) */}
+                  <div className="mt-2 p-2.5 rounded-lg bg-surface-recessed border border-border-hairline flex flex-col gap-1">
+                    <div className="flex items-center justify-between text-[10px] font-label-caps text-text-subdued uppercase">
+                      <span>CPU OPPONENT BOWLING INTENT</span>
+                      <span className="text-telemetry-blue font-bold">AUTONOMOUS</span>
+                    </div>
+                    <div className="text-xs text-text-chalk flex items-center gap-1 font-mono">
+                      <span className="text-text-slate">{bowlerName}:</span>
+                      <span className="text-tertiary">Attacking Corridor • Yorker Guard</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* USER BOWLING COCKPIT (Shown when user is bowling) */
+                <div className="bg-surface-card rounded-xl p-space-md shadow-lg border border-border-hairline flex flex-col gap-space-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="font-label-caps text-label-caps text-telemetry-blue uppercase font-bold flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[16px]">sports_cricket</span>
+                      YOUR BOWLING MANAGEMENT COCKPIT
+                    </span>
+                    <span className="font-label-caps text-[10px] text-text-subdued uppercase">USER DEFENSE</span>
+                  </div>
+
+                  {/* Bowler Selection / Change */}
+                  {userBowlingSlots.length > 0 && (
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-label-caps text-text-subdued uppercase">
+                        NEXT BOWLER (MCC LAW 21.7 COMPLIANT)
+                      </label>
+                      <select
+                        value={userNominatedBowlerId || bowlerId || ''}
+                        onChange={(e) => setUserNominatedBowlerId(e.target.value)}
+                        className="bg-surface-recessed border border-border-hairline text-text-chalk p-1.5 rounded text-[11px] font-label-caps focus:outline-none cursor-pointer"
                       >
-                        <span className="material-symbols-outlined text-[18px]">{m.icon}</span>
-                        <span>{m.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+                        {userBowlingSlots.map((slot) => {
+                          const profile = simulationResult?.finalState.config.playerProfiles.get(slot.playerId);
+                          const bEntry = activeInnings?.bowlers.get(slot.playerId);
+                          const oversBowled = bEntry ? Math.floor(bEntry.ballsBowled / 6) : 0;
+                          const isCurrent = slot.playerId === bowlerId;
+                          const quotaMax = format === 'T10' ? 2 : format === 'T20' ? 4 : format === 'ODI' ? 10 : 999;
+                          const quotaReached = oversBowled >= quotaMax;
+                          return (
+                            <option
+                              key={slot.playerId}
+                              value={slot.playerId}
+                              disabled={isCurrent && (activeInnings?.legalBallsInCurrentOver === 0 && (activeInnings?.completedOvers || 0) > 0)}
+                            >
+                              {profile?.displayName || slot.playerId} ({oversBowled}/{quotaMax} ov{quotaReached ? ' - MAX' : ''}{isCurrent ? ' - ACTIVE' : ''})
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </div>
+                  )}
 
-              {/* Bowling Line & Length Selector */}
-              <div className="bg-surface-card rounded-xl p-space-md shadow-sm border border-border-hairline flex flex-col gap-space-xs">
-                <span className="font-label-caps text-label-caps text-text-subdued uppercase font-bold">
-                  BOWLING TACTICS
-                </span>
-                <div className="grid grid-cols-2 gap-2 text-body-sm">
-                  <select
-                    value={userLength}
-                    onChange={(e) => setUserLength(e.target.value as BowlingLength)}
-                    className="bg-surface-recessed border border-border-hairline text-text-chalk p-1.5 rounded text-[11px] font-label-caps focus:outline-none cursor-pointer"
-                  >
-                    <option value="GOOD_LENGTH">Good Length</option>
-                    <option value="FULL">Full</option>
-                    <option value="YORKER">Yorker</option>
-                    <option value="BACK_OF_LENGTH">Back of Length</option>
-                    <option value="SHORT">Short / Bouncer</option>
-                  </select>
-                  <select
-                    value={userLine}
-                    onChange={(e) => setUserLine(e.target.value as BowlingLine)}
-                    className="bg-surface-recessed border border-border-hairline text-text-chalk p-1.5 rounded text-[11px] font-label-caps focus:outline-none cursor-pointer"
-                  >
-                    <option value="OUTSIDE_OFF">Outside Off</option>
-                    <option value="STUMPS">Off / Middle</option>
-                    <option value="DOWN_LEG">Down Leg</option>
-                  </select>
-                </div>
-              </div>
+                  {/* Bowling Pace & Intensity Strategy */}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-label-caps text-text-subdued uppercase">
+                      DELIVERY PACE & TEMPO
+                    </label>
+                    <div className="grid grid-cols-3 gap-1">
+                      {[
+                        { id: 'FULL_PACE', label: 'FULL PACE' },
+                        { id: 'CONTROLLED', label: 'CONTROLLED' },
+                        { id: 'EFFORT_BALL', label: 'EFFORT BALL' },
+                        { id: 'VARIATION_FOCUS', label: 'VARIATION' },
+                        { id: 'CONSERVE', label: 'CONSERVE' },
+                      ].map((p) => (
+                        <button
+                          key={p.id}
+                          onClick={() => setUserPaceStrategy(p.id as BowlingPaceStrategy)}
+                          className={`py-1 rounded text-[10px] font-label-caps uppercase transition border cursor-pointer ${
+                            userPaceStrategy === p.id
+                              ? 'bg-telemetry-blue text-on-surface border-telemetry-blue font-bold shadow-sm'
+                              : 'bg-surface-recessed text-text-slate border-border-hairline hover:bg-surface-elevated'
+                          }`}
+                          type="button"
+                        >
+                          {p.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-              {/* Big Stepper Button */}
+                  {/* Bowling Tactical Intent */}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-label-caps text-text-subdued uppercase">
+                      BOWLING INTENT
+                    </label>
+                    <div className="grid grid-cols-3 gap-1">
+                      {[
+                        { id: 'ATTACKING', label: 'ATTACKING' },
+                        { id: 'CONTAINMENT', label: 'CONTAIN' },
+                        { id: 'WICKET_TAKING', label: 'WICKET' },
+                      ].map((m) => (
+                        <button
+                          key={m.id}
+                          onClick={() => setUserBowlingIntent(m.id as BowlingIntent)}
+                          className={`py-1 rounded text-[10px] font-label-caps uppercase transition border cursor-pointer ${
+                            userBowlingIntent === m.id
+                              ? 'bg-secondary text-on-secondary border-secondary font-bold shadow-sm'
+                              : 'bg-surface-recessed text-text-slate border-border-hairline hover:bg-surface-elevated'
+                          }`}
+                          type="button"
+                        >
+                          {m.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Line, Length & Variation */}
+                  <div className="grid grid-cols-2 gap-2 text-body-sm pt-1">
+                    <div>
+                      <label className="text-[10px] font-label-caps text-text-subdued uppercase block mb-0.5">LENGTH</label>
+                      <select
+                        value={userLength}
+                        onChange={(e) => setUserLength(e.target.value as BowlingLength)}
+                        className="w-full bg-surface-recessed border border-border-hairline text-text-chalk p-1.5 rounded text-[11px] font-label-caps focus:outline-none cursor-pointer"
+                      >
+                        <option value="GOOD_LENGTH">Good Length</option>
+                        <option value="FULL">Full Pitch</option>
+                        <option value="YORKER">Toe-Crushing Yorker</option>
+                        <option value="BACK_OF_LENGTH">Back of Length</option>
+                        <option value="SHORT">Short / Bouncer</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-label-caps text-text-subdued uppercase block mb-0.5">LINE</label>
+                      <select
+                        value={userLine}
+                        onChange={(e) => setUserLine(e.target.value as BowlingLine)}
+                        className="w-full bg-surface-recessed border border-border-hairline text-text-chalk p-1.5 rounded text-[11px] font-label-caps focus:outline-none cursor-pointer"
+                      >
+                        <option value="OUTSIDE_OFF">Corridor / Outside Off</option>
+                        <option value="STUMPS">Attacking Stumps</option>
+                        <option value="DOWN_LEG">Down Leg Side</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-body-sm">
+                    <div>
+                      <label className="text-[10px] font-label-caps text-text-subdued uppercase block mb-0.5">VARIATION</label>
+                      <select
+                        value={userVariation}
+                        onChange={(e) => setUserVariation(e.target.value as BowlingVariation)}
+                        className="w-full bg-surface-recessed border border-border-hairline text-text-chalk p-1.5 rounded text-[11px] font-label-caps focus:outline-none cursor-pointer"
+                      >
+                        <option value="STOCK">Stock Delivery</option>
+                        <option value="SLOWER_BALL">Slower Ball</option>
+                        <option value="CUTTER">Off/Leg Cutter</option>
+                        <option value="BOUNCER">Bouncer</option>
+                        <option value="GOOGLY">Googly / Arm Ball</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-label-caps text-text-subdued uppercase block mb-0.5">FIELDING PRESET</label>
+                      <select
+                        value={userField}
+                        onChange={(e) => setUserField(e.target.value as FieldPreset)}
+                        className="w-full bg-surface-recessed border border-border-hairline text-text-chalk p-1.5 rounded text-[11px] font-label-caps focus:outline-none cursor-pointer"
+                      >
+                        <option value="BALANCED_RING">Balanced Ring</option>
+                        <option value="ATTACKING_CLOSE_CATCHERS">Close Catchers</option>
+                        <option value="DEATH_BOUNDARY_DEFENSE">Boundary Defense</option>
+                        <option value="SPIN_CHOKE">Spin Choke</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* CPU Batter Plan (Read-Only Information) */}
+                  <div className="mt-1 p-2 rounded-lg bg-surface-recessed border border-border-hairline flex flex-col gap-0.5">
+                    <div className="flex items-center justify-between text-[10px] font-label-caps text-text-subdued uppercase">
+                      <span>CPU OPPONENT BATTING INTENT</span>
+                      <span className="text-primary font-bold">AUTONOMOUS</span>
+                    </div>
+                    <div className="text-xs text-text-chalk flex items-center gap-1 font-mono">
+                      <span className="text-text-slate">{strikerName}:</span>
+                      <span className="text-tertiary">Balanced Stance • Reading Field Preset</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Big Stepper Button (Disabled on match completion) */}
               <div className="bg-surface-card rounded-xl p-space-md shadow-xl border border-border-hairline flex flex-col gap-space-sm">
                 <button
                   onClick={stepToNextDelivery}
-                  className="w-full py-4 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-headline-md text-headline-md font-extrabold uppercase tracking-tight flex items-center justify-center gap-2 shadow-[0_4px_24px_rgba(120,220,119,0.35)] hover:scale-[1.01] transition-all cursor-pointer"
+                  disabled={phase === 'COMPLETED'}
+                  className={`w-full py-4 rounded-xl font-headline-md text-headline-md font-extrabold uppercase tracking-tight flex items-center justify-center gap-2 transition-all ${
+                    phase === 'COMPLETED'
+                      ? 'bg-surface-container text-text-subdued border border-border-hairline cursor-not-allowed opacity-60'
+                      : 'bg-primary hover:bg-primary-container text-on-primary shadow-[0_4px_24px_rgba(120,220,119,0.35)] hover:scale-[1.01] cursor-pointer'
+                  }`}
                   type="button"
                 >
                   <span className="material-symbols-outlined text-[24px]">sports_cricket</span>
-                  <span>TAKE STRIKE [SPACE]</span>
+                  <span>{isUserBatting ? 'TAKE STRIKE [SPACE]' : 'BOWL NEXT BALL [SPACE]'}</span>
                 </button>
 
-                {/* Simulation Steppers Bar */}
+                {/* Simulation Steppers Bar (Disabled on match completion) */}
                 <div className="grid grid-cols-3 gap-1.5 pt-1">
                   <button
                     onClick={handleSimulateOver}
-                    className="py-1.5 rounded bg-surface-elevated hover:bg-surface-bright text-text-slate hover:text-text-chalk font-label-caps text-[10px] uppercase font-bold transition border border-border-hairline cursor-pointer"
+                    disabled={phase === 'COMPLETED'}
+                    className={`py-1.5 rounded font-label-caps text-[10px] uppercase font-bold transition border ${
+                      phase === 'COMPLETED'
+                        ? 'bg-surface-recessed text-text-subdued border-border-hairline cursor-not-allowed opacity-50'
+                        : 'bg-surface-elevated hover:bg-surface-bright text-text-slate hover:text-text-chalk border-border-hairline cursor-pointer'
+                    }`}
                     type="button"
                   >
                     SIM OVER
                   </button>
                   <button
                     onClick={handleSimulateInnings}
-                    className="py-1.5 rounded bg-surface-elevated hover:bg-surface-bright text-text-slate hover:text-text-chalk font-label-caps text-[10px] uppercase font-bold transition border border-border-hairline cursor-pointer"
+                    disabled={phase === 'COMPLETED'}
+                    className={`py-1.5 rounded font-label-caps text-[10px] uppercase font-bold transition border ${
+                      phase === 'COMPLETED'
+                        ? 'bg-surface-recessed text-text-subdued border-border-hairline cursor-not-allowed opacity-50'
+                        : 'bg-surface-elevated hover:bg-surface-bright text-text-slate hover:text-text-chalk border-border-hairline cursor-pointer'
+                    }`}
                     type="button"
                   >
                     SIM INNINGS
                   </button>
                   <button
                     onClick={handleInstantResult}
-                    className="py-1.5 rounded bg-surface-elevated hover:bg-surface-bright text-tertiary font-label-caps text-[10px] uppercase font-bold transition border border-border-hairline cursor-pointer"
+                    disabled={phase === 'COMPLETED'}
+                    className={`py-1.5 rounded font-label-caps text-[10px] uppercase font-bold transition border ${
+                      phase === 'COMPLETED'
+                        ? 'bg-surface-recessed text-text-subdued border-border-hairline cursor-not-allowed opacity-50'
+                        : 'bg-surface-elevated hover:bg-surface-bright text-tertiary border-border-hairline cursor-pointer'
+                    }`}
                     type="button"
                   >
                     SIM MATCH

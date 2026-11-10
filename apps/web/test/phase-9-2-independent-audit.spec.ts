@@ -269,7 +269,7 @@ describe('Stage C: Dream XI Team-Building Audit', () => {
     });
 
     // Check no errors from invalid UUIDs or structure
-    const criticalErrors = validation.errors.filter(e => e.type === 'INVALID_UUID' || e.type === 'DUPLICATE_PLAYER');
+    const criticalErrors = validation.errors.filter(e => e.code === 'SQUAD_SIZE_INVALID' || e.code === 'DUPLICATE_PLAYER');
     expect(criticalErrors).toHaveLength(0);
   });
 
@@ -489,7 +489,7 @@ function createFormatTestConfig(format: MatchFormat, seedN = 919191n): MatchSimu
         battingRating: isBowler ? 35 : 85,
         bowlingRating: isBowler ? 85 : 30,
         fieldingRating: 75,
-        confidenceTier: 'SILVER' as const,
+        confidenceTier: 'ESTIMATED' as const,
         confidenceScore: 0.8,
         ratingVersion: 'rate-1.0.0',
         explainability: { rawPrimaryMetric: '42', eraPeerBaseline: format, sampleSizeInnings: 50, shrinkageApplied: 0.05 },
@@ -692,8 +692,8 @@ describe('Stage E: Complete Match Simulation - All 5 Formats', () => {
 
     for (const inn of result.finalState.innings) {
       for (const event of inn.events) {
-        if (event.batterPlayerId) {
-          expect(allAllowedIds.has(event.batterPlayerId)).toBe(true);
+        if (event.strikerPlayerId) {
+          expect(allAllowedIds.has(event.strikerPlayerId)).toBe(true);
         }
         if (event.bowlerPlayerId) {
           expect(allAllowedIds.has(event.bowlerPlayerId)).toBe(true);
@@ -720,7 +720,7 @@ describe('Stage G: Replay Determinism & Result Integrity', () => {
 
     for (let i = 0; i < Math.min(run1.allEvents.length, 20); i++) {
       expect(run1.allEvents[i].outcome).toBe(run2.allEvents[i].outcome);
-      expect(run1.allEvents[i].runsTotal).toBe(run2.allEvents[i].runsTotal);
+      expect(run1.allEvents[i].scorecardDelta.totalRuns).toBe(run2.allEvents[i].scorecardDelta.totalRuns);
     }
   });
 
@@ -741,8 +741,8 @@ describe('Stage G: Replay Determinism & Result Integrity', () => {
     const run2 = simulateFullMatch(config2);
 
     // Different seeds should produce different event counts or scores
-    const score1 = run1.finalState.innings[0]?.runs ?? 0;
-    const score2 = run2.finalState.innings[0]?.runs ?? 0;
+    const score1 = run1.finalState.innings[0]?.totalRuns ?? 0;
+    const score2 = run2.finalState.innings[0]?.totalRuns ?? 0;
     // Not strictly guaranteed to differ but very unlikely to be identical with different seeds and 120 balls
     expect(run1.allEvents.length).toBeGreaterThan(0);
     expect(run2.allEvents.length).toBeGreaterThan(0);

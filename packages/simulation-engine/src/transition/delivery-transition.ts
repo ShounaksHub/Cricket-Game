@@ -366,19 +366,40 @@ export function stepDelivery(
       nextNonStrikerId = temp;
 
       // Select next bowler (MCC Law 21.7: bowler cannot bowl consecutive overs)
-      // Filter bowlers from bowling lineup
-      const eligibleBowlers = bowlingTeam.lineup.filter((slot) => {
-        if (slot.playerId === bowlerId) return false; // Cannot bowl consecutive overs
-        const bowlerScore = bowlersMap.get(slot.playerId);
-        const oversBowled = bowlerScore
-          ? Math.floor(bowlerScore.ballsBowled / 6)
-          : 0;
-        return oversBowled < ruleset.maxOversPerBowler;
-      });
+      // If user/captain specifically chose nextBowlerPlayerId and it's eligible, use it!
+      if (
+        action.nextBowlerPlayerId &&
+        action.nextBowlerPlayerId !== bowlerId
+      ) {
+        const nominatedSlot = bowlingTeam.lineup.find(
+          (slot) => slot.playerId === action.nextBowlerPlayerId,
+        );
+        if (nominatedSlot) {
+          const bowlerScore = bowlersMap.get(action.nextBowlerPlayerId);
+          const oversBowled = bowlerScore
+            ? Math.floor(bowlerScore.ballsBowled / 6)
+            : 0;
+          if (oversBowled < ruleset.maxOversPerBowler) {
+            nextBowlerId = action.nextBowlerPlayerId;
+          }
+        }
+      }
 
-      if (eligibleBowlers.length > 0) {
-        // Pick bowler with priority or cycle
-        nextBowlerId = eligibleBowlers[0].playerId;
+      // If no valid nominated bowler was chosen, select automatically from eligible bowlers
+      if (nextBowlerId === bowlerId) {
+        const eligibleBowlers = bowlingTeam.lineup.filter((slot) => {
+          if (slot.playerId === bowlerId) return false; // Cannot bowl consecutive overs
+          const bowlerScore = bowlersMap.get(slot.playerId);
+          const oversBowled = bowlerScore
+            ? Math.floor(bowlerScore.ballsBowled / 6)
+            : 0;
+          return oversBowled < ruleset.maxOversPerBowler;
+        });
+
+        if (eligibleBowlers.length > 0) {
+          // Pick bowler with priority or cycle
+          nextBowlerId = eligibleBowlers[0].playerId;
+        }
       }
     }
   }
