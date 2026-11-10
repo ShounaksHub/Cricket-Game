@@ -50,5 +50,5 @@ Blocked. The dev server started and a Brave window was available, but Windows co
 
 **Acceptance status: partial; browser and full-suite gates remain open.**
 
-**Final commit hash:** pending commit.
+**Phase 9.8.1 implementation commit hash:** `803c8f3` (`fix: persist and replay phase 9.8 captaincy decisions`).
 **Working-tree status:** pending commit; unrelated pre-existing changes are intentionally excluded.
