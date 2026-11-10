@@ -54,6 +54,7 @@ import {
   calculatePlayerOfTheMatch,
   createInitialMatchState,
   stepDelivery,
+  selectIncomingBatter,
   resolveAITacticalAction,
   DeterministicPRNG,
   getRulesetForFormat,
@@ -221,6 +222,7 @@ export default function MatchSimulationPage() {
   // --- Tactical Controls for Next Ball ---
   const [serverOnline, setServerOnline] = useState<boolean | null>(null);
   const [userIntent, setUserIntent] = useState<BatterIntent>('BALANCED');
+  const [selectedNextBatterId, setSelectedNextBatterId] = useState<string>('');
   const [userLength, setUserLength] = useState<BowlingLength>('GOOD_LENGTH');
   const [userLine, setUserLine] = useState<BowlingLine>('OUTSIDE_OFF');
   const [userVariation, setUserVariation] = useState<BowlingVariation>('STOCK');
@@ -984,6 +986,7 @@ export default function MatchSimulationPage() {
         currentInnings?.totalWickets ?? 0,
       ).id,
       actionId: `${state.config.matchId}:${state.currentInningsIndex}:${currentInnings?.events.length ?? 0}`,
+      pauseForBatterSelection: isUserBatting,
       nextBowlerPlayerId: isUserBowling && userNominatedBowlerId ? userNominatedBowlerId : undefined,
     };
 
@@ -994,6 +997,13 @@ export default function MatchSimulationPage() {
     const nextIndex = currentEventIndex + 1;
     setVisibleEvents(nextEvents);
     setCurrentEventIndex(nextIndex);
+
+    if (nextState.innings[nextState.currentInningsIndex]?.pendingBatterSelection) {
+      setIsPlaying(false);
+      setSelectedNextBatterId('');
+      saveActiveSession(nextState, nextEvents, nextIndex);
+      return;
+    }
 
     if (nextState.status === 'COMPLETED') {
       setIsPlaying(false);
@@ -1027,6 +1037,28 @@ export default function MatchSimulationPage() {
     archiveCompletedMatch(simulationResult);
   }
 
+  function handleConfirmIncomingBatter() {
+    if (!liveStateRef.current || !selectedNextBatterId) return;
+    const nextState = selectIncomingBatter(liveStateRef.current, selectedNextBatterId);
+    const recordedEvents = visibleEvents.map((event, index) =>
+      index === visibleEvents.length - 1 && event.tactics
+        ? {
+            ...event,
+            tactics: {
+              ...event.tactics,
+              nextBatterPlayerId: selectedNextBatterId,
+              pauseForBatterSelection: true,
+            },
+          }
+        : event,
+    );
+    liveStateRef.current = nextState;
+    setLiveState(nextState);
+    setVisibleEvents(recordedEvents);
+    setSelectedNextBatterId('');
+    saveActiveSession(nextState, recordedEvents, currentEventIndex);
+  }
+
   function handleSimulateOver() {
     if (!liveStateRef.current || !livePrngRef.current) return;
     const currentInnings = liveStateRef.current.innings[liveStateRef.current.currentInningsIndex];
@@ -1038,7 +1070,8 @@ export default function MatchSimulationPage() {
     while (
       liveStateRef.current.status !== 'COMPLETED' &&
       liveStateRef.current.currentInningsIndex === targetInn - 1 &&
-      liveStateRef.current.innings[liveStateRef.current.currentInningsIndex].completedOvers === targetOver
+      liveStateRef.current.innings[liveStateRef.current.currentInningsIndex].completedOvers === targetOver &&
+      !liveStateRef.current.innings[liveStateRef.current.currentInningsIndex].pendingBatterSelection
     ) {
       stepToNextDelivery();
     }
@@ -1049,7 +1082,8 @@ export default function MatchSimulationPage() {
     const currentInnIdx = liveStateRef.current.currentInningsIndex;
     while (
       liveStateRef.current.status !== 'COMPLETED' &&
-      liveStateRef.current.currentInningsIndex === currentInnIdx
+      liveStateRef.current.currentInningsIndex === currentInnIdx &&
+      !liveStateRef.current.innings[liveStateRef.current.currentInningsIndex].pendingBatterSelection
     ) {
       stepToNextDelivery();
     }
@@ -1152,6 +1186,12 @@ export default function MatchSimulationPage() {
   const strikerName = getPlayerDisplayName(strikerId || '');
   const nonStrikerName = getPlayerDisplayName(nonStrikerId || '');
   const bowlerName = getPlayerDisplayName(bowlerId || '');
+  const pendingBatterDecision = isUserBatting ? activeInnings?.pendingBatterSelection : undefined;
+  const availableIncomingBatters = liveState && activeInnings && isUserBatting
+    ? (liveState.config.team1.id === activeInnings.battingTeamId ? liveState.config.team1.lineup : liveState.config.team2.lineup)
+      .filter((slot) => slot.playerId !== strikerId && slot.playerId !== nonStrikerId && !activeInnings.batters.get(slot.playerId)?.isOut)
+      .sort((a, b) => a.battingOrder - b.battingOrder)
+    : [];
 
   // Current active bowler profile and style determination
   const currentActiveBowler = liveState && bowlerId
@@ -2231,9 +2271,7 @@ export default function MatchSimulationPage() {
         const isBattingValid = uniqueBatters.size === 11 && activeLineup.length === 11;
 
         // Overall readiness
-        const isReadyToStart = isUserBowlingFirst
-          ? Boolean(activeOpeningBowlerId) && isFieldValid
-          : isBattingValid;
+        const isReadyToStart = isBattingValid && (!isUserBowlingFirst || (Boolean(activeOpeningBowlerId) && isFieldValid));
 
         function moveSlot(currIdx: number, targetIdx: number) {
           if (targetIdx < 0 || targetIdx >= activeLineup.length) return;
@@ -2300,7 +2338,7 @@ export default function MatchSimulationPage() {
             {/* Main Management Cockpit */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-md">
               {/* SECTION: If user bats first -> Batting Lineup Management */}
-              {isUserBattingFirst && (
+              {(
                 <div className="lg:col-span-12 flex flex-col gap-space-md">
                   <div className="bg-surface-card rounded-xl p-space-md shadow-xl border border-border-hairline flex flex-col gap-space-md">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-border-hairline gap-2">
@@ -3070,6 +3108,35 @@ export default function MatchSimulationPage() {
                     </span>
                     <span className="font-label-caps text-[10px] text-text-subdued uppercase">DIRECT CONTROL</span>
                   </div>
+                  {pendingBatterDecision && (
+                    <div className="rounded-lg border border-primary/50 bg-primary/10 p-3 flex flex-col gap-2">
+                      <div>
+                        <p className="text-xs font-bold text-text-chalk">Wicket down — choose the next batter</p>
+                        <p className="text-[10px] text-text-subdued">Select who takes {pendingBatterDecision.replacesAt === 'STRIKER' ? 'strike' : 'the non-striker’s end'} before play resumes.</p>
+                      </div>
+                      <select
+                        value={selectedNextBatterId}
+                        onChange={(event) => setSelectedNextBatterId(event.target.value)}
+                        className="bg-surface-card border border-border-hairline rounded px-2 py-2 text-xs text-text-chalk"
+                        aria-label="Select incoming batter"
+                      >
+                        <option value="">Choose a batter</option>
+                        {availableIncomingBatters.map((slot) => (
+                          <option key={slot.playerId} value={slot.playerId}>
+                            #{slot.battingOrder} {getPlayerDisplayName(slot.playerId)}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        disabled={!selectedNextBatterId}
+                        onClick={handleConfirmIncomingBatter}
+                        className="rounded bg-primary px-3 py-2 text-xs font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        SEND BATTER IN
+                      </button>
+                    </div>
+                  )}
                   <div className="grid grid-cols-2 gap-2">
                     {[
                       { id: 'DEFEND', label: 'DEFENSIVE', icon: 'shield', desc: 'Solid Block' },
@@ -3411,16 +3478,16 @@ export default function MatchSimulationPage() {
               <div className="bg-surface-card rounded-xl p-space-md shadow-xl border border-border-hairline flex flex-col gap-space-sm">
                 <button
                   onClick={stepToNextDelivery}
-                  disabled={phase === 'COMPLETED'}
+                  disabled={phase === 'COMPLETED' || Boolean(pendingBatterDecision)}
                   className={`w-full py-4 rounded-xl font-headline-md text-headline-md font-extrabold uppercase tracking-tight flex items-center justify-center gap-2 transition-all ${
-                    phase === 'COMPLETED'
+                    phase === 'COMPLETED' || pendingBatterDecision
                       ? 'bg-surface-container text-text-subdued border border-border-hairline cursor-not-allowed opacity-60'
                       : 'bg-primary hover:bg-primary-container text-on-primary shadow-[0_4px_24px_rgba(120,220,119,0.35)] hover:scale-[1.01] cursor-pointer'
                   }`}
                   type="button"
                 >
                   <span className="material-symbols-outlined text-[24px]">sports_cricket</span>
-                  <span>{isUserBatting ? 'TAKE STRIKE [SPACE]' : 'BOWL NEXT BALL [SPACE]'}</span>
+                  <span>{pendingBatterDecision ? 'SELECT NEXT BATTER' : isUserBatting ? 'TAKE STRIKE [SPACE]' : 'BOWL NEXT BALL [SPACE]'}</span>
                 </button>
 
                 {/* Simulation Steppers Bar (Disabled on match completion) */}

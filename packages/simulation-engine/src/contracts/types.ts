@@ -105,6 +105,8 @@ export interface TacticalDeliveryAction {
   readonly bowlingIntent?: BowlingIntent;
   readonly nextBowlerPlayerId?: string;
   readonly nextBatterPlayerId?: string;
+  /** Pause after a wicket so a human captain can nominate the incoming batter. */
+  readonly pauseForBatterSelection?: boolean;
   readonly takeNewBall?: boolean;
   readonly declareInnings?: boolean;
   readonly enforceFollowOn?: boolean;
@@ -210,6 +212,10 @@ export interface InningsState {
   readonly isDeclared: boolean;
   readonly isCompleted: boolean;
   readonly isFreeHit: boolean;
+  readonly pendingBatterSelection?: {
+    readonly dismissedPlayerId: string;
+    readonly replacesAt: 'STRIKER' | 'NON_STRIKER';
+  };
   readonly batters: ReadonlyMap<string, BatterScorecardEntry>;
   readonly bowlers: ReadonlyMap<string, BowlerScorecardEntry>;
   readonly fallOfWickets: readonly FallOfWicket[];

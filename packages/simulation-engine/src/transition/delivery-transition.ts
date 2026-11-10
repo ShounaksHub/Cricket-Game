@@ -53,6 +53,9 @@ export function stepDelivery(
   if (!currentInnings || currentInnings.isCompleted) {
     throw new Error('Current innings is already completed or undefined');
   }
+  if (currentInnings.pendingBatterSelection) {
+    throw new Error('Select the incoming batter before the next delivery');
+  }
 
   const ruleset = getRulesetForFormat(state.config.format);
   const activePhase = getActiveBowlingPhase(
@@ -349,6 +352,12 @@ export function stepDelivery(
   // 9. Batter Replacement on Dismissal
   let nextStrikerId = strikerId;
   let nextNonStrikerId = nonStrikerId;
+  const deferBatterSelection = Boolean(
+    resolution.dismissal &&
+    newTotalWickets < 10 &&
+    action.pauseForBatterSelection &&
+    !action.nextBatterPlayerId,
+  );
 
   if (resolution.dismissal) {
     if (newTotalWickets < 10) {
@@ -367,7 +376,7 @@ export function stepDelivery(
       }
 
       // Fallback: Slot index in batting lineup
-      if (!incomingBatterId) {
+      if (!incomingBatterId && !deferBatterSelection) {
         const incomingBatterSlot = battingTeam.lineup[newTotalWickets + 1];
         incomingBatterId = incomingBatterSlot?.playerId;
       }
@@ -551,6 +560,12 @@ export function stepDelivery(
     (isTest && action?.declareInnings === true) || Boolean(currentInnings.isDeclared);
 
   const isInningsDone = isAllOut || isOverLimit || isTargetOverhauled || isDeclared;
+  const pendingBatterSelection = deferBatterSelection && !isInningsDone
+    ? {
+        dismissedPlayerId: resolution.dismissal!.dismissedPlayerId,
+        replacesAt: nextStrikerId === resolution.dismissal!.dismissedPlayerId ? 'STRIKER' as const : 'NON_STRIKER' as const,
+      }
+    : undefined;
 
   // Free Hit State Transition (ICC Men's T20I Playing Conditions Clause 21.19 / ODI Clause 21.19):
   // 1. A No-Ball creates a Free Hit for the next delivery ONLY in formats where freeHitAfterNoBall is true (Limited Overs).
@@ -580,6 +595,7 @@ export function stepDelivery(
     isCompleted: isInningsDone,
     isDeclared,
     isFreeHit: nextIsFreeHit,
+    pendingBatterSelection,
     batters: battersMap,
     bowlers: bowlersMap,
     fallOfWickets: newFallOfWickets,
@@ -937,4 +953,53 @@ export function stepDelivery(
     nextState,
     event,
   };
+}
+
+/**
+ * Resolves a captain's post-wicket batter decision without simulating another
+ * delivery. Keeping it as a pure transition makes the UI pause safe to save,
+ * resume and replay.
+ */
+export function selectIncomingBatter(state: MatchState, playerId: string): MatchState {
+  const inningsIndex = state.currentInningsIndex;
+  const innings = state.innings[inningsIndex];
+  const pending = innings?.pendingBatterSelection;
+  if (!innings || !pending) {
+    throw new Error('There is no pending incoming-batter decision');
+  }
+
+  const battingTeam = innings.battingTeamId === state.config.team1.id
+    ? state.config.team1
+    : state.config.team2;
+  const candidate = innings.batters.get(playerId);
+  const isAtCrease = playerId === innings.strikerPlayerId || playerId === innings.nonStrikerPlayerId;
+  if (!battingTeam.lineup.some((slot) => slot.playerId === playerId) || isAtCrease || candidate?.isOut) {
+    throw new Error('Selected batter is not eligible to bat');
+  }
+
+  const batters = new Map(innings.batters);
+  if (!batters.has(playerId)) {
+    batters.set(playerId, {
+      playerId,
+      runs: 0,
+      ballsFaced: 0,
+      fours: 0,
+      sixes: 0,
+      strikeRate: 0,
+      isOut: false,
+    });
+  }
+
+  const updatedInnings: InningsState = {
+    ...innings,
+    strikerPlayerId: pending.replacesAt === 'STRIKER' ? playerId : innings.strikerPlayerId,
+    nonStrikerPlayerId: pending.replacesAt === 'NON_STRIKER' ? playerId : innings.nonStrikerPlayerId,
+    pendingBatterSelection: undefined,
+    batters,
+  };
+  const updatedInningsList = [...state.innings];
+  updatedInningsList[inningsIndex] = updatedInnings;
+  const nextState = { ...state, innings: updatedInningsList };
+  verifyMatchInvariants(nextState);
+  return nextState;
 }
