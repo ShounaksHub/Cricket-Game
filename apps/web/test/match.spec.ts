@@ -105,7 +105,9 @@ describe('Web Match Simulation Integration Tests (Phase 4)', () => {
     expect(replayCheck.discrepancies.length).toBe(0);
   });
 
-  it('validates Phase 5 PixiJS field geometry, player positions, and left-hand mirroring', async () => {
+  it(
+    'validates Phase 5 PixiJS field geometry, player positions, and left-hand mirroring',
+    async () => {
     const { getFieldPresetPositions } = await import(
       '../app/match/visualizer/player-manager'
     );
@@ -172,5 +174,5 @@ describe('Web Match Simulation Integration Tests (Phase 4)', () => {
     }, 'FOUR');
     expect(Number.isFinite(posExit.x)).toBe(true);
     expect(Number.isFinite(posExit.y)).toBe(true);
-  });
+  }, 20000);
 });

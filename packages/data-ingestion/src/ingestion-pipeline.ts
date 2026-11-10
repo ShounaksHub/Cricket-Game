@@ -39,7 +39,7 @@ export interface RawPlayerIngestionInput {
   readonly sourceName: 'CRICSHEET' | 'WIKIDATA' | 'MANUAL_CURATION';
   readonly sourceUri: string;
   readonly datasetVersion: string;
-  readonly verificationStatus?: 'AUTOMATED_IMPORT' | 'COMMUNITY_VERIFIED' | 'EXPERT_AUDITED';
+  readonly verificationStatus?: 'AUTOMATED_IMPORT' | 'COMMUNITY_VERIFIED' | 'EXPERT_AUDITED' | 'STATSGURU_RECONCILED';
 }
 
 /**

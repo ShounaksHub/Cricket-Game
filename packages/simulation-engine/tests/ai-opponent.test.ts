@@ -216,4 +216,91 @@ describe('AI Opponent & Strategy Engine (Gate P6.3)', () => {
     expect(run1.wicketkeeperPlayerId).toBe(run2.wicketkeeperPlayerId);
     expect(run1.strategyRationale).toBe(run2.strategyRationale);
   });
+
+  it('generates a valid World XI honoring the One-Player-Per-Nation constraint', () => {
+    // Construct mock profiles with explicit nationalities
+    const multiNationProfiles: PlayerSquadContext[] = [];
+    const nations = [
+      'India', 'Australia', 'England', 'South Africa', 'West Indies',
+      'Pakistan', 'New Zealand', 'Sri Lanka', 'Afghanistan', 'Bangladesh',
+      'Zimbabwe', 'Ireland', 'Netherlands'
+    ];
+
+    // Create 1 keeper per nation
+    nations.forEach((nat, idx) => {
+      multiNationProfiles.push({
+        id: `p-${nat}-1`,
+        fullName: `${nat} Star A`,
+        displayName: `${nat} A`,
+        primaryNationality: nat,
+        primaryRole: idx === 0 ? 'WICKETKEEPER_BATTER' : idx % 2 === 0 ? 'PACE_BOWLER' : 'TOP_ORDER_BATTER',
+        battingHand: 'RIGHT_HAND',
+        bowlingStyle: idx % 2 === 0 ? 'RIGHT_ARM_FAST' : 'NONE',
+        isWicketkeeper: idx === 0,
+        formatRating: { overallRating: 85, battingRating: 85, bowlingRating: 80, fieldingRating: 80 },
+      });
+      multiNationProfiles.push({
+        id: `p-${nat}-2`,
+        fullName: `${nat} Star B`,
+        displayName: `${nat} B`,
+        primaryNationality: nat,
+        primaryRole: idx % 3 === 0 ? 'SPIN_BOWLER' : 'BATTING_ALL_ROUNDER',
+        battingHand: 'LEFT_HAND',
+        bowlingStyle: idx % 3 === 0 ? 'RIGHT_ARM_OFF_BREAK' : 'RIGHT_ARM_FAST_MEDIUM',
+        isWicketkeeper: false,
+        formatRating: { overallRating: 82, battingRating: 80, bowlingRating: 78, fieldingRating: 75 },
+      });
+    });
+
+    const aiTeam = generateAIOpponentTeam(multiNationProfiles, {
+      difficulty: 'HARD',
+      pitchType: 'HARD',
+      format: 'T20',
+      uniqueNationRule: true,
+      seed: 12345n,
+    });
+
+    expect(aiTeam.lineup).toHaveLength(11);
+    const selectedNations = aiTeam.lineup.map(slot => {
+      const p = multiNationProfiles.find(x => x.id === slot.playerId);
+      return p?.primaryNationality;
+    });
+
+    const uniqueNations = new Set(selectedNations);
+    expect(uniqueNations.size).toBe(11);
+    expect(aiTeam.name).toContain('Global World XI');
+  });
+
+  it('guarantees One Team Per Nation by respecting excludedNations and targetNation', () => {
+    const nationProfiles: PlayerSquadContext[] = [];
+    ['India', 'Australia'].forEach((nat) => {
+      for (let i = 1; i <= 15; i++) {
+        nationProfiles.push({
+          id: `${nat.toLowerCase()}-${i}`,
+          fullName: `${nat} Player ${i}`,
+          displayName: `${nat} ${i}`,
+          primaryNationality: nat,
+          primaryRole: i === 1 ? 'WICKETKEEPER_BATTER' : i <= 5 ? 'TOP_ORDER_BATTER' : i <= 8 ? 'BATTING_ALL_ROUNDER' : 'PACE_BOWLER',
+          battingHand: 'RIGHT_HAND',
+          bowlingStyle: i <= 5 ? 'NONE' : 'RIGHT_ARM_FAST',
+          isWicketkeeper: i === 1,
+          formatRating: { overallRating: 85, battingRating: 85, bowlingRating: 80, fieldingRating: 80 },
+        });
+      }
+    });
+
+    // When User chooses India, AI selects Australia (excludedNations: ['India'])
+    const aiTeam = generateAIOpponentTeam(nationProfiles, {
+      excludedNations: ['India'],
+      targetNation: 'Australia',
+      seed: 98765n,
+    });
+
+    expect(aiTeam.lineup).toHaveLength(11);
+    expect(aiTeam.name).toBe('Australia All-Time XI');
+    for (const slot of aiTeam.lineup) {
+      const p = nationProfiles.find(x => x.id === slot.playerId);
+      expect(p?.primaryNationality).toBe('Australia');
+    }
+  });
 });

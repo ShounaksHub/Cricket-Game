@@ -12,6 +12,12 @@ export interface SquadValidationOptions {
    * If false, allows incomplete drafts (e.g. 5/11 players) without failing on squad size.
    */
   requireMatchReady?: boolean;
+
+  /**
+   * If true, enforces the One-Player-Per-Nation rule (World XI constraint).
+   * No country can have more than 1 player in the playing XI.
+   */
+  uniqueNationRule?: boolean;
 }
 
 /**
@@ -297,6 +303,30 @@ export function validateDreamTeamSquad(
         severity: 'ADVISORY_WARNING',
         suggestedCorrection: 'Consider selecting bowling all-rounders who can bat',
       });
+    }
+  }
+
+  // 10. One-Player-Per-Nation (World XI Constraint)
+  if (options.uniqueNationRule && playerContexts) {
+    const nationPlayers = new Map<string, string[]>();
+    for (const slot of lineup) {
+      const ctx = playerContexts.get(slot.playerId);
+      if (ctx?.primaryNationality) {
+        const list = nationPlayers.get(ctx.primaryNationality) || [];
+        list.push(ctx.displayName || ctx.fullName);
+        nationPlayers.set(ctx.primaryNationality, list);
+      }
+    }
+
+    for (const [nation, players] of nationPlayers.entries()) {
+      if (players.length > 1) {
+        errors.push({
+          code: 'MULTIPLE_PLAYERS_FROM_NATION',
+          message: `One Team Per Nation rule violated: ${nation} has ${players.length} players (${players.join(', ')}). Only 1 player allowed per nation.`,
+          severity: 'HARD_ERROR',
+          suggestedCorrection: `Replace duplicate cricketers from ${nation} with players from other nations`,
+        });
+      }
     }
   }
 

@@ -13,7 +13,10 @@ import {
   Server,
   Activity,
   Sparkles,
+  HelpCircle,
+  BookOpen,
 } from 'lucide-react';
+import { WelcomeModal } from './WelcomeModal';
 
 interface ApiHealthResponse {
   status: string;
@@ -30,6 +33,7 @@ interface ApiHealthResponse {
 export function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [welcomeModalOpen, setWelcomeModalOpen] = useState(false);
   const [apiHealth, setApiHealth] = useState<ApiHealthResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -107,8 +111,18 @@ export function Navbar() {
             })}
           </div>
 
-          {/* Telemetry Status & Mobile Toggle */}
-          <div className="flex items-center gap-3">
+          {/* Action Buttons, Telemetry & Mobile Toggle */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Rules & Guide Button */}
+            <button
+              onClick={() => setWelcomeModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#141A22] hover:bg-[#1C2533] border border-[#D4AF37]/40 text-[#D4AF37] text-xs font-semibold shadow-sm transition group"
+              title="View Cricket Simulator Rules & Guide"
+            >
+              <BookOpen className="w-3.5 h-3.5 group-hover:scale-110 transition" />
+              <span className="hidden sm:inline">Rules & Guide</span>
+            </button>
+
             <div className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-[#141A22] border border-[#222A36] text-[11px] font-mono">
               <Server className="w-3.5 h-3.5 text-[#8A94A6]" />
               {loading ? (
@@ -160,8 +174,25 @@ export function Navbar() {
               </Link>
             );
           })}
+
+          <button
+            onClick={() => {
+              setMobileMenuOpen(false);
+              setWelcomeModalOpen(true);
+            }}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-[#141A22] text-[#D4AF37] border border-[#D4AF37]/30 transition"
+          >
+            <BookOpen className="w-4 h-4" />
+            <span>Rules & Game Guide</span>
+          </button>
         </div>
       )}
+
+      {/* Global Welcome & Rules Modal */}
+      <WelcomeModal
+        forceOpen={welcomeModalOpen}
+        onClose={() => setWelcomeModalOpen(false)}
+      />
     </nav>
   );
 }

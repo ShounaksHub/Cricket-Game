@@ -18,7 +18,8 @@ export type SquadValidationCode =
   | 'TOP_ORDER_DEFICIT'
   | 'INSUFFICIENT_SPIN_OPTIONS'
   | 'INSUFFICIENT_PACE_OPTIONS'
-  | 'TAIL_TOO_LONG';
+  | 'TAIL_TOO_LONG'
+  | 'MULTIPLE_PLAYERS_FROM_NATION';
 
 export interface SquadValidationIssue {
   readonly code: SquadValidationCode;
@@ -65,6 +66,7 @@ export interface PlayerSquadContext {
   readonly id: string;
   readonly fullName: string;
   readonly displayName: string;
+  readonly primaryNationality?: string;
   readonly primaryRole: PrimaryRole;
   readonly battingHand: BattingHand;
   readonly bowlingStyle: BowlingStyle;

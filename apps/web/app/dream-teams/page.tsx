@@ -27,7 +27,13 @@ import {
   FolderOpen,
   X,
   ChevronDown,
+  Globe,
 } from 'lucide-react';
+import {
+  SUPPORTED_NATIONAL_TEAMS,
+  buildNationalLineup,
+  buildWorldXILineup,
+} from '@/lib/national-teams';
 import type {
   CareerCategory,
   MatchFormat,
@@ -186,6 +192,7 @@ export default function DreamTeamBuilderPage() {
   const [selectedCategory, setSelectedCategory] = useState<CareerCategory | 'ALL'>('ALL');
   const [selectedCountry, setSelectedCountry] = useState<string>('ALL');
   const [displayLimit, setDisplayLimit] = useState<number>(60);
+  const [uniqueNationRule, setUniqueNationRule] = useState<boolean>(false);
 
   // Hydrate from localStorage on client mount
   useEffect(() => {
@@ -242,6 +249,7 @@ export default function DreamTeamBuilderPage() {
           id: p.id,
           fullName: p.fullName,
           displayName: p.displayName,
+          primaryNationality: p.primaryNationality,
           primaryRole: p.primaryRole,
           battingHand: p.battingHand,
           bowlingStyle: p.bowlingStyle,
@@ -254,12 +262,23 @@ export default function DreamTeamBuilderPage() {
     return map;
   }, [lineup, playerLookup, format]);
 
+  // Track distinct represented nations in active squad
+  const representedNations = useMemo(() => {
+    const nations = new Set<string>();
+    for (const slot of lineup) {
+      const p = playerLookup.get(slot.playerId);
+      if (p?.primaryNationality) nations.add(p.primaryNationality);
+    }
+    return nations;
+  }, [lineup, playerLookup]);
+
   // 5. Live Squad Validation
   const validation: SquadValidationResult = useMemo(() => {
     return validateDreamTeamSquad(format, lineup, squadContextMap, {
       requireMatchReady: lineup.length === 11,
+      uniqueNationRule,
     });
-  }, [format, lineup, squadContextMap]);
+  }, [format, lineup, squadContextMap, uniqueNationRule]);
 
   // 6. Live Squad Analytics (8 Dimensions)
   const analytics: SquadAnalyticsResult = useMemo(() => {
@@ -717,6 +736,97 @@ export default function DreamTeamBuilderPage() {
           </Link>
         </div>
       </header>
+
+      {/* World XI & National Team Toolbar */}
+      <section className="max-w-7xl mx-auto mt-4 p-3.5 rounded-xl bg-[#12161E] border border-[#232D3E] flex flex-wrap items-center justify-between gap-3 shadow-lg">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Globe className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs font-bold text-[#F8F9FA] uppercase tracking-wider">
+              One Player Per Nation:
+            </span>
+          </div>
+
+          <button
+            onClick={() => setUniqueNationRule(!uniqueNationRule)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition flex items-center gap-2 ${
+              uniqueNationRule
+                ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/60 shadow-md ring-1 ring-emerald-500/30'
+                : 'bg-[#181F2A] text-[#8A94A6] border-[#283548] hover:text-[#F8F9FA]'
+            }`}
+          >
+            <span>{uniqueNationRule ? 'Active (Strict World XI)' : 'Inactive (Any Nation)'}</span>
+            <span
+              className={`w-2 h-2 rounded-full ${
+                uniqueNationRule ? 'bg-emerald-400 animate-pulse' : 'bg-gray-500'
+              }`}
+            />
+          </button>
+
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#18202C] border border-[#263346] text-xs font-mono">
+            <span className="text-[#8A94A6]">Nations in XI:</span>
+            <strong
+              className={
+                representedNations.size === 11
+                  ? 'text-emerald-400 font-bold'
+                  : 'text-[#D4AF37]'
+              }
+            >
+              {representedNations.size} / 11
+            </strong>
+          </div>
+        </div>
+
+        <div className="flex items-center flex-wrap gap-2">
+          {/* Auto-Draft World XI Button */}
+          <button
+            onClick={() => {
+              const res = buildWorldXILineup(allPlayers, format);
+              setLineup(res.lineup);
+              setTeamName(res.teamName);
+              setUniqueNationRule(true);
+              setStatusMessage({
+                type: 'success',
+                text: 'Auto-drafted Global World XI (11 players from 11 distinct countries)!',
+              });
+            }}
+            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/50 transition flex items-center gap-1.5 shadow-sm"
+            title="Automatically draft 11 elite players from 11 distinct countries"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Auto-Draft World XI</span>
+          </button>
+
+          {/* National Team Presets Dropdown */}
+          <div className="flex items-center gap-1.5">
+            <select
+              onChange={(e) => {
+                if (!e.target.value) return;
+                const res = buildNationalLineup(e.target.value, allPlayers, format);
+                setLineup(res.lineup);
+                setTeamName(res.teamName);
+                setUniqueNationRule(false);
+                setStatusMessage({
+                  type: 'success',
+                  text: `Loaded authentic All-Time ${res.teamName}!`,
+                });
+                e.target.value = '';
+              }}
+              defaultValue=""
+              className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-[#18202C] text-[#D4AF37] border border-[#2E3C50] hover:border-[#D4AF37]/60 focus:outline-none cursor-pointer"
+            >
+              <option value="" disabled>
+                Load National XI...
+              </option>
+              {SUPPORTED_NATIONAL_TEAMS.map((nat) => (
+                <option key={nat.id} value={nat.id}>
+                  {nat.flag} {nat.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </section>
 
       {/* Prominent Match-Ready CTA Banner */}
       {validation.isMatchReady && (

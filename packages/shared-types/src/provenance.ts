@@ -12,7 +12,7 @@ export interface DataSourceProvenance {
   readonly datasetVersion: string;
   readonly ingestionTimestamp: string;
   readonly attributionNotice: string;
-  readonly verificationStatus: 'AUTOMATED_IMPORT' | 'COMMUNITY_VERIFIED' | 'EXPERT_AUDITED';
+  readonly verificationStatus: 'AUTOMATED_IMPORT' | 'COMMUNITY_VERIFIED' | 'EXPERT_AUDITED' | 'STATSGURU_RECONCILED';
   readonly notes?: string;
 }
 

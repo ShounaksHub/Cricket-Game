@@ -25,7 +25,14 @@ import {
   AlertTriangle,
   X,
   RefreshCw,
+  Globe,
+  BookOpen,
 } from 'lucide-react';
+import {
+  SUPPORTED_NATIONAL_TEAMS,
+  buildNationalLineup,
+  buildWorldXILineup,
+} from '@/lib/national-teams';
 import type {
   MatchFormat,
   DreamTeamPlayerSlotInput,
@@ -185,6 +192,11 @@ export default function MatchSimulationPage() {
   const [userTeamName, setUserTeamName] = useState<string>('User Dream XI');
   const [aiTeamName, setAiTeamName] = useState<string>('AI World XI');
   const [aiDifficulty, setAiDifficulty] = useState<AIDifficulty>('MEDIUM');
+
+  // --- Nation & World XI Match Modes ---
+  const [teamMode, setTeamMode] = useState<'ONE_TEAM_PER_NATION' | 'ONE_PLAYER_PER_NATION' | 'CUSTOM_DREAM_TEAM'>('ONE_TEAM_PER_NATION');
+  const [userNation, setUserNation] = useState<string>('India');
+  const [aiNation, setAiNation] = useState<string>('Australia');
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -534,6 +546,7 @@ export default function MatchSimulationPage() {
         id: p.id,
         fullName: p.fullName,
         displayName: p.displayName,
+        primaryNationality: p.primaryNationality,
         primaryRole: p.primaryRole,
         battingHand: p.battingHand,
         bowlingStyle: p.bowlingStyle,
@@ -546,32 +559,42 @@ export default function MatchSimulationPage() {
     let lineup1: DreamTeamPlayerSlotInput[] = [];
     let customName = userTeamName;
 
-    if (typeof window !== 'undefined') {
-      try {
-        const stored = localStorage.getItem('cricket_active_user_team');
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed?.lineup) && parsed.lineup.length === 11) {
-            lineup1 = parsed.lineup;
-            if (parsed.teamName) customName = parsed.teamName;
+    if (teamMode === 'ONE_TEAM_PER_NATION') {
+      const res = buildNationalLineup(userNation, all, format);
+      lineup1 = res.lineup;
+      customName = res.teamName;
+    } else if (teamMode === 'ONE_PLAYER_PER_NATION') {
+      const res = buildWorldXILineup(all, format);
+      lineup1 = res.lineup;
+      customName = 'User World XI (1 Per Nation)';
+    } else {
+      if (typeof window !== 'undefined') {
+        try {
+          const stored = localStorage.getItem('cricket_active_user_team');
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed?.lineup) && parsed.lineup.length === 11) {
+              lineup1 = parsed.lineup;
+              if (parsed.teamName) customName = parsed.teamName;
+            }
           }
+        } catch {
+          // Fallback
         }
-      } catch {
-        // Fallback
       }
-    }
 
-    if (lineup1.length !== 11) {
-      // Default Team 1: Balanced XI (Rohit, Gilchrist, Kohli, Lara, De Villiers, Sobers, Stokes, Jadeja, Akram, Warne, Bumrah)
-      const t1Names = ['Rohit', 'Gilchrist', 'Kohli', 'Lara', 'Villiers', 'Sobers', 'Stokes', 'Jadeja', 'Akram', 'Warne', 'Bumrah'];
-      const defaultIds = t1Names.map((n) => all.find((p) => p.fullName.includes(n))?.id || all[0].id);
-      lineup1 = defaultIds.map((pid, idx) => ({
-        playerId: pid,
-        battingOrder: idx + 1,
-        isCaptain: idx === 2,
-        isDesignatedWicketkeeper: idx === 1,
-        bowlingPriority: idx === 8 ? 1 : idx === 10 ? 1 : idx === 9 ? 2 : idx === 7 ? 3 : idx === 5 ? 4 : idx === 6 ? 5 : null,
-      }));
+      if (lineup1.length !== 11) {
+        // Default Team 1: Balanced XI (Rohit, Gilchrist, Kohli, Lara, De Villiers, Sobers, Stokes, Jadeja, Akram, Warne, Bumrah)
+        const t1Names = ['Rohit', 'Gilchrist', 'Kohli', 'Lara', 'Villiers', 'Sobers', 'Stokes', 'Jadeja', 'Akram', 'Warne', 'Bumrah'];
+        const defaultIds = t1Names.map((n) => all.find((p) => p.fullName.includes(n))?.id || all[0].id);
+        lineup1 = defaultIds.map((pid, idx) => ({
+          playerId: pid,
+          battingOrder: idx + 1,
+          isCaptain: idx === 2,
+          isDesignatedWicketkeeper: idx === 1,
+          bowlingPriority: idx === 8 ? 1 : idx === 10 ? 1 : idx === 9 ? 2 : idx === 7 ? 3 : idx === 5 ? 4 : idx === 6 ? 5 : null,
+        }));
+      }
     }
 
     // Team 2: Dynamically generated AI Opponent tailored to pitch & difficulty (0 overlap)
@@ -582,6 +605,9 @@ export default function MatchSimulationPage() {
       pitchType: selectedPitch,
       format,
       seed,
+      uniqueNationRule: teamMode === 'ONE_PLAYER_PER_NATION',
+      targetNation: teamMode === 'ONE_TEAM_PER_NATION' ? aiNation : undefined,
+      excludedNations: teamMode === 'ONE_TEAM_PER_NATION' ? [userNation] : undefined,
     });
 
     return {
@@ -925,10 +951,136 @@ export default function MatchSimulationPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-[#8A94A6] uppercase tracking-wider block mb-2">
-                  Competing Teams
-                </label>
-                <div className="space-y-2">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-semibold text-[#8A94A6] uppercase tracking-wider">
+                    Match Roster Mode
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof window !== 'undefined') {
+                        window.dispatchEvent(new CustomEvent('open-cricket-welcome-modal'));
+                      }
+                    }}
+                    className="text-[11px] text-[#D4AF37] hover:underline flex items-center gap-1"
+                  >
+                    <BookOpen className="w-3 h-3" />
+                    <span>View Rules</span>
+                  </button>
+                </div>
+
+                {/* 3 Modes */}
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  {[
+                    { id: 'ONE_TEAM_PER_NATION', label: '1 Team / Nation', icon: Globe, desc: 'Country Rivalry' },
+                    { id: 'ONE_PLAYER_PER_NATION', label: 'World XI', icon: Sparkles, desc: '1 Player / Nation' },
+                    { id: 'CUSTOM_DREAM_TEAM', label: 'Custom Dream XI', icon: Shield, desc: 'Saved Lineup' },
+                  ].map((m) => {
+                    const Icon = m.icon;
+                    const active = teamMode === m.id;
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => {
+                          setTeamMode(m.id as any);
+                          if (m.id === 'ONE_TEAM_PER_NATION') {
+                            setUserTeamName(`${userNation} All-Time XI`);
+                            setAiTeamName(`${aiNation} All-Time XI`);
+                          } else if (m.id === 'ONE_PLAYER_PER_NATION') {
+                            setUserTeamName('User World XI (1 Per Nation)');
+                            setAiTeamName('AI Global World XI (1 Per Nation)');
+                          } else {
+                            setUserTeamName('User Dream XI');
+                            setAiTeamName('AI World XI');
+                          }
+                        }}
+                        className={`p-2 rounded-lg text-left border transition ${
+                          active
+                            ? 'bg-[#0D4A38] border-[#D4AF37] text-[#F8F9FA] shadow-md'
+                            : 'bg-[#181F2A] border-[#252E3E] text-[#8A94A6] hover:bg-[#202938]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-1 font-bold text-xs mb-0.5">
+                          <Icon className={`w-3.5 h-3.5 ${active ? 'text-[#D4AF37]' : ''}`} />
+                          <span>{m.label}</span>
+                        </div>
+                        <div className="text-[10px] text-[#8A94A6]">{m.desc}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Mode Specific Configuration */}
+                {teamMode === 'ONE_TEAM_PER_NATION' && (
+                  <div className="p-3 rounded-lg bg-[#18202A] border border-emerald-500/30 space-y-3">
+                    <div className="flex items-center justify-between text-xs text-emerald-400 font-mono">
+                      <span>✓ ONE TEAM PER NATION ENFORCED</span>
+                      <span className="text-[10px] text-[#8A94A6]">No Duplicate Nations</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[11px] text-[#8A94A6] block mb-1">Your National Team:</label>
+                        <select
+                          value={userNation}
+                          onChange={(e) => {
+                            const newNation = e.target.value;
+                            setUserNation(newNation);
+                            setUserTeamName(`${newNation} All-Time XI`);
+                            // If AI had same nation, switch AI to another
+                            if (aiNation === newNation) {
+                              const other = SUPPORTED_NATIONAL_TEAMS.find((n) => n.id !== newNation)?.id || 'Australia';
+                              setAiNation(other);
+                              setAiTeamName(`${other} All-Time XI`);
+                            }
+                          }}
+                          className="w-full bg-[#12161E] border border-[#283548] text-xs font-semibold text-[#F8F9FA] rounded px-2.5 py-1.5 focus:outline-none focus:border-[#D4AF37]"
+                        >
+                          {SUPPORTED_NATIONAL_TEAMS.map((n) => (
+                            <option key={n.id} value={n.id}>
+                              {n.flag} {n.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] text-[#8A94A6] block mb-1">AI Opponent Nation:</label>
+                        <select
+                          value={aiNation}
+                          onChange={(e) => {
+                            const newAiNation = e.target.value;
+                            setAiNation(newAiNation);
+                            setAiTeamName(`${newAiNation} All-Time XI`);
+                          }}
+                          className="w-full bg-[#12161E] border border-[#283548] text-xs font-semibold text-[#3B82F6] rounded px-2.5 py-1.5 focus:outline-none focus:border-[#3B82F6]"
+                        >
+                          {SUPPORTED_NATIONAL_TEAMS.filter((n) => n.id !== userNation).map((n) => (
+                            <option key={n.id} value={n.id}>
+                              {n.flag} {n.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {teamMode === 'ONE_PLAYER_PER_NATION' && (
+                  <div className="p-3 rounded-lg bg-[#18202A] border border-emerald-500/30 space-y-2">
+                    <div className="text-xs text-emerald-400 font-mono flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>WORLD XI CHALLENGE: 1 PLAYER PER NATION</span>
+                    </div>
+                    <p className="text-[11px] text-[#8A94A6] leading-relaxed">
+                      Both squads contain 11 legendary cricketers from 11 distinct countries (IND, AUS, ENG, WI, SA, PAK, NZ, SL, AFG, BAN, ZIM/IRE). Zero national duplicates!
+                    </p>
+                  </div>
+                )}
+
+                {/* Team Matchup Cards Display */}
+                <div className="mt-3 space-y-2">
                   <div className="p-3 rounded-lg bg-[#18202A] border border-[#283344] flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded bg-[#EC1C24]/20 border border-[#EC1C24]/40 flex items-center justify-center text-[#EC1C24]">
@@ -936,7 +1088,13 @@ export default function MatchSimulationPage() {
                       </div>
                       <div>
                         <div className="text-sm font-semibold text-[#F8F9FA]">{userTeamName}</div>
-                        <div className="text-[11px] text-[#8A94A6]">11 Verified Benchmark Legends</div>
+                        <div className="text-[11px] text-[#8A94A6]">
+                          {teamMode === 'ONE_TEAM_PER_NATION'
+                            ? `Authentic All-Time ${userNation} Squad`
+                            : teamMode === 'ONE_PLAYER_PER_NATION'
+                            ? '11 Elite Cricketers from 11 Nations'
+                            : 'Custom User Playing XI'}
+                        </div>
                       </div>
                     </div>
                     <span className="text-[10px] px-2 py-0.5 rounded bg-[#0D4A38] text-[#D4AF37] border border-[#D4AF37]/40">
@@ -955,7 +1113,13 @@ export default function MatchSimulationPage() {
                       </div>
                       <div>
                         <div className="text-sm font-semibold text-[#F8F9FA]">{aiTeamName}</div>
-                        <div className="text-[11px] text-[#8A94A6]">Autonomous Tactical Captaincy &middot; {aiDifficulty}</div>
+                        <div className="text-[11px] text-[#8A94A6]">
+                          {teamMode === 'ONE_TEAM_PER_NATION'
+                            ? `Authentic All-Time ${aiNation} Squad &middot; ${aiDifficulty}`
+                            : teamMode === 'ONE_PLAYER_PER_NATION'
+                            ? `AI World XI (11 Distinct Nations) &middot; ${aiDifficulty}`
+                            : `Autonomous Tactical Captaincy &middot; ${aiDifficulty}`}
+                        </div>
                       </div>
                     </div>
                     <span className="text-[10px] px-2 py-0.5 rounded bg-[#1E2633] text-[#3B82F6] border border-[#3B82F6]/30">

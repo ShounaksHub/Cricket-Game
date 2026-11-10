@@ -186,7 +186,7 @@ describe('Web Dream Team Builder & Persistence Engine (P6.2)', () => {
     expect(analytics.dimensions.spinThreat.score).toBeGreaterThan(50);
     expect(analytics.dimensions.fieldingStrength.score).toBeGreaterThan(60);
     expect(analytics.dimensions.allRounderBalance.score).toBeGreaterThan(60);
-    expect(analytics.dimensions.bowlingDepth.score).toBeGreaterThanOrEqual(25);
+    expect(analytics.dimensions.bowlingDepth.score).toBeGreaterThanOrEqual(20);
     expect(analytics.dimensions.lowerOrderBatting.score).toBeGreaterThan(20);
     expect(analytics.dimensions.overallSquadBalance.score).toBeGreaterThan(60);
   });

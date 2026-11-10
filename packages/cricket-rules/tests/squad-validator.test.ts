@@ -402,4 +402,22 @@ describe('Squad Validation Engine (P3.2)', () => {
     expect(result.isValid).toBe(false);
     expect(result.errors.some((e) => e.code === 'MULTIPLE_CAPTAINS_DESIGNATED')).toBe(true);
   });
+
+  it('enforces One-Player-Per-Nation constraint when uniqueNationRule is enabled', () => {
+    const { lineup, contexts } = createValidLineup();
+    // Assign nationalities: make first two players both from India
+    const p1 = contexts.get(lineup[0].playerId);
+    const p2 = contexts.get(lineup[1].playerId);
+    if (p1) (p1 as any).primaryNationality = 'India';
+    if (p2) (p2 as any).primaryNationality = 'India';
+
+    // Without uniqueNationRule: should be valid
+    const normalResult = validateDreamTeamSquad('T20', lineup, contexts, { uniqueNationRule: false });
+    expect(normalResult.isValid).toBe(true);
+
+    // With uniqueNationRule: should fail with MULTIPLE_PLAYERS_FROM_NATION
+    const strictResult = validateDreamTeamSquad('T20', lineup, contexts, { uniqueNationRule: true });
+    expect(strictResult.isValid).toBe(false);
+    expect(strictResult.errors.some((e) => e.code === 'MULTIPLE_PLAYERS_FROM_NATION')).toBe(true);
+  });
 });

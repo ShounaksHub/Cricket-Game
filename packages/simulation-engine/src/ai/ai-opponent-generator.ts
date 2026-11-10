@@ -14,6 +14,12 @@ export interface AIOpponentGenerationOptions {
   pitchType?: PitchType;
   format?: MatchFormat;
   seed?: bigint;
+  /** Enforces One-Player-Per-Nation rule (World XI) */
+  uniqueNationRule?: boolean;
+  /** Restricts AI squad to a specific country (e.g. 'Australia All-Time XI') */
+  targetNation?: string;
+  /** Excludes specific nations from AI selection (guarantees One Team Per Nation in match) */
+  excludedNations?: string[];
 }
 
 export interface AIOpponentTeamResult {
@@ -60,14 +66,22 @@ export function generateAIOpponentTeam(
     }
   }
 
-  // Exclude user players to guarantee zero overlap
+  // Exclude user players to guarantee zero overlap and apply nation filters
   const userPlayerIds = new Set(options.userLineup?.map((s) => s.playerId) ?? []);
+  const excludedNationSet = new Set(options.excludedNations || []);
   const availablePool: PlayerSquadContext[] = [];
 
   for (const [id, profile] of profilesMap.entries()) {
-    if (!userPlayerIds.has(id)) {
-      availablePool.push(profile);
+    if (userPlayerIds.has(id)) continue;
+    if (options.targetNation && profile.primaryNationality !== options.targetNation) continue;
+    if (
+      excludedNationSet.size > 0 &&
+      profile.primaryNationality &&
+      excludedNationSet.has(profile.primaryNationality)
+    ) {
+      continue;
     }
+    availablePool.push(profile);
   }
 
   if (availablePool.length < 11) {
@@ -168,11 +182,24 @@ export function generateAIOpponentTeam(
   // 4. Assemble the Starting XI
   const selectedPlayers: PlayerSquadContext[] = [];
   const selectedIds = new Set<string>();
+  const selectedNations = new Set<string>();
 
-  const pickCandidate = (pool: PlayerSquadContext[]): PlayerSquadContext | null => {
+  const pickCandidate = (
+    pool: PlayerSquadContext[],
+    ignoreNationConstraint = false,
+  ): PlayerSquadContext | null => {
     for (const c of pool) {
       if (!selectedIds.has(c.id)) {
+        if (
+          options.uniqueNationRule &&
+          !ignoreNationConstraint &&
+          c.primaryNationality &&
+          selectedNations.has(c.primaryNationality)
+        ) {
+          continue;
+        }
         selectedIds.add(c.id);
+        if (c.primaryNationality) selectedNations.add(c.primaryNationality);
         selectedPlayers.push(c);
         return c;
       }
@@ -184,7 +211,10 @@ export function generateAIOpponentTeam(
   let wk = pickCandidate(keepers);
   if (!wk) {
     // Fallback: pick any player with wicketkeeper skill or highest fielding
-    wk = pickCandidate(availablePool.filter((p) => p.isWicketkeeper)) || pickCandidate(availablePool)!;
+    wk =
+      pickCandidate(availablePool.filter((p) => p.isWicketkeeper)) ||
+      pickCandidate(availablePool) ||
+      pickCandidate(availablePool, true)!;
   }
 
   // Step B: Pick Frontline Pacers
@@ -204,13 +234,16 @@ export function generateAIOpponentTeam(
 
   // Step E: Pick Specialist Batters (Top and Middle) to fill remaining slots up to 11
   while (selectedPlayers.length < 11) {
-    const nextBatter = pickCandidate(topOrderBatters) || pickCandidate(middleOrderBatters) || pickCandidate(availablePool);
+    const nextBatter =
+      pickCandidate(topOrderBatters) ||
+      pickCandidate(middleOrderBatters) ||
+      pickCandidate(availablePool);
     if (!nextBatter) break;
   }
 
-  // If still under 11, backfill from available pool
+  // If still under 11, backfill from available pool (relaxing nation constraint if necessary)
   while (selectedPlayers.length < 11) {
-    const filler = pickCandidate(availablePool);
+    const filler = pickCandidate(availablePool) || pickCandidate(availablePool, true);
     if (!filler) break;
   }
 
@@ -319,18 +352,25 @@ export function generateAIOpponentTeam(
     };
   });
 
-  // Team Naming based on difficulty & venue
+  // Team Naming based on difficulty, nation mode & venue
   const teamNames: Record<AIDifficulty, string> = {
     HARD: 'Apex Legends XI',
     MEDIUM: 'AI World XI',
     EASY: 'Classic All-Stars XI',
   };
 
-  const rationale = `[${difficulty} AI Strategy]: ${counterReason} Designated ${captainCandidate.displayName} as tactical captain and ${wk.displayName} behind the stumps. Configured ${paceTarget} pace and ${spinTarget} spin options for optimal ${format} quota management.`;
+  let assignedName = teamNames[difficulty];
+  if (options.targetNation) {
+    assignedName = `${options.targetNation} All-Time XI`;
+  } else if (options.uniqueNationRule) {
+    assignedName = 'AI Global World XI (1 Per Nation)';
+  }
+
+  const rationale = `[${difficulty} AI Strategy]: ${counterReason} Designated ${captainCandidate.displayName} as tactical captain and ${wk.displayName} behind the stumps. Configured ${paceTarget} pace and ${spinTarget} spin options for optimal ${format} quota management.${options.uniqueNationRule ? ' Enforced One-Player-Per-Nation global diversity constraint.' : ''}${options.targetNation ? ` Assembled authentic national roster for ${options.targetNation}.` : ''}`;
 
   return {
     id: `ai-opponent-${difficulty.toLowerCase()}-${pitchType.toLowerCase()}`,
-    name: teamNames[difficulty],
+    name: assignedName,
     difficulty,
     lineup,
     captainPlayerId: captainId,

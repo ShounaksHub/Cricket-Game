@@ -5,7 +5,7 @@ export interface CreateProvenanceInput {
   readonly sourceName: 'CRICSHEET' | 'WIKIDATA' | 'DBPEDIA' | 'COMMONS' | 'MANUAL_CURATION';
   readonly sourceUri: string;
   readonly datasetVersion: string;
-  readonly verificationStatus?: 'AUTOMATED_IMPORT' | 'COMMUNITY_VERIFIED' | 'EXPERT_AUDITED';
+  readonly verificationStatus?: 'AUTOMATED_IMPORT' | 'COMMUNITY_VERIFIED' | 'EXPERT_AUDITED' | 'STATSGURU_RECONCILED';
   readonly notes?: string;
 }
 
