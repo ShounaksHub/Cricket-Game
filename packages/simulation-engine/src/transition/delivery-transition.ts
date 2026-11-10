@@ -429,14 +429,15 @@ export function stepDelivery(
 
   const isInningsDone = isAllOut || isOverLimit || isTargetOverhauled || isDeclared;
 
-  // Free Hit State Transition (ICC Men's T20I Playing Conditions Clause 21.19):
-  // 1. A No-Ball always creates a Free Hit for the next delivery.
-  // 2. If the current delivery was a Free Hit and the bowler bowls an illegal ball (Wide or No-Ball),
+  // Free Hit State Transition (ICC Men's T20I Playing Conditions Clause 21.19 / ODI Clause 21.19):
+  // 1. A No-Ball creates a Free Hit for the next delivery ONLY in formats where freeHitAfterNoBall is true (Limited Overs).
+  // 2. In Test cricket, free hits are not awarded following a No-Ball (ICC Test Clause 21.19).
+  // 3. If the current delivery was a Free Hit and the bowler bowls an illegal ball (Wide or No-Ball),
   //    the Free Hit carries over to the subsequent delivery.
-  // 3. If the current delivery was a Free Hit and is bowled legally, the Free Hit is consumed.
-  // 4. A Free Hit never carries over between innings or after an innings is completed.
+  // 4. If the current delivery was a Free Hit and is bowled legally, the Free Hit is consumed.
+  // 5. A Free Hit never carries over between innings or after an innings is completed.
   let nextIsFreeHit = false;
-  if (!isInningsDone) {
+  if (!isInningsDone && ruleset.freeHitAfterNoBall) {
     if (resolution.outcome === 'NO_BALL' || resolution.extras.noBalls > 0) {
       nextIsFreeHit = true;
     } else if (isFreeHit && !resolution.isLegalDelivery) {

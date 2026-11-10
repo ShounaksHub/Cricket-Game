@@ -51,15 +51,18 @@ export function simulateFullMatch(
     deliveryCount++;
   }
 
+  // Safety fallthrough only if loop was artificially truncated by options.maxDeliveries
   if (state.status !== 'COMPLETED') {
     if (config.format === 'TEST_RED_BALL' || config.format === 'TEST_PINK_BALL') {
+      const day = state.currentDayNumber ?? 1;
+      const dayDesc = day > 5 ? 'Day 5 overs concluded' : `Simulation truncated at ${deliveryCount} deliveries (Day ${day})`;
       state = {
         ...state,
         status: 'COMPLETED',
         result: {
           isTie: false,
           isDraw: true,
-          summary: 'Match drawn (Day 5 overs concluded)',
+          summary: `Match drawn (${dayDesc})`,
         },
       };
     }
