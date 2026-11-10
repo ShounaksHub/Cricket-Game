@@ -72,6 +72,7 @@ import {
   ingestPlayerRecord,
 } from '@cricket/data-ingestion';
 import dynamic from 'next/dynamic';
+import { CricketDreamXILogo } from '@/components/CricketDreamXILogo';
 
 const CricketVisualizerCanvas = dynamic(
   () =>
@@ -81,9 +82,15 @@ const CricketVisualizerCanvas = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[580px] bg-[#030d07] rounded-xl flex items-center justify-center border border-emerald-950/60 shadow-2xl">
-        <div className="flex items-center space-x-2 text-emerald-400 font-mono text-xs uppercase tracking-widest">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping inline-block" />
+      <div className="w-full h-[580px] bg-surface-recessed rounded-2xl flex flex-col items-center justify-center border border-border-hairline shadow-2xl gap-4">
+        <CricketDreamXILogo
+          variant="app-icon"
+          width={64}
+          height={64}
+          className="w-16 h-16 rounded-2xl shadow-[0_0_30px_rgba(120,220,119,0.2)] animate-pulse"
+        />
+        <div className="flex items-center space-x-2 text-primary font-mono text-xs uppercase tracking-widest">
+          <span className="w-2 h-2 rounded-full bg-primary animate-ping inline-block" />
           <span>INITIALIZING PIXIJS V8 2D BROADCAST VISUALIZER...</span>
         </div>
       </div>

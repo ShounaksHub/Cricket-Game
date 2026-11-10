@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { MatchFormat } from '@cricket/shared-types';
+import { CricketDreamXILogo } from '@/components/CricketDreamXILogo';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -137,13 +138,20 @@ export default function HomeScreen() {
 
         {/* Central Hero Headline & Value Proposition */}
         <div className="relative z-10 max-w-4xl flex flex-col gap-space-md my-auto pt-space-xl pb-space-lg">
-          <div className="flex items-center gap-space-xs">
-            <span className="px-space-sm py-0.5 rounded-full bg-surface-elevated font-label-caps text-label-caps text-text-chalk uppercase tracking-widest shadow-sm">
-              AUTHENTIC 3D TACTICAL SIMULATION
+          <div className="flex items-center gap-space-sm">
+            <CricketDreamXILogo
+              variant="monogram"
+              theme="dark"
+              height={28}
+              className="h-7 w-auto"
+            />
+            <span className="px-space-sm py-1 rounded-full bg-surface-elevated font-label-caps text-label-caps text-text-chalk uppercase tracking-widest shadow-sm border border-border-hairline flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              AUTHENTIC ICC SIMULATION ENGINE
             </span>
-            <span className="h-1.5 w-1.5 rounded-full bg-secondary" />
-            <span className="font-label-caps text-label-caps text-text-slate uppercase tracking-wider">
-              NEXT-GEN BROADCAST HUD
+            <span className="h-1.5 w-1.5 rounded-full bg-secondary hidden sm:inline-block" />
+            <span className="font-label-caps text-label-caps text-text-slate uppercase tracking-wider hidden sm:inline-block">
+              BROADCAST TELEMETRY HUD
             </span>
           </div>
 

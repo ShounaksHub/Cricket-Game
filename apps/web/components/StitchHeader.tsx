@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { CricketDreamXILogo } from './CricketDreamXILogo';
 
 export function StitchHeader() {
   const pathname = usePathname();
@@ -27,23 +28,26 @@ export function StitchHeader() {
       <div className="h-20 max-w-[1440px] mx-auto px-4 md:px-margin-desktop flex items-center justify-between">
         {/* Brand */}
         <div className="flex items-center gap-space-md">
-          <Link className="flex items-center gap-space-sm group focus:outline-none" href="/">
-            <img
-              alt="Cricket Dream XI Official Logo"
-              className="h-8 w-auto object-contain transition-transform group-hover:scale-105"
-              src="/assets/stitch/logo.png"
-              onError={(e) => {
-                // Fallback in case of image load delay
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-            <div className="flex flex-col">
-              <span className="font-headline-md text-title-md text-text-chalk tracking-tight leading-none group-hover:text-primary transition-colors">
-                DREAM XI
-              </span>
-              <span className="font-label-caps text-label-caps text-text-subdued uppercase tracking-widest">
-                CHAMPIONSHIP
-              </span>
+          <Link className="flex items-center group focus:outline-none" href="/" aria-label="Cricket Dream XI Home">
+            {/* Desktop / Tablet: Primary Horizontal Logo */}
+            <div className="hidden sm:block">
+              <CricketDreamXILogo
+                variant="horizontal"
+                theme="dark"
+                height={38}
+                className="h-9 w-auto transition-transform group-hover:scale-105"
+                priority
+              />
+            </div>
+            {/* Mobile Compact: Stacked Logo */}
+            <div className="sm:hidden">
+              <CricketDreamXILogo
+                variant="stacked"
+                theme="dark"
+                height={36}
+                className="h-9 w-auto transition-transform group-hover:scale-105"
+                priority
+              />
             </div>
           </Link>
         </div>
@@ -143,6 +147,12 @@ export function StitchHeader() {
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="lg:hidden bg-surface-card border-b border-border-hairline px-4 py-4 flex flex-col gap-2">
+          <div className="pb-3 border-b border-border-hairline flex items-center justify-between">
+            <CricketDreamXILogo variant="horizontal" theme="dark" height={28} className="h-7 w-auto" />
+            <span className="font-label-caps text-[10px] text-primary bg-surface-elevated px-2 py-0.5 rounded border border-border-hairline">
+              OFFLINE ENGINE
+            </span>
+          </div>
           {navItems.map((item) => {
             const isActive = item.pathMatch(pathname);
             return (

@@ -17,6 +17,7 @@ import {
   BookOpen,
 } from 'lucide-react';
 import { WelcomeModal } from './WelcomeModal';
+import { CricketDreamXILogo } from './CricketDreamXILogo';
 
 interface ApiHealthResponse {
   status: string;
@@ -72,21 +73,13 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo & Title */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-lg bg-[#0D4A38] border border-[#D4AF37]/50 flex items-center justify-center text-[#D4AF37] shadow-sm group-hover:scale-105 transition">
-              <Trophy className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="text-sm font-bold tracking-tight text-[#F8F9FA] group-hover:text-[#D4AF37] transition flex items-center gap-1.5">
-                <span>CRICKET SIMULATOR</span>
-                <span className="hidden sm:inline-block px-1.5 py-0.2 rounded text-[10px] font-mono uppercase bg-[#18202A] text-[#D4AF37] border border-[#D4AF37]/30">
-                  T20 PRO
-                </span>
-              </div>
-              <div className="text-[10px] text-[#8A94A6] tracking-wider uppercase font-mono">
-                ICC Rules • Deterministic Engine
-              </div>
-            </div>
+          <Link href="/" className="flex items-center gap-3 group" aria-label="Cricket Dream XI Home">
+            <CricketDreamXILogo
+              variant="horizontal"
+              theme="dark"
+              height={36}
+              className="h-8 w-auto group-hover:scale-105 transition-transform"
+            />
           </Link>
 
           {/* Desktop Navigation Links */}

@@ -16,6 +16,7 @@ import {
   ChevronRight,
   BookOpen,
 } from 'lucide-react';
+import { CricketDreamXILogo } from './CricketDreamXILogo';
 
 interface WelcomeModalProps {
   forceOpen?: boolean;
@@ -68,9 +69,12 @@ export function WelcomeModal({ forceOpen, onClose }: WelcomeModalProps) {
         {/* Modal Top Banner */}
         <div className="relative px-6 py-5 bg-gradient-to-r from-surface-recessed via-surface-card to-surface-elevated border-b border-border-hairline flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-surface-container border border-tertiary/50 flex items-center justify-center text-tertiary shadow-lg">
-              <Trophy className="w-5 h-5" />
-            </div>
+            <CricketDreamXILogo
+              variant="app-icon"
+              width={44}
+              height={44}
+              className="w-11 h-11 rounded-xl shadow-lg shrink-0 border border-border-hairline"
+            />
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-headline-md text-text-chalk tracking-tight">

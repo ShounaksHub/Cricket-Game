@@ -24,11 +24,46 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://cricket-dream-xi.vercel.app'),
   title: 'Cricket Dream XI • Official Tactical Match Simulator',
   description:
     'Authoritative, broadcast-grade cricket simulation platform with 1,144 international players, deterministic physics, and tactical decision-making.',
   icons: {
-    icon: '/assets/stitch/logo.png',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-48x48.png', sizes: '48x48', type: 'image/png' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+  },
+  manifest: '/site.webmanifest',
+  openGraph: {
+    title: 'Cricket Dream XI • Official Tactical Match Simulator',
+    description:
+      'Authoritative, broadcast-grade cricket simulation platform with 1,144 international players, deterministic physics, and tactical decision-making.',
+    url: 'https://cricket-dream-xi.vercel.app',
+    siteName: 'Cricket Dream XI',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Cricket Dream XI Official Brand Identity',
+      },
+    ],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Cricket Dream XI • Official Tactical Match Simulator',
+    description:
+      'Authoritative, broadcast-grade cricket simulation platform with 1,144 international players, deterministic physics, and tactical decision-making.',
+    images: ['/og-image.png'],
   },
 };
 
