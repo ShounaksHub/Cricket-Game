@@ -79,6 +79,35 @@ export function calculateOutcomeLogits(input: OutcomeCalculationInput): OutcomeL
       (f) => f.distanceMeters > 18 && f.distanceMeters < 55,
     ).length;
 
+    // Granular regional coverage: Off-side vs Leg-side, Deep vs Close
+    const deepSquareLegOrMidWicket = tactics.customFieldPositions.filter(
+      (f) => f.distanceMeters >= 50 && f.angleDegrees >= 240 && f.angleDegrees <= 330,
+    ).length;
+    const shortFineLegOrLegSlip = tactics.customFieldPositions.filter(
+      (f) => f.distanceMeters < 25 && f.angleDegrees >= 180 && f.angleDegrees < 240,
+    ).length;
+    const deepCoverOrPoint = tactics.customFieldPositions.filter(
+      (f) => f.distanceMeters >= 50 && f.angleDegrees >= 50 && f.angleDegrees <= 120,
+    ).length;
+
+    // Deep on-side sweepers suppress pull/hook and leg-side lofted boundaries
+    if (deepSquareLegOrMidWicket >= 1) {
+      logits.SIX -= 0.12 * deepSquareLegOrMidWicket;
+      logits.FOUR -= 0.1 * deepSquareLegOrMidWicket;
+    }
+
+    // Short fine leg catches glances/edges down leg and stops singles, but doesn't stop boundaries
+    if (shortFineLegOrLegSlip >= 1) {
+      logits.WICKET += 0.08 * shortFineLegOrLegSlip;
+      logits.RUN_1 -= 0.05 * shortFineLegOrLegSlip;
+    }
+
+    // Deep cover/point stops square drives and cuts
+    if (deepCoverOrPoint >= 1) {
+      logits.FOUR -= 0.12 * deepCoverOrPoint;
+      logits.RUN_1 += 0.06 * deepCoverOrPoint;
+    }
+
     // Slips & Close catchers increase edge dismissals and dots, but concede boundaries
     if (slipsOrClose >= 3) {
       logits.WICKET += 0.1 * slipsOrClose;

@@ -137,7 +137,35 @@ export function stepDelivery(
     currentSessionNumber: state.currentSessionNumber ?? 1,
   };
 
-  // 4. Execute Delivery Pipeline and Resolve Dismissal
+  // 4. Validate Field Legality (MCC Law 28.4 & ICC Playing Conditions)
+  // - MCC Law 28.4: At the instant of the bowler's delivery, there shall not be more than 5 fielders on the leg side.
+  // - MCC Law 28.4: Not more than 2 fielders behind the popping crease on the on side.
+  // - Powerplay fielding restrictions: Limited fielders outside 30-yard ring.
+  // Any breach constitutes a No-Ball (MCC Law 28.4.2 / ICC Playing Conditions Clause 28.4).
+  let isFieldingNoBall = false;
+  if (action.customFieldPositions && action.customFieldPositions.length > 0) {
+    const legSideFielders = action.customFieldPositions.filter(
+      (f) => f.angleDegrees > 180 && f.angleDegrees < 360,
+    ).length;
+    const behindSquareLegFielders = action.customFieldPositions.filter(
+      (f) => f.angleDegrees >= 180 && f.angleDegrees <= 270,
+    ).length;
+    const outsideCircleFielders = action.customFieldPositions.filter(
+      (f) => f.isBoundary || f.distanceMeters > 30,
+    ).length;
+
+    const maxOutsideRing = ruleset.getMaxFieldersOutsideRing(currentInnings.completedOvers);
+
+    if (
+      legSideFielders > 5 ||
+      behindSquareLegFielders > 2 ||
+      outsideCircleFielders > maxOutsideRing
+    ) {
+      isFieldingNoBall = true;
+    }
+  }
+
+  // 5. Execute Delivery Pipeline and Resolve Dismissal
   const pipelineResult = executeDeliveryPipeline(
     {
       context: deliveryContext,
@@ -149,11 +177,13 @@ export function stepDelivery(
     prng,
   );
 
+  const finalOutcome = isFieldingNoBall ? 'NO_BALL' : pipelineResult.outcome;
+
   const resolution = resolveDeliveryOutcome({
-    outcome: pipelineResult.outcome,
-    isNoBall: pipelineResult.outcome === 'NO_BALL',
+    outcome: finalOutcome,
+    isNoBall: finalOutcome === 'NO_BALL',
     isFreeHit,
-    isWide: pipelineResult.outcome === 'WIDE',
+    isWide: finalOutcome === 'WIDE',
     strikerPlayerId: strikerId,
     nonStrikerPlayerId: nonStrikerId,
     bowlerPlayerId: bowlerId,
