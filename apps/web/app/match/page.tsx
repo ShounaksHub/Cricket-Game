@@ -49,6 +49,9 @@ import {
   type BowlingVariation,
   type FieldPreset,
   type TacticalDeliveryAction,
+  generateAIOpponentTeam,
+  type AIDifficulty,
+  type AIOpponentTeamResult,
 } from '@cricket/simulation-engine';
 import {
   VERIFIED_BENCHMARK_PLAYERS,
@@ -115,7 +118,8 @@ export default function MatchSimulationPage() {
   const [userField, setUserField] = useState<FieldPreset>('BALANCED_RING');
   const [isAIOptimized, setIsAIOptimized] = useState<boolean>(true);
   const [userTeamName, setUserTeamName] = useState<string>('User Dream XI');
-  const [aiTeamName, setAiTeamName] = useState<string>('AI World Legends XI');
+  const [aiTeamName, setAiTeamName] = useState<string>('AI World XI');
+  const [aiDifficulty, setAiDifficulty] = useState<AIDifficulty>('MEDIUM');
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -226,37 +230,19 @@ export default function MatchSimulationPage() {
       }));
     }
 
-    // Team 2: AI World Legends XI selected strictly from remaining pool (0 overlapping players with Team 1)
-    const userIds = new Set(lineup1.map((s) => s.playerId));
-    const availableAI = all.filter((p) => !userIds.has(p.id));
-
-    const aiKeeper = availableAI.find((p) => p.isWicketkeeper) || availableAI[0];
-    const aiTopMiddle = availableAI.filter(
-      (p) => p.id !== aiKeeper.id && (p.primaryRole === 'TOP_ORDER_BATTER' || p.primaryRole === 'MIDDLE_ORDER_BATTER')
-    );
-    const aiAllRounders = availableAI.filter(
-      (p) => p.primaryRole === 'BATTING_ALL_ROUNDER' || p.primaryRole === 'BOWLING_ALL_ROUNDER'
-    );
-    const aiPacers = availableAI.filter((p) => p.primaryRole === 'PACE_BOWLER');
-    const aiSpinners = availableAI.filter((p) => p.primaryRole === 'SPIN_BOWLER');
-
-    const lineup2: DreamTeamPlayerSlotInput[] = [
-      { playerId: aiTopMiddle[0]?.id || availableAI[1].id, battingOrder: 1, isCaptain: false, isDesignatedWicketkeeper: false },
-      { playerId: aiTopMiddle[1]?.id || availableAI[2].id, battingOrder: 2, isCaptain: false, isDesignatedWicketkeeper: false },
-      { playerId: aiTopMiddle[2]?.id || availableAI[3].id, battingOrder: 3, isCaptain: true, isDesignatedWicketkeeper: false },
-      { playerId: aiTopMiddle[3]?.id || availableAI[4].id, battingOrder: 4, isCaptain: false, isDesignatedWicketkeeper: false },
-      { playerId: aiKeeper.id, battingOrder: 5, isCaptain: false, isDesignatedWicketkeeper: true },
-      { playerId: aiAllRounders[0]?.id || availableAI[5].id, battingOrder: 6, isCaptain: false, isDesignatedWicketkeeper: false, bowlingPriority: 4 },
-      { playerId: aiAllRounders[1]?.id || availableAI[6].id, battingOrder: 7, isCaptain: false, isDesignatedWicketkeeper: false, bowlingPriority: 5 },
-      { playerId: aiPacers[0]?.id || availableAI[7].id, battingOrder: 8, isCaptain: false, isDesignatedWicketkeeper: false, bowlingPriority: 1 },
-      { playerId: aiSpinners[0]?.id || availableAI[8].id, battingOrder: 9, isCaptain: false, isDesignatedWicketkeeper: false, bowlingPriority: 2 },
-      { playerId: aiPacers[1]?.id || availableAI[9].id, battingOrder: 10, isCaptain: false, isDesignatedWicketkeeper: false, bowlingPriority: 1 },
-      { playerId: aiSpinners[1]?.id || availableAI[10].id, battingOrder: 11, isCaptain: false, isDesignatedWicketkeeper: false, bowlingPriority: 3 },
-    ];
+    // Team 2: Dynamically generated AI Opponent tailored to pitch & difficulty (0 overlap)
+    const seed = BigInt(seedInput || '987654321');
+    const aiResult = generateAIOpponentTeam(profiles, {
+      userLineup: lineup1,
+      difficulty: aiDifficulty,
+      pitchType: selectedPitch,
+      format,
+      seed,
+    });
 
     return {
       team1: { id: 'user-team', name: customName, lineup: lineup1 },
-      team2: { id: 'ai-team', name: aiTeamName, lineup: lineup2 },
+      team2: { id: 'ai-team', name: aiResult.name, lineup: aiResult.lineup },
       profiles,
     };
   }
@@ -543,13 +529,47 @@ export default function MatchSimulationPage() {
                       </div>
                       <div>
                         <div className="text-sm font-semibold text-[#F8F9FA]">{aiTeamName}</div>
-                        <div className="text-[11px] text-[#8A94A6]">Autonomous Tactical Captaincy</div>
+                        <div className="text-[11px] text-[#8A94A6]">Autonomous Tactical Captaincy &middot; {aiDifficulty}</div>
                       </div>
                     </div>
                     <span className="text-[10px] px-2 py-0.5 rounded bg-[#1E2633] text-[#3B82F6] border border-[#3B82F6]/30">
                       AI OPPONENT
                     </span>
                   </div>
+                </div>
+              </div>
+
+              {/* AI Difficulty Selector */}
+              <div>
+                <label className="text-xs font-semibold text-[#8A94A6] uppercase tracking-wider block mb-2">
+                  AI Tactical Difficulty &amp; Strategy
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'EASY', label: 'EASY', team: 'Classic All-Stars XI', badge: 'Relaxed Tactics' },
+                    { id: 'MEDIUM', label: 'MEDIUM', team: 'AI World XI', badge: 'Balanced Equilibrium' },
+                    { id: 'HARD', label: 'HARD', team: 'Apex Legends XI', badge: 'Counter-Selection' },
+                  ].map((d) => (
+                    <button
+                      key={d.id}
+                      onClick={() => {
+                        setAiDifficulty(d.id as AIDifficulty);
+                        setAiTeamName(d.team);
+                      }}
+                      className={`p-2.5 rounded-lg text-left border transition flex flex-col justify-between ${
+                        aiDifficulty === d.id
+                          ? 'bg-[#0D4A38] border-[#D4AF37] text-[#F8F9FA] shadow-md'
+                          : 'bg-[#181F2A] border-[#252E3E] text-[#8A94A6] hover:bg-[#202938]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="font-bold text-xs">{d.label}</span>
+                        {aiDifficulty === d.id && <Sparkles className="w-3 h-3 text-[#D4AF37]" />}
+                      </div>
+                      <span className="text-[10px] text-[#D4AF37] mt-1 font-semibold">{d.team}</span>
+                      <span className="text-[9px] text-[#8A94A6] opacity-80">{d.badge}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
 
