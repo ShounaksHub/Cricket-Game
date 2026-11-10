@@ -319,6 +319,37 @@ Every phase from Phase 0 to Phase 6 has been designed, coded, rigorously tested,
 
 ---
 
+## 9.5. Recently Implemented Gameplay Features
+
+### 1. Interactive Welcome & Rules Modal (`WelcomeModal.tsx`)
+- **Auto-Onboarding:** Appears automatically for new users on initial load, with a "Don't show again on startup" preference stored in `localStorage`.
+- **Global Accessibility:** Can be summoned at any time via the **"Rules & Guide"** button in the global navigation bar (desktop and mobile drawer) or via the **"View Rules"** action in the Match setup room.
+- **Four Comprehensive Briefing Sections:**
+  1. *Game Overview:* Explains the hybrid simulation loop (phase strategy + ball-by-ball micro-tactics).
+  2. *Match & Cricket Rules:* Details T20 powerplays, 4-over bowler quotas, no-balls, free hits, and boundary rules.
+  3. *Tactical Masterclass:* Explains batting intent (Defensive, Balanced, Aggressive, Ultra Aggressive) vs. bowling lines, lengths, and variations (Yorkers, Bouncers, Googly, Slower Balls).
+  4. *National Duel & World XI:* Complete breakdown of the two nation-based gameplay formats.
+
+### 2. "One Team Per Nation" (National Duel Mode)
+- **Authentic National All-Time Squads:** Pre-configured all-time XI presets for 8 major cricket powerhouses:
+  - 🇮🇳 **India:** Tendulkar (C), Rohit, Kohli, Dravid, Yuvraj, Dhoni (WK), Kapil Dev, Jadeja, Kumble, Bumrah, Shami.
+  - 🇦🇺 **Australia:** Hayden, Gilchrist (WK), Ponting (C), S. Smith, M. Waugh, Bevan, Warne, Lee, Starc, McGrath, Cummins.
+  - 🏴󠁧󠁢󠁥󠁮󠁧󠁿 **England:** Cook, Buttler (WK), Root, Pietersen, Stokes (C), Flintoff, Botham, Swann, Broad, Anderson, Archer.
+  - 🏝️ **West Indies:** Gayle, Greenidge, Lara, Richards (C), Sobers, Lloyd, Dujon (WK), Marshall, Garner, Holding, Ambrose.
+  - 🇿🇦 **South Africa:** G. Smith (C), de Kock (WK), Amla, Kallis, de Villiers, Miller, Pollock, Klusener, Steyn, Donald, Rabada.
+  - 🇵🇰 **Pakistan:** Saeed Anwar, Babar Azam, Inzamam-ul-Haq, Javed Miandad, Imran Khan (C), Wasim Akram, M. Rizwan (WK), Shahid Afridi, Shoaib Akhtar, Waqar Younis, Saqlain Mushtaq.
+  - 🇳🇿 **New Zealand:** McCullum (WK), Williamson (C), Crowe, Taylor, Cairns, Anderson, Vettori, Hadlee, Southee, Boult, Bond.
+  - 🇱🇰 **Sri Lanka:** Jayasuriya, Dilshan, Sangakkara (WK/C), Jayawardene, de Silva, Ranatunga, Mathews, Vaas, Malinga, Muralitharan, Herath.
+- **Enforced National Distinction:** User selects their national side, and the AI opponent automatically selects a *different* nation from the remaining pool. No two teams can represent the same country.
+
+### 3. "One Player Per Nation" (World XI Mode)
+- **11 Players from 11 Distinct Countries:** Squad builder restriction ensuring that every single player in the 11-man lineup hails from a different cricket nation (e.g., IND, AUS, ENG, WI, SA, PAK, NZ, SL, AFG, BAN, ZIM/IRE).
+- **Rule 10 Validation:** Integrated directly into `@cricket/cricket-rules` (`squad-validator.ts`), rejecting rosters with `MULTIPLE_PLAYERS_FROM_NATION` when enabled.
+- **AI Squad Drafting:** The AI opponent generator (`AIOpponentGenerator`) synthesizes a balanced World XI respecting unique nation constraints on both teams.
+- **One-Click World XI Auto-Draft:** Squad builder in `/dream-teams` features an instant auto-draft button compiling an elite, rule-compliant World XI in one click.
+
+---
+
 ## 10. Master Roadmap: What We Are Building Next
 
 The immediate priority was establishing an authoritative, complete, end-to-end playable T20 game (Phases 0–6). The upcoming phases expand format depth, community features, career modes, and immersive presentation:
