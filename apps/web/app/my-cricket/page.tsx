@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { MatchFormat } from '@cricket/shared-types';
+import { FEATURE_REGISTRY, PlannedFeature } from '@/lib/feature-registry';
+import { UpcomingFeatureModal } from '@/components/UpcomingFeatureModal';
 
 interface SavedTeam {
   id: string;
@@ -71,6 +73,7 @@ export default function MyCricketPage() {
   const [crowdAudio, setCrowdAudio] = useState<boolean>(true);
   const [aiVoice, setAiVoice] = useState<boolean>(true);
   const [notification, setNotification] = useState<string | null>(null);
+  const [selectedUpcomingFeature, setSelectedUpcomingFeature] = useState<PlannedFeature | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -181,9 +184,8 @@ export default function MyCricketPage() {
     }
   }
 
-  function handleForceSync() {
-    setNotification('Data sync verified: 1,144 player vectors synchronized.');
-    setTimeout(() => setNotification(null), 3000);
+  function handleCloudSyncInfo() {
+    setSelectedUpcomingFeature(FEATURE_REGISTRY['cloud-sync']);
   }
 
   // Derive genuine metrics from matchHistory
@@ -757,24 +759,23 @@ export default function MyCricketPage() {
                   </button>
                 </div>
 
-                {/* Commentary Speech Synthesizer Toggle */}
+                {/* Commentary Voice Toggle */}
                 <div className="flex items-center justify-between py-1">
                   <div className="flex flex-col">
-                    <span className="font-body-bold text-body-sm text-text-chalk">Voice Commentary Stream</span>
-                    <span className="font-label-caps text-[10px] text-text-subdued">Tactical ball callouts</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-body-bold text-body-sm text-text-chalk">Voice Commentary Stream</span>
+                      <span className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.2 rounded border bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                        Coming Soon
+                      </span>
+                    </div>
+                    <span className="font-label-caps text-[10px] text-text-subdued">Synthesized tactical audio callouts</span>
                   </div>
                   <button
-                    onClick={() => setAiVoice(!aiVoice)}
-                    className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
-                      aiVoice ? 'bg-primary' : 'bg-surface-recessed'
-                    }`}
+                    onClick={() => setSelectedUpcomingFeature(FEATURE_REGISTRY['commentary-audio'])}
+                    className="text-xs text-emerald-400 hover:text-emerald-300 font-mono underline"
                     type="button"
                   >
-                    <span
-                      className={`block w-4 h-4 rounded-full bg-white transition-transform ${
-                        aiVoice ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                    />
+                    Roadmap &rarr;
                   </button>
                 </div>
               </div>
@@ -782,11 +783,15 @@ export default function MyCricketPage() {
               {/* Bottom Action Buttons */}
               <div className="flex items-center justify-between pt-space-xs border-t border-border-hairline">
                 <button
-                  onClick={handleForceSync}
-                  className="text-text-subdued hover:text-text-chalk font-label-caps text-label-caps flex items-center gap-1 transition-colors cursor-pointer uppercase"
+                  onClick={handleCloudSyncInfo}
+                  className="text-emerald-400 hover:text-emerald-300 font-label-caps text-label-caps flex items-center gap-1.5 transition-colors cursor-pointer uppercase"
                   type="button"
                 >
-                  <span className="material-symbols-outlined text-[16px]">sync</span> FORCE DATA SYNC
+                  <span className="material-symbols-outlined text-[16px]">cloud_sync</span>
+                  <span>CLOUD SYNC</span>
+                  <span className="text-[8px] font-mono px-1 py-0.2 rounded border bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                    SOON
+                  </span>
                 </button>
                 <button
                   onClick={handleClearAllData}
@@ -800,6 +805,13 @@ export default function MyCricketPage() {
           </div>
         </div>
       </div>
+
+      {/* Upcoming Feature Modal */}
+      <UpcomingFeatureModal
+        feature={selectedUpcomingFeature}
+        isOpen={!!selectedUpcomingFeature}
+        onClose={() => setSelectedUpcomingFeature(null)}
+      />
     </div>
   );
 }

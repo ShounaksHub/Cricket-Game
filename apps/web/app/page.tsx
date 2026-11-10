@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { MatchFormat } from '@cricket/shared-types';
 import { CricketDreamXILogo } from '@/components/CricketDreamXILogo';
+import { UpcomingUpdatesSection } from '@/components/UpcomingUpdatesSection';
+import { UpcomingFeatureModal } from '@/components/UpcomingFeatureModal';
+import { FEATURE_REGISTRY, PlannedFeature } from '@/lib/feature-registry';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -36,6 +39,7 @@ export default function HomeScreen() {
     targetStr?: string;
     ballsThisOver: string[];
   } | null>(null);
+  const [selectedUpcomingFeature, setSelectedUpcomingFeature] = useState<PlannedFeature | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -868,11 +872,14 @@ export default function HomeScreen() {
                 <div className="flex items-center gap-space-xs">
                   <span className="material-symbols-outlined text-[18px] text-tertiary">bolt</span>
                   <span className="font-label-caps text-label-caps text-tertiary uppercase tracking-wider font-extrabold">
-                    DAILY MASTERCLASS SCENARIO
+                    HISTORIC CLUTCH SCENARIO
+                  </span>
+                  <span className="text-[9px] font-mono uppercase px-2 py-0.5 rounded border bg-emerald-500/10 text-emerald-400 border-emerald-500/30 ml-2">
+                    Coming Soon
                   </span>
                 </div>
                 <span className="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container text-text-slate">
-                  EXPIRES IN 07H 42M
+                  SCENARIO ROADMAP
                 </span>
               </div>
               <h3 className="font-headline-lg text-headline-lg text-text-chalk uppercase tracking-tight mb-space-xs">
@@ -897,14 +904,18 @@ export default function HomeScreen() {
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-space-md">
-              <Link
-                href="/match?scenario=gabba2021"
-                className="px-space-lg py-3 bg-secondary-container hover:bg-secondary-fixed text-on-secondary-container font-headline-md text-body-bold uppercase tracking-wider rounded transition-all flex items-center gap-space-xs font-bold shadow-md"
+              <button
+                onClick={() => setSelectedUpcomingFeature(FEATURE_REGISTRY['gabba-heist-scenario'])}
+                className="px-space-lg py-3 bg-secondary-container hover:bg-secondary-fixed text-on-secondary-container font-headline-md text-body-bold uppercase tracking-wider rounded transition-all flex items-center gap-space-xs font-bold shadow-md cursor-pointer"
+                type="button"
               >
-                <span className="material-symbols-outlined text-[20px]">play_circle</span>
-                <span>ENTER SCENARIO CLUTCH</span>
-              </Link>
-              <span className="font-label-caps text-label-caps text-text-subdued">1,402 MANAGERS SOLVED TODAY</span>
+                <span className="material-symbols-outlined text-[20px]">info</span>
+                <span>SCENARIO ROADMAP</span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/30 text-emerald-300">
+                  COMING SOON
+                </span>
+              </button>
+              <span className="font-label-caps text-label-caps text-text-subdued">HISTORIC INJECTION IN DEVELOPMENT</span>
             </div>
           </div>
 
@@ -978,7 +989,10 @@ export default function HomeScreen() {
         </div>
       </section>
 
-      {/* Section 5: Offline Engine Status Bar & Quick Stats Strip */}
+      {/* Section 5: Upcoming Features & Roadmap (Phase 9.3.3) */}
+      <UpcomingUpdatesSection />
+
+      {/* Section 6: Offline Engine Status Bar & Quick Stats Strip */}
       <section className="w-full bg-surface-container-lowest mt-space-xl py-space-md z-10 border-t border-border-hairline">
         <div className="max-w-[1440px] mx-auto px-4 md:px-margin-desktop flex flex-col md:flex-row items-center justify-between gap-space-md">
           {/* Engine Status */}
@@ -1020,6 +1034,13 @@ export default function HomeScreen() {
           </div>
         </div>
       </section>
+
+      {/* Feature Information Modal */}
+      <UpcomingFeatureModal
+        feature={selectedUpcomingFeature}
+        isOpen={!!selectedUpcomingFeature}
+        onClose={() => setSelectedUpcomingFeature(null)}
+      />
     </div>
   );
 }

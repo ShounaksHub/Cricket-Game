@@ -1,7 +1,7 @@
 # Global Cricket Dream Team & Simulation Game — Master Project Brain (`brain.md`)
 
-**Document Version:** 2.2.0  
-**Last Updated:** November 2026 (Post-Phase 9.3.1 Player Agency, Manual Field Placement & Bowling Calibration)  
+**Document Version:** 2.3.0  
+**Last Updated:** November 2026 (Post-Phase 9.3.3 Upcoming Features Experience & Placeholder Transparency)  
 **System Status:** Production-Ready Single-Project Monorepo (Next.js 15.5.29, NestJS 11, Turborepo 2.3, PixiJS v8.22, Prisma v6, PostgreSQL 16)  
 **Deployment Target:** Unified Vercel Monorepo (`apps/web` + standalone `@cricket/simulation-engine` package)  
 **Active Services & URLs:**
@@ -399,6 +399,15 @@ All workspace verification commands execute cleanly with 100% passing results:
    pnpm turbo run build
    ```
    *Result:* 9/9 packages built; all 8 Next.js App Router routes statically generated and prerendered.
+
+### ADR-016: Explicit Feature Transparency & Public Roadmap Classification (Phase 9.3.3)
+- **Status:** Accepted (November 2026)
+- **Context:** Placeholders with misleading success feedback (e.g., fake data sync toasts) or broken scenario links (e.g. unhandled `/match?scenario=gabba2021`) degraded user trust and violated the honest offline design ethos of the game.
+- **Decision:**
+  1. Centralize all feature availability statuses in `apps/web/lib/feature-registry.ts` with strict categories (`AVAILABLE`, `IN_DEVELOPMENT`, `COMING_SOON`).
+  2. Permanently remove artificial progress bars, simulated network delays, and fake success toasts.
+  3. Label incomplete systems with subtle `COMING SOON` or `IN DEV` badges and provide an interactive roadmap modal detailing current development status and offline availability assurances.
+  4. Ensure working features (local offline match simulation, team building with 1,144 players, 5 cricket formats, guest manager records) remain pristine.
 
 ---
 

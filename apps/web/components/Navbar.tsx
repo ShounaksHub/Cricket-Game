@@ -66,6 +66,8 @@ export function Navbar() {
     { href: '/players', label: 'Player Registry', icon: Users },
     { href: '/dream-teams', label: 'Squad Builder', icon: Shield },
     { href: '/match', label: 'Match Simulator', icon: PlayCircle },
+    { href: '/my-cricket', label: 'Career Hub', icon: Sparkles },
+    { href: '/#upcoming-roadmap', label: 'Roadmap', icon: Activity },
   ];
 
   return (
