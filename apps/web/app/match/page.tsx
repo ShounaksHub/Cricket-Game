@@ -33,6 +33,7 @@ import {
   verifyMatchReplay,
   reconcileMatchScorecard,
   calculatePlayerOfTheMatch,
+  createInitialMatchState,
   stepDelivery,
   resolveAITacticalAction,
   DeterministicPRNG,
@@ -99,7 +100,11 @@ export default function MatchSimulationPage() {
     winner: 'USER' | 'AI';
     decision: 'BAT' | 'BOWL';
     coinLanded: 'HEADS' | 'TAILS';
+    aiReason?: string;
   } | null>(null);
+
+  const liveStateRef = useRef<MatchState | null>(null);
+  const livePrngRef = useRef<DeterministicPRNG | null>(null);
 
   // --- Live Simulation State ---
   const [simulationResult, setSimulationResult] = useState<MatchSimulationResult | null>(null);
@@ -254,14 +259,26 @@ export default function MatchSimulationPage() {
     const coin = prng.nextFloat() < 0.5 ? 'HEADS' : 'TAILS';
     const userWon = coin === coinSide;
 
-    const winner = userWon ? 'USER' : 'AI';
-    // AI elects to bowl if dew factor > 0.35, else bat
-    const decision = winner === 'USER' ? 'BAT' : dewFactor > 0.35 ? 'BOWL' : 'BAT';
+    const winner: 'USER' | 'AI' = userWon ? 'USER' : 'AI';
+    let aiDecision: 'BAT' | 'BOWL' = 'BAT';
+    let aiReason = '';
+
+    if (dewFactor > 0.25 || selectedPitch === 'FLAT') {
+      aiDecision = 'BOWL';
+      aiReason = `Elected to BOWL first to exploit anticipated dew (${Math.round(dewFactor * 100)}%) and favorable chase conditions.`;
+    } else if (selectedPitch === 'TURNING' || selectedPitch === 'DUSTY') {
+      aiDecision = 'BAT';
+      aiReason = `Elected to BAT first to capitalize on fresh track carry before pitch wear and spin accelerate.`;
+    } else {
+      aiDecision = prng.nextFloat() < 0.5 ? 'BAT' : 'BOWL';
+      aiReason = `Elected to ${aiDecision} first based on balanced team tactical equilibrium.`;
+    }
 
     setTossResult({
       winner,
-      decision,
+      decision: winner === 'USER' ? 'BAT' : aiDecision,
       coinLanded: coin,
+      aiReason,
     });
   }
 
@@ -305,10 +322,17 @@ export default function MatchSimulationPage() {
       playerProfiles: profiles,
     };
 
-    // Run full simulation to determine all events & bit-exact deterministic trajectory
+    // Pre-calculate full match for verification & scorecard fallback
     const result = simulateFullMatch(config);
     setSimulationResult(result);
-    setLiveState(result.finalState);
+
+    // Initialize live interactive simulation state
+    const initialLiveState = createInitialMatchState(config);
+    const livePrng = new DeterministicPRNG(seed);
+    liveStateRef.current = initialLiveState;
+    livePrngRef.current = livePrng;
+
+    setLiveState(initialLiveState);
     setVisibleEvents([]);
     setCurrentEventIndex(0);
     setPhase('LIVE');
@@ -316,18 +340,36 @@ export default function MatchSimulationPage() {
   }
 
   function stepToNextDelivery() {
-    if (!simulationResult) return;
-    if (currentEventIndex >= simulationResult.allEvents.length) {
+    if (!liveStateRef.current || !livePrngRef.current) return;
+    const state = liveStateRef.current;
+    const prng = livePrngRef.current;
+
+    if (state.status === 'COMPLETED') {
       setIsPlaying(false);
       setPhase('COMPLETED');
       return;
     }
 
-    const nextEvent = simulationResult.allEvents[currentEventIndex];
-    setVisibleEvents((prev) => [...prev, nextEvent]);
+    const aiAction = resolveAITacticalAction(state, prng);
+    const currentInnings = state.innings[state.currentInningsIndex];
+    const isUserBatting = currentInnings?.battingTeamId === 'user-team';
+    const isUserBowling = currentInnings?.bowlingTeamId === 'user-team';
+
+    const action: TacticalDeliveryAction = {
+      batterIntent: isUserBatting && !isAIOptimized ? userIntent : aiAction.batterIntent,
+      bowlerLength: isUserBowling && !isAIOptimized ? userLength : aiAction.bowlerLength,
+      bowlerLine: isUserBowling && !isAIOptimized ? userLine : aiAction.bowlerLine,
+      bowlerVariation: isUserBowling && !isAIOptimized ? userVariation : aiAction.bowlerVariation,
+      fieldPreset: isUserBowling && !isAIOptimized ? userField : aiAction.fieldPreset,
+    };
+
+    const { nextState, event } = stepDelivery(state, action, prng);
+    liveStateRef.current = nextState;
+    setLiveState(nextState);
+    setVisibleEvents((prev) => [...prev, event]);
     setCurrentEventIndex((prev) => prev + 1);
 
-    if (currentEventIndex + 1 >= simulationResult.allEvents.length) {
+    if (nextState.status === 'COMPLETED') {
       setIsPlaying(false);
       setPhase('COMPLETED');
     }
@@ -337,35 +379,28 @@ export default function MatchSimulationPage() {
     if (!simulationResult) return;
     setVisibleEvents([...simulationResult.allEvents]);
     setCurrentEventIndex(simulationResult.allEvents.length);
+    setLiveState(simulationResult.finalState);
+    if (liveStateRef.current) {
+      liveStateRef.current = simulationResult.finalState;
+    }
     setIsPlaying(false);
     setPhase('COMPLETED');
   }
 
   function handleSimulateOver() {
-    if (!simulationResult) return;
-    let idx = currentEventIndex;
-    const currentEvent = simulationResult.allEvents[idx];
-    if (!currentEvent) return;
+    if (!liveStateRef.current || !livePrngRef.current) return;
+    const currentInnings = liveStateRef.current.innings[liveStateRef.current.currentInningsIndex];
+    if (!currentInnings || currentInnings.isCompleted) return;
 
-    const targetOver = currentEvent.overNumber;
-    const currentInnings = currentEvent.inningsNumber;
+    const targetOver = currentInnings.completedOvers;
+    const targetInn = currentInnings.inningsNumber;
 
-    const added: DeliveryEvent[] = [];
     while (
-      idx < simulationResult.allEvents.length &&
-      simulationResult.allEvents[idx].overNumber === targetOver &&
-      simulationResult.allEvents[idx].inningsNumber === currentInnings
+      liveStateRef.current.status !== 'COMPLETED' &&
+      liveStateRef.current.currentInningsIndex === targetInn - 1 &&
+      liveStateRef.current.innings[liveStateRef.current.currentInningsIndex].completedOvers === targetOver
     ) {
-      added.push(simulationResult.allEvents[idx]);
-      idx++;
-    }
-
-    setVisibleEvents((prev) => [...prev, ...added]);
-    setCurrentEventIndex(idx);
-
-    if (idx >= simulationResult.allEvents.length) {
-      setIsPlaying(false);
-      setPhase('COMPLETED');
+      stepToNextDelivery();
     }
   }
 
@@ -779,11 +814,41 @@ export default function MatchSimulationPage() {
                   <div className="text-base font-bold text-[#F8F9FA]">
                     {tossResult.winner === 'USER' ? `${userTeamName} won the toss!` : `${aiTeamName} won the toss!`}
                   </div>
-                  <div className="text-xs text-[#8A94A6] mt-1">
-                    {tossResult.winner === 'USER'
-                      ? 'You have elected to BAT first.'
-                      : `AI has elected to ${tossResult.decision} first.`}
-                  </div>
+
+                  {tossResult.winner === 'USER' ? (
+                    <div className="mt-3">
+                      <div className="text-xs text-[#8A94A6] mb-2">What do you elect to do?</div>
+                      <div className="flex justify-center gap-3">
+                        <button
+                          onClick={() => setTossResult((prev) => (prev ? { ...prev, decision: 'BAT' } : null))}
+                          className={`px-5 py-2.5 rounded-lg font-bold text-xs border transition ${
+                            tossResult.decision === 'BAT'
+                              ? 'bg-[#0D4A38] text-[#D4AF37] border-[#D4AF37] shadow-lg'
+                              : 'bg-[#181F2A] text-[#8A94A6] border-[#252E3E]'
+                          }`}
+                        >
+                          🏏 Bat First
+                        </button>
+                        <button
+                          onClick={() => setTossResult((prev) => (prev ? { ...prev, decision: 'BOWL' } : null))}
+                          className={`px-5 py-2.5 rounded-lg font-bold text-xs border transition ${
+                            tossResult.decision === 'BOWL'
+                              ? 'bg-[#0D4A38] text-[#D4AF37] border-[#D4AF37] shadow-lg'
+                              : 'bg-[#181F2A] text-[#8A94A6] border-[#252E3E]'
+                          }`}
+                        >
+                          ⚾ Bowl First
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-[#8A94A6] mt-2 bg-[#12161E] p-2.5 rounded-lg border border-[#202838]">
+                      <span className="font-semibold text-[#D4AF37] block mb-0.5">
+                        {aiTeamName} elected to {tossResult.decision} first.
+                      </span>
+                      <span>{tossResult.aiReason}</span>
+                    </div>
+                  )}
                 </div>
 
                 <button
