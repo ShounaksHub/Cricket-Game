@@ -303,6 +303,21 @@ export function calculateOutcomeLogits(input: OutcomeCalculationInput): OutcomeL
     }
   }
 
+  // High-level captain plans are applied at the same engine boundary as the
+  // existing tactical inputs, so beginner controls remain simulation-backed.
+  if (tactics.bowlingPlan === 'ATTACK') {
+    logits.WICKET += 0.22;
+    logits.DOT += 0.10;
+    logits.FOUR += 0.12;
+    logits.SIX += 0.08;
+  } else if (tactics.bowlingPlan === 'DEFENSIVE') {
+    logits.FOUR -= 0.20;
+    logits.SIX -= 0.18;
+    logits.RUN_1 += 0.18;
+    logits.DOT += 0.10;
+    logits.WICKET -= 0.10;
+  }
+
   // 6. Match Context Dynamics (Powerplay, Death Overs, Required Rate)
   if (context.isPowerplay) {
     logits.FOUR += 0.25;

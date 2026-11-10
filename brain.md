@@ -467,4 +467,8 @@ c:\Users\shoun\OneDrive\Desktop\cricket game\
   - Community rosters, custom pitch profiles, and user-submitted historical commentary soundboards.
 
 ---
+### ADR-018: Phase-Based Bowling Plans & Live-State Completion Authority (Phase 9.7)
+- **Status:** Accepted (November 2026)
+- **Decision:** Keep one pure delivery pipeline and add structured high-level bowling plans (`ATTACK`, `BALANCED`, `DEFENSIVE`) that map into the existing tactical action/logit inputs. Resolve phases from active format/context: T10/T20/ODI limited-overs boundaries and contextual Test phases. Record the effective action on every delivery event. The interactive live state is authoritative at completion; result/history hydration must reconcile that state, never the precomputed autonomous fallback. Persist the exact config snapshot and recorded actions for deterministic resume. Represent unlimited Test bowling with `Infinity` internally and `∞` in the beginner UI, never arbitrary sentinel quotas.
+
 *End of Master Project Brain (`brain.md`) — Maintained by Antigravity AI Engine & Engineering Team.*

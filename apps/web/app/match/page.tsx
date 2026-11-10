@@ -73,6 +73,8 @@ import {
   type FieldPreset,
   type CustomFielderPosition,
   type TacticalDeliveryAction,
+  type BowlingPlan,
+  getActiveBowlingPhase,
   type ReplayVerificationReport,
   generateAIOpponentTeam,
   type AIDifficulty,
@@ -138,10 +140,18 @@ export interface ActiveMatchSession {
   userIntent?: BatterIntent;
   userPaceStrategy?: BowlingPaceStrategy;
   userBowlingIntent?: BowlingIntent;
+  userBowlingPlan?: BowlingPlan;
+  managementMode?: 'MANUAL' | 'ASSISTED' | 'AUTOMATIC';
   userField?: FieldPreset;
   customFielders?: InteractiveFielder[];
   userOpeningBowlerId?: string;
   userBattingLineup?: DreamTeamPlayerSlotInput[];
+  configSnapshot?: {
+    readonly config: Omit<MatchSimulationConfig, 'seed' | 'playerProfiles'> & {
+      readonly seed: string;
+      readonly playerProfiles: readonly [string, PlayerSquadContext][];
+    };
+  };
 }
 
 export interface ArchivedMatchRecord {
@@ -217,6 +227,9 @@ export default function MatchSimulationPage() {
   const [userField, setUserField] = useState<FieldPreset>('BALANCED_RING');
   const [userPaceStrategy, setUserPaceStrategy] = useState<BowlingPaceStrategy>('FULL_PACE');
   const [userBowlingIntent, setUserBowlingIntent] = useState<BowlingIntent>('ATTACKING');
+  const [userBowlingPlan, setUserBowlingPlan] = useState<BowlingPlan>('BALANCED');
+  const [managementMode, setManagementMode] = useState<'MANUAL' | 'ASSISTED' | 'AUTOMATIC'>('ASSISTED');
+  const [showAdvancedTactics, setShowAdvancedTactics] = useState(false);
   const [userNominatedBowlerId, setUserNominatedBowlerId] = useState<string>('');
   const [userOpeningBowlerId, setUserOpeningBowlerId] = useState<string>('');
   const [userBattingLineup, setUserBattingLineup] = useState<DreamTeamPlayerSlotInput[]>([]);
@@ -307,6 +320,8 @@ export default function MatchSimulationPage() {
               setCustomFielders(preMatch.customFielders);
             }
             if (preMatch.userField) setUserField(preMatch.userField);
+            if (preMatch.userBowlingPlan) setUserBowlingPlan(preMatch.userBowlingPlan);
+            if (preMatch.managementMode) setManagementMode(preMatch.managementMode);
             setPhase('POST_TOSS_MANAGEMENT');
           }
         } catch {
@@ -361,7 +376,16 @@ export default function MatchSimulationPage() {
         userPaceStrategy,
         userBowlingIntent,
         userField,
+        userBowlingPlan,
+        managementMode,
         customFielders,
+        configSnapshot: {
+          config: {
+            ...currentState.config,
+            seed: currentState.config.seed.toString(),
+            playerProfiles: Array.from(currentState.config.playerProfiles.entries()),
+          },
+        },
       };
       localStorage.setItem('cricket_active_match_session', JSON.stringify(session));
     } catch (err) {
@@ -454,27 +478,33 @@ export default function MatchSimulationPage() {
       }
     }
 
-    const config: MatchSimulationConfig = {
-      matchId: activeSession.matchId,
-      format: activeSession.format,
-      seed,
-      versions: {
-        simulationVersion: 'sim-1.0.0',
-        rulesetVersion: getRulesetForFormat(activeSession.format).rulesetVersion,
-        ratingVersion: 'rate-1.0.0',
-      },
-      stadiumId: activeSession.selectedStadiumId,
-      pitchType: activeSession.selectedPitch,
-      conditions: {
-        ambientTemperatureC: activeSession.temperature,
-        humidityPercentage: activeSession.humidity,
-        cloudCoverPercentage: activeSession.cloudCover,
-        dewFactor: activeSession.dewFactor,
-      },
-      team1: battingFirst,
-      team2: bowlingFirst,
-      playerProfiles: profiles,
-    };
+    const config: MatchSimulationConfig = activeSession.configSnapshot
+      ? {
+          ...activeSession.configSnapshot.config,
+          seed: BigInt(activeSession.configSnapshot.config.seed),
+          playerProfiles: new Map(activeSession.configSnapshot.config.playerProfiles),
+        }
+      : {
+          matchId: activeSession.matchId,
+          format: activeSession.format,
+          seed,
+          versions: {
+            simulationVersion: 'sim-1.0.0',
+            rulesetVersion: getRulesetForFormat(activeSession.format).rulesetVersion,
+            ratingVersion: 'rate-1.0.0',
+          },
+          stadiumId: activeSession.selectedStadiumId,
+          pitchType: activeSession.selectedPitch,
+          conditions: {
+            ambientTemperatureC: activeSession.temperature,
+            humidityPercentage: activeSession.humidity,
+            cloudCoverPercentage: activeSession.cloudCover,
+            dewFactor: activeSession.dewFactor,
+          },
+          team1: battingFirst,
+          team2: bowlingFirst,
+          playerProfiles: profiles,
+        };
 
     const fullResult = simulateFullMatch(config);
     setSimulationResult(fullResult);
@@ -484,8 +514,9 @@ export default function MatchSimulationPage() {
 
     for (let i = 0; i < activeSession.currentEventIndex; i++) {
       if (currentLiveState.status === 'COMPLETED') break;
-      const aiAction = resolveAITacticalAction(currentLiveState, livePrng);
-      const { nextState } = stepDelivery(currentLiveState, aiAction, livePrng);
+      const recordedAction = activeSession.visibleEvents[i]?.tactics;
+      const action = recordedAction ?? resolveAITacticalAction(currentLiveState, livePrng);
+      const { nextState } = stepDelivery(currentLiveState, action, livePrng);
       currentLiveState = nextState;
     }
 
@@ -498,6 +529,8 @@ export default function MatchSimulationPage() {
     if (activeSession.userIntent) setUserIntent(activeSession.userIntent);
     if (activeSession.userPaceStrategy) setUserPaceStrategy(activeSession.userPaceStrategy);
     if (activeSession.userBowlingIntent) setUserBowlingIntent(activeSession.userBowlingIntent);
+    if (activeSession.userBowlingPlan) setUserBowlingPlan(activeSession.userBowlingPlan);
+    if (activeSession.managementMode) setManagementMode(activeSession.managementMode);
     if (activeSession.userField) setUserField(activeSession.userField);
     if (activeSession.customFielders && activeSession.customFielders.length === 9) {
       setCustomFielders(activeSession.customFielders);
@@ -943,6 +976,14 @@ export default function MatchSimulationPage() {
       customFieldPositions: isUserBowling && mappedCustomField.length > 0 ? mappedCustomField : undefined,
       bowlingPaceStrategy: isUserBowling ? userPaceStrategy : aiAction.bowlingPaceStrategy,
       bowlingIntent: isUserBowling ? userBowlingIntent : aiAction.bowlingIntent,
+      bowlingPlan: isUserBowling ? userBowlingPlan : aiAction.bowlingPlan,
+      activePhase: getActiveBowlingPhase(
+        state.config.format,
+        currentInnings?.completedOvers ?? 0,
+        state.currentSessionNumber ?? 1,
+        currentInnings?.totalWickets ?? 0,
+      ).id,
+      actionId: `${state.config.matchId}:${state.currentInningsIndex}:${currentInnings?.events.length ?? 0}`,
       nextBowlerPlayerId: isUserBowling && userNominatedBowlerId ? userNominatedBowlerId : undefined,
     };
 
@@ -958,7 +999,15 @@ export default function MatchSimulationPage() {
       setIsPlaying(false);
       setPhase('COMPLETED');
       if (simulationResult) {
-        archiveCompletedMatch(simulationResult);
+        const authoritativeResult: MatchSimulationResult = {
+          ...simulationResult,
+          finalState: nextState,
+          scorecard: reconcileMatchScorecard(nextState),
+          allEvents: nextEvents,
+          totalDeliveriesSimulated: nextEvents.length,
+        };
+        setSimulationResult(authoritativeResult);
+        archiveCompletedMatch(authoritativeResult);
       }
     } else {
       saveActiveSession(nextState, nextEvents, nextIndex);
@@ -1026,7 +1075,7 @@ export default function MatchSimulationPage() {
 
   // Dynamic format & target metrics
   const isTestFormat = format === 'TEST_RED_BALL' || format === 'TEST_PINK_BALL';
-  const formatMaxOvers = format === 'T10' ? 10 : format === 'ODI' ? 50 : format === 'T20' ? 20 : 9999;
+  const formatMaxOvers = format === 'T10' ? 10 : format === 'ODI' ? 50 : format === 'T20' ? 20 : Infinity;
   const totalInningsBalls = formatMaxOvers * 6;
   const targetRuns = activeInnings?.targetRuns;
   const runsRemaining = targetRuns !== undefined ? Math.max(0, targetRuns - currentRuns) : 0;
@@ -1094,6 +1143,7 @@ export default function MatchSimulationPage() {
   // Eligible user bowlers for dynamic bowling changes
   const userBowlingSlots = liveState && isUserBowling
     ? (liveState.config.team1.id === 'user-team' ? liveState.config.team1.lineup : liveState.config.team2.lineup)
+      .filter((slot) => liveState.config.playerProfiles.get(slot.playerId)?.bowlingStyle !== 'NONE')
     : [];
 
   const strikerStats = strikerId ? activeInnings?.batters.get(strikerId) : undefined;
@@ -1112,6 +1162,10 @@ export default function MatchSimulationPage() {
       currentActiveBowler.bowlingStyle.includes('SPIN') ||
       currentActiveBowler.bowlingStyle.includes('ORTHODOX')
     : false;
+  const activeBowlingPhase = activeInnings
+    ? getActiveBowlingPhase(format, activeInnings.completedOvers, liveState?.currentSessionNumber ?? 1, activeInnings.totalWickets)
+    : undefined;
+  const displayedQuota = format === 'T10' ? 2 : format === 'T20' ? 4 : format === 'ODI' ? 10 : undefined;
 
   // Calculate live win probability
   const liveWinProb = targetRuns !== undefined
@@ -3066,6 +3120,49 @@ export default function MatchSimulationPage() {
                     <span className="font-label-caps text-[10px] text-text-subdued uppercase">TACTICS</span>
                   </div>
 
+                  <div className="rounded-lg bg-surface-recessed border border-border-hairline p-3 flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-bold text-text-chalk">Bowling plan</p>
+                        <p className="text-[10px] text-text-subdued">{activeBowlingPhase?.label ?? 'Choose a plan'} · affects the next delivery</p>
+                      </div>
+                      <select
+                        value={managementMode}
+                        onChange={(e) => setManagementMode(e.target.value as 'MANUAL' | 'ASSISTED' | 'AUTOMATIC')}
+                        className="bg-surface-card border border-border-hairline text-text-slate rounded px-2 py-1 text-[10px]"
+                        aria-label="Bowling management mode"
+                      >
+                        <option value="ASSISTED">Assisted</option>
+                        <option value="MANUAL">Manual</option>
+                        <option value="AUTOMATIC">Automatic</option>
+                      </select>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {([
+                        ['ATTACK', 'Take wickets'],
+                        ['BALANCED', 'Control'],
+                        ['DEFENSIVE', 'Protect runs'],
+                      ] as const).map(([id, description]) => (
+                        <button
+                          key={id}
+                          type="button"
+                          onClick={() => setUserBowlingPlan(id)}
+                          className={`rounded-md border px-2 py-2 text-left transition ${userBowlingPlan === id ? 'border-primary bg-primary/15 text-primary' : 'border-border-hairline bg-surface-card text-text-slate hover:text-text-chalk'}`}
+                        >
+                          <span className="block text-[10px] font-bold uppercase">{id}</span>
+                          <span className="block text-[9px] normal-case opacity-80">{description}</span>
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowAdvancedTactics((value) => !value)}
+                      className="self-start text-[10px] font-bold uppercase tracking-wide text-text-subdued hover:text-text-chalk"
+                    >
+                      {showAdvancedTactics ? '▾ Hide advanced tactics' : '▸ Advanced tactics'}
+                    </button>
+                  </div>
+
                   {/* Bowler Selection / Change */}
                   {userBowlingSlots.length > 0 && (
                     <div className="flex flex-col gap-1">
@@ -3082,15 +3179,14 @@ export default function MatchSimulationPage() {
                           const bEntry = activeInnings?.bowlers.get(slot.playerId);
                           const oversBowled = bEntry ? Math.floor(bEntry.ballsBowled / 6) : 0;
                           const isCurrent = slot.playerId === bowlerId;
-                          const quotaMax = format === 'T10' ? 2 : format === 'T20' ? 4 : format === 'ODI' ? 10 : 999;
-                          const quotaReached = oversBowled >= quotaMax;
+                          const quotaReached = displayedQuota !== undefined && oversBowled >= displayedQuota;
                           return (
                             <option
                               key={slot.playerId}
                               value={slot.playerId}
                               disabled={isCurrent && (activeInnings?.legalBallsInCurrentOver === 0 && (activeInnings?.completedOvers || 0) > 0)}
                             >
-                              {profile?.displayName || slot.playerId} ({oversBowled}/{quotaMax} ov{quotaReached ? ' - MAX' : ''}{isCurrent ? ' - ACTIVE' : ''})
+                              {profile?.displayName || slot.playerId} ({oversBowled}/{displayedQuota ?? '∞'} ov{quotaReached ? ' - MAX' : ''}{isCurrent ? ' - ACTIVE' : ''})
                             </option>
                           );
                         })}
@@ -3098,6 +3194,7 @@ export default function MatchSimulationPage() {
                     </div>
                   )}
 
+                  {showAdvancedTactics && <>
                   {/* Bowling Pace & Intensity Strategy */}
                   <div className="flex flex-col gap-1">
                     <label className="text-[10px] font-label-caps text-text-subdued uppercase">
@@ -3242,6 +3339,7 @@ export default function MatchSimulationPage() {
                       </select>
                     </div>
                   </div>
+                  </>}
 
                   {/* CPU Batter Plan (Read-Only Information) */}
                   <div className="mt-1 p-2 rounded-lg bg-surface-recessed border border-border-hairline flex flex-col gap-0.5">

@@ -615,7 +615,7 @@ describe('Stage E: Complete Match Simulation - All 5 Formats', () => {
 
     // Unlimited bowler quota in Tests
     const ruleset = getRulesetForFormat('TEST_RED_BALL');
-    expect(ruleset.maxOversPerBowler).toBe(9999);
+    expect(ruleset.maxOversPerBowler).toBe(Infinity);
     expect(ruleset.freeHitAfterNoBall).toBe(false); // No free hit in Tests
 
     const scorecard = reconcileMatchScorecard(result.finalState);

@@ -188,8 +188,8 @@ export function getRulesetForFormat(format: MatchFormat): RulesetInterface {
       return new (class extends T20Ruleset {
         override readonly format: MatchFormat = 'TEST_RED_BALL';
         override readonly rulesetVersion = 'rules-test-icc-2026.1';
-        override readonly maxOversPerInnings = 9999;
-        override readonly maxOversPerBowler = 9999;
+        override readonly maxOversPerInnings = Infinity;
+        override readonly maxOversPerBowler = Infinity;
         override readonly freeHitAfterNoBall = false;
         override readonly powerplay = { p1EndOver: 0 };
         override readonly followOnDeficitThreshold = 200;
@@ -247,8 +247,8 @@ export function getRulesetForFormat(format: MatchFormat): RulesetInterface {
       return new (class extends T20Ruleset {
         override readonly format: MatchFormat = 'TEST_PINK_BALL';
         override readonly rulesetVersion = 'rules-test-pink-ball-icc-2026.1';
-        override readonly maxOversPerInnings = 9999;
-        override readonly maxOversPerBowler = 9999;
+        override readonly maxOversPerInnings = Infinity;
+        override readonly maxOversPerBowler = Infinity;
         override readonly freeHitAfterNoBall = false;
         override readonly powerplay = { p1EndOver: 0 };
         override readonly followOnDeficitThreshold = 200;

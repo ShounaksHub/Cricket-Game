@@ -118,6 +118,9 @@ export const TacticalDeliveryActionSchema = z.object({
   bowlerVariation: z.enum(['STOCK', 'SLOWER_BALL', 'BOUNCER', 'GOOGLY', 'ARM_BALL']),
   fieldPreset: z.enum(['ATTACKING', 'BALANCED', 'BOUNDARY_DEFENSE', 'SPIN_CHOKE', 'CUSTOM']),
   customFieldPositions: z.array(CustomFielderPositionSchema).optional(),
+  bowlingPlan: z.enum(['ATTACK', 'BALANCED', 'DEFENSIVE']).optional(),
+  activePhase: z.string().optional(),
+  actionId: z.string().optional(),
 });
 
 export const TossActionSchema = z.object({

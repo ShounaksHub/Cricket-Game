@@ -75,6 +75,8 @@ export type BowlingIntent =
   | 'WICKET_TAKING'
   | 'DEFENSIVE';
 
+export type BowlingPlan = 'ATTACK' | 'BALANCED' | 'DEFENSIVE';
+
 export type FieldPreset =
   | 'ATTACKING_CLOSE_CATCHERS'
   | 'BALANCED_RING'
@@ -106,6 +108,10 @@ export interface TacticalDeliveryAction {
   readonly takeNewBall?: boolean;
   readonly declareInnings?: boolean;
   readonly enforceFollowOn?: boolean;
+  /** High-level captain decision. The engine maps this to the fields above. */
+  readonly bowlingPlan?: BowlingPlan;
+  readonly activePhase?: string;
+  readonly actionId?: string;
 }
 
 export interface Trajectory2D {
@@ -152,6 +158,8 @@ export interface DeliveryEvent {
     readonly totalRuns: number;
     readonly totalWickets: number;
   };
+  /** The exact captain/AI inputs used for this delivery, for audit and replay. */
+  readonly tactics?: TacticalDeliveryAction;
 }
 
 export interface BatterScorecardEntry {

@@ -19,6 +19,7 @@ import { createInitialInningsState, verifyMatchInvariants } from '../state/match
 import { calculateWearIncrement } from '../environment/environmental-engine.js';
 import { generateCommentary } from './commentary.js';
 import { generateTrajectory } from './trajectory.js';
+import { applyBowlingPlan, getActiveBowlingPhase } from '../contracts/bowling-plans.js';
 
 export interface StepDeliveryResult {
   readonly nextState: MatchState;
@@ -54,6 +55,16 @@ export function stepDelivery(
   }
 
   const ruleset = getRulesetForFormat(state.config.format);
+  const activePhase = getActiveBowlingPhase(
+    state.config.format,
+    currentInnings.completedOvers,
+    state.currentSessionNumber ?? 1,
+    currentInnings.totalWickets,
+  );
+  const effectiveAction = {
+    ...applyBowlingPlan(action, action.bowlingPlan),
+    activePhase: action.activePhase ?? activePhase.id,
+  };
   const isTeam1Batting = currentInnings.battingTeamId === state.config.team1.id;
   const battingTeam = isTeam1Batting ? state.config.team1 : state.config.team2;
   const bowlingTeam = isTeam1Batting ? state.config.team2 : state.config.team1;
@@ -172,7 +183,7 @@ export function stepDelivery(
       batter: strikerProfile,
       bowler: bowlerProfile,
       conditions: state.config.conditions,
-      tactics: action,
+      tactics: effectiveAction,
     },
     prng,
   );
@@ -189,8 +200,8 @@ export function stepDelivery(
     bowlerPlayerId: bowlerId,
     bowlerStyle: bowlerProfile.bowlingStyle,
     bowlingTeamLineup: bowlingTeam.lineup,
-    fieldPreset: action.fieldPreset,
-    customFieldPositions: action.customFieldPositions,
+    fieldPreset: effectiveAction.fieldPreset,
+    customFieldPositions: effectiveAction.customFieldPositions,
     prng,
   });
 
@@ -474,8 +485,8 @@ export function stepDelivery(
     baseSpeedKmh = 124 + (prng.nextFloat() * 14);
   }
 
-  if (action.bowlingPaceStrategy) {
-    switch (action.bowlingPaceStrategy) {
+  if (effectiveAction.bowlingPaceStrategy) {
+    switch (effectiveAction.bowlingPaceStrategy) {
       case 'FULL_PACE':
         baseSpeedKmh += isSpinner ? 3 : 5;
         break;
@@ -520,6 +531,7 @@ export function stepDelivery(
       totalRuns: newTotalRuns,
       totalWickets: newTotalWickets,
     },
+    tactics: effectiveAction,
   };
 
   // 13. Innings Completion Evaluation

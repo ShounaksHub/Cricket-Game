@@ -172,7 +172,7 @@ describe('Multi-Format Cricket Simulation Engine (Phase 8)', () => {
     const ruleset = getRulesetForFormat('TEST_RED_BALL');
     expect(ruleset.format).toBe('TEST_RED_BALL');
     expect(ruleset.freeHitAfterNoBall).toBe(false);
-    expect(ruleset.maxOversPerBowler).toBe(9999); // Unlimited quota
+    expect(ruleset.maxOversPerBowler).toBe(Infinity); // Unlimited quota
     expect(ruleset.maxFieldersOutsideCircle(10)).toBe(9); // Unrestricted field
   });
 

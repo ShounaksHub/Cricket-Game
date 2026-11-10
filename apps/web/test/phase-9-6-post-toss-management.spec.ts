@@ -7,7 +7,7 @@ import {
   getRulesetForFormat,
   type MatchSimulationConfig,
 } from '@cricket/simulation-engine';
-import type { PlayerSquadContext, MatchFormat } from '@cricket/shared-types';
+import type { PlayerSquadContext, MatchFormat, DreamTeamPlayerSlotInput } from '@cricket/shared-types';
 import { VERIFIED_BENCHMARK_PLAYERS, ingestPlayerRecord } from '@cricket/data-ingestion';
 import { CANONICAL_FIELD_PRESETS, type InteractiveFielder } from '../components/InteractiveFieldEditor';
 
@@ -42,7 +42,7 @@ describe('Phase 9.6: Mandatory Post-Toss Team Management & Explicit Start Verifi
   const p10 = all[9].id;
   const p11 = all[10].id;
 
-  const defaultUserLineup = [
+  const defaultUserLineup: DreamTeamPlayerSlotInput[] = [
     { playerId: p1, battingOrder: 1, isCaptain: true, bowlingPriority: null },
     { playerId: p2, battingOrder: 2, isDesignatedWicketkeeper: true, bowlingPriority: null },
     { playerId: p3, battingOrder: 3, bowlingPriority: null },
@@ -182,7 +182,7 @@ describe('Phase 9.6: Mandatory Post-Toss Team Management & Explicit Start Verifi
         { format: 'T10', maxQuota: 2 },
         { format: 'T20', maxQuota: 4 },
         { format: 'ODI', maxQuota: 10 },
-        { format: 'TEST_RED_BALL', maxQuota: 9999 },
+        { format: 'TEST_RED_BALL', maxQuota: Infinity },
       ];
 
       for (const { format, maxQuota } of formats) {
