@@ -1,9 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import Link from 'next/link';
 import { getAuthoritativePlayerImage } from '@/lib/player-image-resolver';
-import { useRouter } from 'next/navigation';
 import type {
   MatchFormat,
   PlayerProfile,
@@ -59,16 +57,14 @@ function getPlayerPortrait(playerOrId: any, index: number = 0): string {
 const ITEMS_PER_PAGE = 8;
 
 export default function PlayerCataloguePage() {
-  const router = useRouter();
   const [selectedFormat, setSelectedFormat] = useState<MatchFormat>('T20');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [roleFilter, setRoleFilter] = useState<'ALL' | 'BATTER' | 'WK' | 'ALL-ROUNDER' | 'BOWLER'>('ALL');
   const [nationFilter, setNationFilter] = useState<string>('ALL');
   const [eraFilter, setEraFilter] = useState<string>('ALL');
-  const [sortBy, setSortBy] = useState<'OVR_DESC' | 'NAME_ASC' | 'BAT_AVG' | 'BOWL_ECON'>('OVR_DESC');
+  const [sortBy, setSortBy] = useState<'RUNS_DESC' | 'WICKETS_DESC' | 'NAME_ASC' | 'BAT_AVG' | 'BOWL_ECON'>('RUNS_DESC');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [inspectedPlayerId, setInspectedPlayerId] = useState<string | null>(null);
-  const [draftAlert, setDraftAlert] = useState<string | null>(null);
 
   // Ingest all 1,144 players
   const allPlayers = useMemo<PlayerProfile[]>(() => {
@@ -110,10 +106,11 @@ export default function PlayerCataloguePage() {
 
     // Sort
     list = [...list].sort((a, b) => {
-      if (sortBy === 'OVR_DESC') {
-        const aOvr = a.ratings[selectedFormat]?.overallRating ?? 75;
-        const bOvr = b.ratings[selectedFormat]?.overallRating ?? 75;
-        return bOvr - aOvr;
+      if (sortBy === 'RUNS_DESC') {
+        return (b.formatStats[selectedFormat]?.runsScored ?? 0) - (a.formatStats[selectedFormat]?.runsScored ?? 0);
+      }
+      if (sortBy === 'WICKETS_DESC') {
+        return (b.formatStats[selectedFormat]?.wicketsTaken ?? 0) - (a.formatStats[selectedFormat]?.wicketsTaken ?? 0);
       }
       if (sortBy === 'NAME_ASC') {
         return (a.displayName || a.fullName).localeCompare(b.displayName || b.fullName);
@@ -142,6 +139,7 @@ export default function PlayerCataloguePage() {
     }
     return filteredPlayers[0] || allPlayers[0];
   }, [inspectedPlayerId, filteredPlayers, allPlayers]);
+  const activeStats = activePlayer?.formatStats[selectedFormat];
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredPlayers.length / ITEMS_PER_PAGE) || 1;
@@ -166,59 +164,12 @@ export default function PlayerCataloguePage() {
     return { bat, bowl, wk, ar, total: allPlayers.length };
   }, [allPlayers]);
 
-  function handleDraftPlayer(player: PlayerProfile) {
-    // Add to saved dream team
-    try {
-      const stored = localStorage.getItem('cricket_dream_teams');
-      let teams = stored ? JSON.parse(stored) : [];
-      let defaultTeam = teams[0] || {
-        id: `team-${Date.now()}`,
-        teamName: 'THUNDERBOLTS XI',
-        format: selectedFormat,
-        status: 'DRAFT',
-        lineup: [],
-        updatedAt: new Date().toISOString(),
-      };
-
-      const existingSlot = defaultTeam.lineup?.find((s: any) => s.playerId === player.id);
-      if (existingSlot) {
-        setDraftAlert(`${player.displayName} is already in your Playing XI!`);
-        setTimeout(() => setDraftAlert(null), 3000);
-        return;
-      }
-
-      if ((defaultTeam.lineup?.length || 0) >= 11) {
-        setDraftAlert(`Your squad already has 11 players! Go to Dream XI to adjust lineup.`);
-        setTimeout(() => setDraftAlert(null), 3500);
-        return;
-      }
-
-      const nextOrder = (defaultTeam.lineup?.length || 0) + 1;
-      const newSlot = {
-        playerId: player.id,
-        battingOrder: nextOrder,
-        isCaptain: nextOrder === 1,
-        isViceCaptain: nextOrder === 2,
-        isDesignatedWicketkeeper: player.primaryRole === 'WICKETKEEPER_BATTER' || player.isWicketkeeper,
-      };
-
-      defaultTeam.lineup = [...(defaultTeam.lineup || []), newSlot];
-      teams = [defaultTeam, ...teams.filter((t: any) => t.id !== defaultTeam.id)];
-      localStorage.setItem('cricket_dream_teams', JSON.stringify(teams));
-
-      setDraftAlert(`Added ${player.displayName} to Playing XI (Slot #${nextOrder})!`);
-      setTimeout(() => setDraftAlert(null), 3000);
-    } catch {
-      // Fallback
-    }
-  }
-
   function handleResetFilters() {
     setSearchQuery('');
     setRoleFilter('ALL');
     setNationFilter('ALL');
     setEraFilter('ALL');
-    setSortBy('OVR_DESC');
+    setSortBy('RUNS_DESC');
     setCurrentPage(1);
   }
 
@@ -236,38 +187,18 @@ export default function PlayerCataloguePage() {
               <div className="flex items-center gap-2 mb-2">
                 <span className="w-2 h-2 rounded-full bg-secondary" />
                 <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest">
-                  PLAYER DATABASE • {allPlayers.length.toLocaleString()} PLAYERS
+                  PLAYER ARCHIVE • {allPlayers.length.toLocaleString()} PLAYERS
                 </span>
               </div>
               <h1 className="font-display-lg text-display-lg text-text-chalk tracking-tight uppercase">
-                EXPLORE CRICKET LEGENDS
+                CRICKET PLAYER ARCHIVE
               </h1>
               <p className="font-body-base text-body-base text-text-slate max-w-2xl mt-1">
-                Explore cricketers across nations, generations, and formats. Compare authentic career statistics,
-                ratings, and draft them into your Dream XI.
+                Browse recorded career data across nations, generations, and formats. Where a field is not verified in
+                the source record, the archive shows a dash rather than an estimate.
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="bg-surface-card px-4 py-2 rounded-lg flex items-center gap-3 shadow-sm border border-border-hairline">
-                <span className="font-label-caps text-label-caps text-text-subdued uppercase">
-                  SALARY CAP REMAINING
-                </span>
-                <span className="font-scoreboard-md text-scoreboard-md text-tertiary">₹42.5 CR</span>
-              </div>
-            </div>
           </div>
-
-          {draftAlert && (
-            <div className="mb-4 bg-primary-container text-on-primary-container px-4 py-2.5 rounded-xl font-label-caps text-label-caps flex items-center justify-between shadow-lg">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px]">sports_cricket</span>
-                <span>{draftAlert}</span>
-              </div>
-              <Link href="/dream-teams" className="underline font-bold text-body-sm">
-                VIEW SQUAD →
-              </Link>
-            </div>
-          )}
 
           {/* Search & Main Command Filters */}
           <div className="bg-surface-card rounded-xl p-4 shadow-md space-y-4 border border-border-hairline">
@@ -283,7 +214,7 @@ export default function PlayerCataloguePage() {
                   setCurrentPage(1);
                 }}
                 className="w-full bg-surface-recessed rounded-lg pl-12 pr-28 py-3.5 font-body-base text-body-base text-text-chalk placeholder:text-text-subdued focus:outline-none focus:ring-1 focus:ring-tertiary transition-all"
-                placeholder="Search 1,144+ players by name, signature trait, or country..."
+                placeholder="Search players by name or country..."
                 type="text"
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
@@ -294,17 +225,7 @@ export default function PlayerCataloguePage() {
                   >
                     <span className="material-symbols-outlined text-[18px]">close</span>
                   </button>
-                ) : (
-                  <span className="bg-surface-elevated font-label-caps text-label-caps text-text-slate px-2 py-1 rounded">
-                    ⌘K
-                  </span>
-                )}
-                <button
-                  onClick={() => setCurrentPage(1)}
-                  className="bg-primary hover:bg-primary-container text-on-primary font-body-bold text-body-sm px-3.5 py-1.5 rounded transition-all flex items-center gap-1 shadow-[0_2px_8px_rgba(120,220,119,0.3)]"
-                >
-                  <span>FILTER</span>
-                </button>
+                ) : null}
               </div>
             </div>
 
@@ -391,7 +312,8 @@ export default function PlayerCataloguePage() {
                     onChange={(e) => setSortBy(e.target.value as any)}
                     className="appearance-none bg-surface-elevated text-text-chalk font-body-bold text-body-sm pl-3 pr-8 py-1.5 rounded-lg focus:outline-none cursor-pointer border border-border-hairline"
                   >
-                    <option value="OVR_DESC">Overall Rating (High to Low)</option>
+                    <option value="RUNS_DESC">Career Runs (High to Low)</option>
+                    <option value="WICKETS_DESC">Career Wickets (High to Low)</option>
                     <option value="NAME_ASC">Player Name (A-Z)</option>
                     <option value="BAT_AVG">Batting Average (Descending)</option>
                     <option value="BOWL_ECON">Bowling Economy (Tightest)</option>
@@ -451,12 +373,12 @@ export default function PlayerCataloguePage() {
                 </select>
               </div>
 
-              {/* Format Suitability */}
+              {/* Career record format */}
               <div className="flex items-center gap-2 bg-surface-recessed px-3 py-1.5 rounded-lg border border-border-hairline">
                 <span className="material-symbols-outlined text-[16px] text-text-subdued">
                   sports_cricket
                 </span>
-                <span className="font-label-caps text-label-caps text-text-subdued uppercase">FORMAT:</span>
+                <span className="font-label-caps text-label-caps text-text-subdued uppercase">RECORD FORMAT:</span>
                 <div className="flex items-center gap-1.5 ml-1">
                   {(['T20', 'ODI', 'TEST_RED_BALL'] as MatchFormat[]).map((fmt) => (
                     <button
@@ -497,19 +419,16 @@ export default function PlayerCataloguePage() {
             <div className="lg:col-span-7 flex flex-col gap-4">
               <div className="flex items-center justify-between px-1">
                 <span className="font-label-caps text-label-caps text-text-subdued uppercase tracking-wider">
-                  SHOWING {pagedPlayers.length} OF {filteredPlayers.length.toLocaleString()} PROFILES // SORTED
-                  BY RATING
+                  SHOWING {pagedPlayers.length} OF {filteredPlayers.length.toLocaleString()} PROFILES
                 </span>
-                <span className="font-label-caps text-label-caps text-primary">LIVE RADAR ACTIVE</span>
+                <span className="font-label-caps text-label-caps text-primary">SELECT A PROFILE TO VIEW RECORD</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {pagedPlayers.map((player, idx) => {
                   const isInspecting = activePlayer?.id === player.id;
                   const roleCat = getStitchRoleCategory(player.primaryRole);
-                  const ovr = player.ratings[selectedFormat]?.overallRating ?? 75;
-                  const batRating = player.ratings[selectedFormat]?.battingRating ?? 50;
-                  const bowlRating = player.ratings[selectedFormat]?.bowlingRating ?? 50;
+                  const stats = player.formatStats[selectedFormat];
                   const portrait = getPlayerPortrait(player, idx + (currentPage - 1) * ITEMS_PER_PAGE);
                   const flag = getCountryFlag(player.primaryNationality);
                   const careerSpan = `${player.careerDebutYear}-${player.careerRetirementYear ? String(player.careerRetirementYear).slice(-2) : 'Pres'}`;
@@ -568,49 +487,36 @@ export default function PlayerCataloguePage() {
                         </div>
                       </div>
 
-                      {/* Metrics Matrix Strip */}
+                      {/* Recorded career statistics for the selected format. */}
                       <div className="grid grid-cols-4 gap-2 mt-4 bg-surface-recessed p-2.5 rounded-lg text-center">
                         <div>
-                          <span className="font-label-caps text-[10px] text-text-subdued block uppercase">OVR</span>
-                          <span className="font-scoreboard-md text-scoreboard-md text-tertiary">{ovr}</span>
+                          <span className="font-label-caps text-[10px] text-text-subdued block uppercase">MATCHES</span>
+                          <span className="font-scoreboard-md text-scoreboard-md text-text-chalk">{stats?.matchesPlayed ?? '—'}</span>
                         </div>
                         <div>
-                          <span className="font-label-caps text-[10px] text-text-subdued block uppercase">BAT</span>
-                          <span className="font-scoreboard-md text-scoreboard-md text-text-chalk">{batRating}</span>
+                          <span className="font-label-caps text-[10px] text-text-subdued block uppercase">RUNS</span>
+                          <span className="font-scoreboard-md text-scoreboard-md text-primary">{stats ? stats.runsScored.toLocaleString() : '—'}</span>
                         </div>
                         <div>
-                          <span className="font-label-caps text-[10px] text-text-subdued block uppercase">BOWL</span>
-                          <span className="font-scoreboard-md text-scoreboard-md text-text-slate">{bowlRating}</span>
+                          <span className="font-label-caps text-[10px] text-text-subdued block uppercase">AVG</span>
+                          <span className="font-scoreboard-md text-scoreboard-md text-secondary">{stats?.battingAverage?.toFixed(2) ?? '—'}</span>
                         </div>
                         <div>
-                          <span className="font-label-caps text-[10px] text-text-subdued block uppercase">COST</span>
-                          <span className="font-scoreboard-md text-scoreboard-md text-secondary">
-                            ₹{(ovr * 0.1).toFixed(1)}M
-                          </span>
+                          <span className="font-label-caps text-[10px] text-text-subdued block uppercase">WKTS</span>
+                          <span className="font-scoreboard-md text-scoreboard-md text-telemetry-blue">{stats?.wicketsTaken ?? '—'}</span>
                         </div>
                       </div>
 
-                      {/* Action Bar */}
-                      <div className="flex items-center gap-2 mt-3 pt-2">
+                      <div className="mt-3 pt-2">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             setInspectedPlayerId(player.id);
                           }}
-                          className="flex-1 py-2 rounded bg-surface-elevated hover:bg-surface-bright text-text-chalk font-body-bold text-body-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                          className="w-full py-2 rounded bg-surface-elevated hover:bg-surface-bright text-text-chalk font-body-bold text-body-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                         >
                           <span className="material-symbols-outlined text-[16px]">visibility</span>
-                          <span>Inspect</span>
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDraftPlayer(player);
-                          }}
-                          className="flex-1 py-2 rounded bg-primary hover:bg-primary-container text-on-primary font-body-bold text-body-sm flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
-                        >
-                          <span className="material-symbols-outlined text-[16px]">person_add</span>
-                          <span>Draft XI</span>
+                          <span>View career record</span>
                         </button>
                       </div>
                     </div>
@@ -674,17 +580,14 @@ export default function PlayerCataloguePage() {
                   {/* Profile Header Dock */}
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-1 rounded-full font-label-caps text-label-caps bg-[#282310] text-tertiary shadow-[0_0_12px_rgba(212,175,55,0.25)] flex items-center gap-1">
+                      <span className="px-2.5 py-1 rounded-full font-label-caps text-label-caps bg-[#202920] text-secondary flex items-center gap-1">
                         <span className="material-symbols-outlined text-[14px]">verified</span>
-                        HALL OF FAME
-                      </span>
-                      <span className="px-2 py-1 rounded-full font-label-caps text-label-caps bg-surface-elevated text-text-slate">
-                        ALL-TIME LEGEND
+                        ARCHIVE PROFILE
                       </span>
                     </div>
                     <div className="flex items-center gap-1 bg-surface-elevated px-2 py-1 rounded-lg">
                       <span className="font-label-caps text-label-caps text-text-subdued">STATUS:</span>
-                      <span className="font-label-caps text-label-caps text-primary uppercase">UNLOCKED</span>
+                      <span className="font-label-caps text-label-caps text-primary uppercase">{activePlayer.isActive ? 'ACTIVE' : 'RETIRED'}</span>
                     </div>
                   </div>
 
@@ -731,35 +634,16 @@ export default function PlayerCataloguePage() {
                       </div>
                     </div>
 
-                    {/* Huge Rating Badge Overlay */}
-                    <div className="mt-4 pt-4 flex items-center justify-between bg-surface-recessed/60 px-4 py-3 rounded-lg border border-border-hairline">
-                      <div className="flex flex-col">
-                        <span className="font-label-caps text-label-caps text-text-subdued uppercase">
-                          OVERALL RATING ({selectedFormat})
-                        </span>
-                        <span className="font-body-sm text-body-sm text-text-slate">
-                          Confidence Tier: {activePlayer.ratings[selectedFormat]?.confidenceTier || 'GOLD'}
-                        </span>
-                      </div>
-                      <div className="flex items-baseline gap-1">
-                        <span className="font-scoreboard-xl text-scoreboard-xl text-tertiary leading-none">
-                          {activePlayer.ratings[selectedFormat]?.overallRating ?? 85}
-                        </span>
-                        <span className="font-label-caps text-label-caps text-text-subdued">/100</span>
-                      </div>
-                    </div>
                   </div>
 
-                  {/* Format Analytics Multi-Tab */}
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center justify-between">
                       <span className="font-label-caps text-label-caps text-text-subdued uppercase tracking-wider">
-                        CAREER STATISTICS
+                        RECORDED CAREER STATISTICS
                       </span>
-                      <span className="font-label-caps text-label-caps text-secondary">VERIFIED STATS</span>
+                      <span className="font-label-caps text-label-caps text-secondary">ARCHIVE RECORD</span>
                     </div>
 
-                    {/* Format Switcher */}
                     <div className="grid grid-cols-3 gap-1 bg-surface-recessed p-1 rounded-lg border border-border-hairline">
                       {(['TEST_RED_BALL', 'ODI', 'T20'] as MatchFormat[]).map((fmt) => (
                         <button
@@ -776,211 +660,45 @@ export default function PlayerCataloguePage() {
                       ))}
                     </div>
 
-                    {/* Tabular Stat Breakdown Grid */}
-                    <div className="grid grid-cols-4 gap-2 bg-surface-recessed p-3.5 rounded-xl text-center border border-border-hairline">
-                      <div>
-                        <span className="font-label-caps text-[10px] text-text-subdued uppercase block">
-                          MATCHES
-                        </span>
-                        <span className="font-scoreboard-md text-scoreboard-md text-text-chalk">
-                          {activePlayer.formatStats[selectedFormat]?.matchesPlayed ?? 45}
-                        </span>
-                        <span className="font-label-caps text-[9px] text-text-subdued block mt-0.5">
-                          {activePlayer.formatStats[selectedFormat]?.inningsBatted ?? 38} INN
-                        </span>
-                      </div>
-                      <div>
-                        <span className="font-label-caps text-[10px] text-text-subdued uppercase block">RUNS</span>
-                        <span className="font-scoreboard-md text-scoreboard-md text-primary">
-                          {(activePlayer.formatStats[selectedFormat]?.runsScored ?? 1850).toLocaleString()}
-                        </span>
-                        <span className="font-label-caps text-[9px] text-text-subdued block mt-0.5">
-                          SR: {activePlayer.formatStats[selectedFormat]?.strikeRate?.toFixed(1) ?? '132.5'}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="font-label-caps text-[10px] text-text-subdued uppercase block">
-                          CENTURIES
-                        </span>
-                        <span className="font-scoreboard-md text-scoreboard-md text-tertiary">
-                          {activePlayer.formatStats[selectedFormat]?.centuries ?? 3}
-                        </span>
-                        <span className="font-label-caps text-[9px] text-text-subdued block mt-0.5">
-                          50s: {activePlayer.formatStats[selectedFormat]?.halfCenturies ?? 12}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="font-label-caps text-[10px] text-text-subdued uppercase block">
-                          AVERAGE
-                        </span>
-                        <span className="font-scoreboard-md text-scoreboard-md text-secondary">
-                          {(activePlayer.formatStats[selectedFormat]?.battingAverage ?? 42.5).toFixed(2)}
-                        </span>
-                        <span className="font-label-caps text-[9px] text-text-subdued block mt-0.5">
-                          HS: {activePlayer.formatStats[selectedFormat]?.highestScore ?? 118}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Attribute Spectrum & Sliders */}
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center justify-between">
-                      <span className="font-label-caps text-label-caps text-text-subdued uppercase tracking-wider">
-                        PLAYER SKILLS &amp; RATINGS
-                      </span>
-                      <span className="font-label-caps text-label-caps text-tertiary font-bold">
-                        PEAK ATTRIBUTES
-                      </span>
-                    </div>
-                    <div className="space-y-2.5 bg-surface-recessed p-4 rounded-xl border border-border-hairline">
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-body-bold text-body-sm text-text-chalk">
-                            Technique & Precision
-                          </span>
-                          <span className="font-scoreboard-md text-[14px] text-primary">
-                            {activePlayer.attributes.technique}{' '}
-                            <span className="text-text-subdued text-[10px]">/ 100</span>
-                          </span>
+                    {activeStats ? (
+                      <>
+                        <div className="rounded-xl border border-border-hairline bg-surface-recessed p-3">
+                          <p className="mb-2 font-label-caps text-[10px] uppercase text-text-subdued">Batting</p>
+                          <div className="grid grid-cols-4 gap-2 text-center">
+                            {[
+                              ['Matches', activeStats.matchesPlayed], ['Innings', activeStats.inningsBatted],
+                              ['Runs', activeStats.runsScored.toLocaleString()], ['High score', activeStats.highestScore],
+                              ['Average', activeStats.battingAverage?.toFixed(2) ?? '—'], ['Strike rate', activeStats.strikeRate?.toFixed(1) ?? '—'],
+                              ['100s / 50s', `${activeStats.centuries} / ${activeStats.halfCenturies}`], ['4s / 6s', activeStats.fours === null && activeStats.sixes === null ? '—' : `${activeStats.fours ?? '—'} / ${activeStats.sixes ?? '—'}`],
+                            ].map(([label, value]) => (
+                              <div key={String(label)}>
+                                <span className="block font-label-caps text-[9px] uppercase text-text-subdued">{label}</span>
+                                <span className="font-scoreboard-md text-[15px] text-text-chalk">{value}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                        <div className="w-full bg-surface-elevated h-1.5 rounded-full overflow-hidden">
-                          <div
-                            className="bg-primary h-full rounded-full transition-all duration-500"
-                            style={{ width: `${activePlayer.attributes.technique}%` }}
-                          />
+                        <div className="rounded-xl border border-border-hairline bg-surface-recessed p-3">
+                          <p className="mb-2 font-label-caps text-[10px] uppercase text-text-subdued">Bowling & fielding</p>
+                          <div className="grid grid-cols-3 gap-2 text-center">
+                            {[
+                              ['Balls bowled', activeStats.ballsBowled], ['Wickets', activeStats.wicketsTaken], ['Bowling average', activeStats.bowlingAverage?.toFixed(2) ?? '—'],
+                              ['Economy', activeStats.economyRate?.toFixed(2) ?? '—'], ['Five-wicket hauls', activeStats.fiveWicketHauls], ['Catches / stumpings', `${activeStats.catchesTaken} / ${activeStats.stumpingsMade}`],
+                            ].map(([label, value]) => (
+                              <div key={String(label)}>
+                                <span className="block font-label-caps text-[9px] uppercase text-text-subdued">{label}</span>
+                                <span className="font-scoreboard-md text-[15px] text-telemetry-blue">{value}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
+                        <p className="text-[10px] text-text-subdued">Data source: {activeStats.dataSourceId}</p>
+                      </>
+                    ) : (
+                      <div className="rounded-xl border border-border-hairline bg-surface-recessed p-4 text-sm text-text-slate">
+                        No verified {selectedFormat === 'TEST_RED_BALL' ? 'Test' : selectedFormat} career record is available for this player.
                       </div>
-
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-body-bold text-body-sm text-text-chalk">
-                            Match Temperament & Clutch
-                          </span>
-                          <span className="font-scoreboard-md text-[14px] text-primary">
-                            {activePlayer.attributes.pressureHandling}
-                          </span>
-                        </div>
-                        <div className="w-full bg-surface-elevated h-1.5 rounded-full overflow-hidden">
-                          <div
-                            className="bg-primary h-full rounded-full transition-all duration-500"
-                            style={{ width: `${activePlayer.attributes.pressureHandling}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-body-bold text-body-sm text-text-chalk">
-                            Spin Handling & Footwork
-                          </span>
-                          <span className="font-scoreboard-md text-[14px] text-secondary">
-                            {activePlayer.attributes.againstSpin}
-                          </span>
-                        </div>
-                        <div className="w-full bg-surface-elevated h-1.5 rounded-full overflow-hidden">
-                          <div
-                            className="bg-secondary h-full rounded-full transition-all duration-500"
-                            style={{ width: `${activePlayer.attributes.againstSpin}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-body-bold text-body-sm text-text-chalk">
-                            Pace & Bounce Mastery
-                          </span>
-                          <span className="font-scoreboard-md text-[14px] text-secondary">
-                            {activePlayer.attributes.againstPace}
-                          </span>
-                        </div>
-                        <div className="w-full bg-surface-elevated h-1.5 rounded-full overflow-hidden">
-                          <div
-                            className="bg-secondary h-full rounded-full transition-all duration-500"
-                            style={{ width: `${activePlayer.attributes.againstPace}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-body-bold text-body-sm text-text-chalk">
-                            Running Speed & Agility
-                          </span>
-                          <span className="font-scoreboard-md text-[14px] text-text-slate">
-                            {activePlayer.attributes.runningBetweenWickets}
-                          </span>
-                        </div>
-                        <div className="w-full bg-surface-elevated h-1.5 rounded-full overflow-hidden">
-                          <div
-                            className="bg-text-slate h-full rounded-full transition-all duration-500"
-                            style={{ width: `${activePlayer.attributes.runningBetweenWickets}%` }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Signature Traits Badges */}
-                  <div className="flex flex-col gap-2">
-                    <span className="font-label-caps text-label-caps text-text-subdued uppercase tracking-wider">
-                      SIGNATURE TRAITS & ABILITIES
-                    </span>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                      <div className="bg-surface-elevated p-2.5 rounded-lg flex flex-col gap-1 border border-border-hairline">
-                        <div className="flex items-center gap-1.5 text-warning-amber">
-                          <span className="material-symbols-outlined text-[16px]">cyclone</span>
-                          <span className="font-label-caps text-[10px] font-bold">BIG MATCH CLUTCH</span>
-                        </div>
-                        <span className="font-body-sm text-[12px] text-text-slate leading-snug">
-                          +{Math.round(activePlayer.attributes.bigMatchTemperament * 0.15)}% strike rate boost in
-                          pressure chases.
-                        </span>
-                      </div>
-                      <div className="bg-surface-elevated p-2.5 rounded-lg flex flex-col gap-1 border border-border-hairline">
-                        <div className="flex items-center gap-1.5 text-secondary">
-                          <span className="material-symbols-outlined text-[16px]">sports_baseball</span>
-                          <span className="font-label-caps text-[10px] font-bold">TIMING MASTERY</span>
-                        </div>
-                        <span className="font-body-sm text-[12px] text-text-slate leading-snug">
-                          {activePlayer.attributes.timing}/100 timing converts edge chances into boundary gaps.
-                        </span>
-                      </div>
-                      <div className="bg-surface-elevated p-2.5 rounded-lg flex flex-col gap-1 border border-border-hairline">
-                        <div className="flex items-center gap-1.5 text-telemetry-blue">
-                          <span className="material-symbols-outlined text-[16px]">shield</span>
-                          <span className="font-label-caps text-[10px] font-bold">RECOVERY RESILIENCE</span>
-                        </div>
-                        <span className="font-body-sm text-[12px] text-text-slate leading-snug">
-                          Recovers momentum within 2 balls after consecutive dot balls.
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Squad Recruitment Action Dock */}
-                  <div className="pt-2 flex flex-col gap-2.5">
-                    <button
-                      onClick={() => handleDraftPlayer(activePlayer)}
-                      className="w-full py-4 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-headline-md text-headline-md flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                    >
-                      <span className="material-symbols-outlined text-[24px]">group_add</span>
-                      <span>
-                        ADD TO CURRENT SQUAD (CAP ₹
-                        {((activePlayer.ratings[selectedFormat]?.overallRating ?? 85) * 0.1).toFixed(1)} CR)
-                      </span>
-                    </button>
-                    <div className="flex items-center justify-between px-1">
-                      <div className="flex items-center gap-1 text-text-subdued font-label-caps text-label-caps">
-                        <span className="material-symbols-outlined text-[14px]">lock_reset</span>
-                        INSTANT RE-SELL TAX 0%
-                      </div>
-                      <div className="flex items-center gap-1 text-secondary font-label-caps text-label-caps">
-                        <span className="material-symbols-outlined text-[14px]">check_circle</span>
-                        SQUAD BALANCE COMPLIANT
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>

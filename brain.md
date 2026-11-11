@@ -1,7 +1,7 @@
 # Global Cricket Dream Team & Simulation Game — Master Project Brain (`brain.md`)
 
-**Document Version:** 2.4.0  
-**Last Updated:** November 2026 (Post-Phase 9.4 User-Controlled Team Management & Match Flow Redesign)  
+**Document Version:** 2.5.0
+**Last Updated:** November 2026 (Player Archive separation and captaincy UX follow-up)
 **System Status:** Production-Ready Single-Project Monorepo (Next.js 15.5.29, NestJS 11, Turborepo 2.3, PixiJS v8.22, Prisma v6, PostgreSQL 16)  
 **Deployment Target:** Unified Vercel Monorepo (`apps/web` + standalone `@cricket/simulation-engine` package)  
 **Active Services & URLs:**
@@ -300,8 +300,9 @@ The frontend in `apps/web` has been reconstructed to mirror Google Stitch design
    - All tactical controls are disabled when match phase is `COMPLETED`.
 5. **Full Match Scorecard (`/match/[id]/scorecard`):**
    - Traditional tabular layout (Batsman, Dismissal, Runs, Balls, 4s, 6s, SR; Bowler, Overs, Maidens, Runs, Wickets, Economy), extras breakdown, and Fall of Wickets (FOW) charts.
-6. **Player Catalogue & Deep Stats (`/players`):**
-   - Searchable, filterable directory of all 1,144 players with era filters, skill radar charts, and Bayesian rating badges. All 1,144 players resolve to deterministic SVG avatars — zero unverified portrait photos (Phase 9.1/9.2 identity repair).
+6. **Player Archive (`/players`):**
+   - Read-only, searchable and filterable directory of all 1,144 players. It presents sourced, format-specific career records (matches, runs, batting average, strike rate, centuries, wickets, bowling average, economy, five-wicket hauls, catches and stumpings), career span, role and nationality. Missing source fields display as unavailable rather than estimates. All players resolve to deterministic SVG avatars — zero unverified portrait photos (Phase 9.1/9.2 identity repair).
+   - The archive never writes to a squad, exposes salary caps, player prices, resale rules or auction mechanics. Those concerns remain isolated to the dedicated squad-composition route and a future auction feature.
 7. **Pitch & Conditions Configurator (`/conditions`):**
    - Interactive sliders for grass cover, soil moisture, crack density, cloud cover, temperature, and day/night schedule.
 8. **Tournament & Series Hub (`/tournaments`):**
@@ -484,5 +485,11 @@ c:\Users\shoun\OneDrive\Desktop\cricket game\
 - **Status:** Accepted (November 2026)
 - **Decision:** Treat the simulation engine's full test suite, typecheck, build, calibration bounds, and five-format deterministic replay as release gates. Use shared format phase definitions for AI and transition behavior. Validate match state against event-derived scorecard data, including legal balls, extras, player figures, delivery deltas, event sequence, and result identity. Resume and history replay must consume recorded delivery actions and fail explicitly when an action is missing; they must never synthesize a replacement AI action for a damaged interactive record.
 - **Scope:** Phase 9.8.2 is automated verification only. Browser gameplay, screenshots, and viewport acceptance remain a separate phase concern.
+
+### ADR-022: Read-Only Player Archive and Dedicated Squad Composition (November 2026)
+- **Status:** Accepted
+- **Context:** The former player catalogue mixed factual career research with local squad drafting, synthetic pricing, salary-cap copy and resale language. This made the player archive look like an unfinished auction system and concealed the actual career data users expected to explore.
+- **Decision:** `/players` is a read-only archive. It may search, filter, sort and inspect `PlayerProfile.formatStats`, identity and provenance. It must render `null` or omitted source fields as unavailable and never substitute invented values. It has no squad-local-storage writes, selection/drafting actions, player prices, salary-cap or money UI. `/dream-teams` remains the sole owned surface for XI composition, validation, captaincy, wicketkeeper assignment, batting order and saved-squad persistence. A future auction system will be introduced as a separate explicit feature rather than simulated in the archive.
+- **Data Boundary:** `formatStats` is real-world career data; ratings, attributes and era metrics are derived simulation calibration and are not presented as archival career figures.
 
 *End of Master Project Brain (`brain.md`) — Maintained by Antigravity AI Engine & Engineering Team.*
