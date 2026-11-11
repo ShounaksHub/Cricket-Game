@@ -60,7 +60,7 @@ export function EnterArenaSplash() {
         </h1>
 
         <p className="font-body-base text-body-base text-text-slate max-w-sm mb-6 leading-relaxed">
-          Experience tactical cricket simulation with 1,144 international legends, deterministic ball physics, and genuine stadium soundtracks.
+          Build your team, call the toss, and lead your side through the match.
         </p>
 
         {/* Live Soundtrack Teaser */}

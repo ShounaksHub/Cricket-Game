@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Trophy,
@@ -191,18 +190,17 @@ export interface ArchivedMatchRecord {
 }
 
 export default function MatchSimulationPage() {
-  const searchParams = useSearchParams();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
   // --- Setup State ---
   const [phase, setPhase] = useState<MatchPhase>('SETUP');
   const [format, setFormat] = useState<MatchFormat>('T20');
   useEffect(() => {
-    const requestedFormat = searchParams.get('format');
+    const requestedFormat = new URLSearchParams(window.location.search).get('format');
     if (requestedFormat && ['T10', 'T20', 'ODI', 'TEST_RED_BALL', 'TEST_PINK_BALL'].includes(requestedFormat)) {
       setFormat(requestedFormat as MatchFormat);
     }
-  }, [searchParams]);
+  }, []);
   const [selectedStadiumId, setSelectedStadiumId] = useState<string>('stadium-mcg');
   const [selectedPitch, setSelectedPitch] = useState<'HARD' | 'FLAT' | 'TURNING' | 'GREEN' | 'DUSTY'>('HARD');
   const [dewFactor, setDewFactor] = useState<number>(0.2);
@@ -3809,7 +3807,7 @@ export default function MatchSimulationPage() {
               <div className="p-6 rounded-xl bg-gradient-to-r from-surface-elevated via-surface-card to-surface-elevated border border-primary/40 text-center flex flex-col gap-2">
                 <span className="font-label-caps text-label-caps text-tertiary tracking-widest uppercase flex items-center justify-center gap-1">
                   <span className="material-symbols-outlined text-[18px]">military_tech</span>
-                  CHAMPIONSHIP MATCH FINISHED • OFFICIAL RESULT
+                  Match complete
                 </span>
                 <h1 className="font-display-lg text-display-lg text-text-chalk tracking-tight uppercase">
                   {simulationResult.scorecard.result?.summary ?? 'Match Concluded'}
@@ -3820,7 +3818,7 @@ export default function MatchSimulationPage() {
                     className="flex items-center gap-1.5 text-primary hover:underline transition font-mono font-medium cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-[16px]">verified</span>
-                    <span>100% Deterministic Parity Verified (Audit)</span>
+                    <span>Replay verification</span>
                   </button>
                   <span>•</span>
                   <span className="font-mono text-text-subdued">Seed: #{simulationResult.finalState.config.seed.toString()}</span>

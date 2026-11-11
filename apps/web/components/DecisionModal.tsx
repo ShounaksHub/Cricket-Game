@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import type { PlayerSquadContext } from '@cricket/shared-types';
 import { getAuthoritativePlayerImage } from '@/lib/player-image-resolver';
 
@@ -32,6 +32,28 @@ export function DecisionModal({
   onDelegateToAI,
   aiButtonLabel = 'Let AI Choose (Auto-Manage)',
 }: DecisionModalProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!isOpen) return;
+    const previous = document.activeElement as HTMLElement | null;
+    dialogRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onDelegateToAI();
+      }
+      if (event.key === 'Tab' && dialogRef.current) {
+        const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>('button:not(:disabled), [href], [tabindex="0"]'));
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => { document.removeEventListener('keydown', onKeyDown); previous?.focus(); };
+  }, [isOpen, onDelegateToAI]);
   if (!isOpen) return null;
 
   const isBatting = type === 'NEXT_BATTER';
@@ -40,6 +62,9 @@ export function DecisionModal({
     <div
       role="dialog"
       aria-modal="true"
+      aria-labelledby="decision-modal-title"
+      tabIndex={-1}
+      ref={dialogRef}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in"
     >
       <div className="bg-[#0b1410] border border-emerald-500/30 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
@@ -57,7 +82,7 @@ export function DecisionModal({
                 {isBatting ? 'Wicket Fallen' : 'Over Completed'}
               </span>
             </div>
-            <h3 className="text-xl font-bold text-white tracking-tight">{title}</h3>
+            <h3 id="decision-modal-title" className="text-xl font-bold text-white tracking-tight">{title}</h3>
             <p className="text-xs text-neutral-400 mt-0.5">{subtitle}</p>
           </div>
           <button

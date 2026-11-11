@@ -330,7 +330,7 @@ export default function HomeScreen() {
               <span className="font-scoreboard-md text-scoreboard-md text-text-chalk">
                 {careerStats.totalRuns.toLocaleString()}{' '}
                 <span className="font-label-caps text-label-caps text-primary">
-                  {careerStats.totalMatches > 0 ? `(${careerStats.totalMatches} FIXTURES)` : 'LOCAL BENCHMARK'}
+                  {careerStats.totalMatches > 0 ? `(${careerStats.totalMatches} MATCHES)` : ''}
                 </span>
               </span>
             </div>
@@ -346,15 +346,14 @@ export default function HomeScreen() {
             <div className="hidden sm:flex flex-col">
               <span className="font-label-caps text-label-caps text-text-subdued uppercase">ROSTER VAULT</span>
               <span className="font-scoreboard-md text-scoreboard-md text-tertiary">
-                1,144 PLAYERS{' '}
-                <span className="font-label-caps text-label-caps text-tertiary-fixed-dim">100% AUDITED</span>
+                1,144 players
               </span>
             </div>
           </div>
           <div className="flex items-center gap-space-xs">
             <span className="material-symbols-outlined text-[18px] text-primary">verified</span>
             <span className="font-label-caps text-label-caps text-text-slate uppercase tracking-wider">
-              OFFLINE CRICKET MATCH SIMULATOR
+              Cricket Dream XI
             </span>
           </div>
         </div>
@@ -1102,10 +1101,10 @@ export default function HomeScreen() {
               </span>
             </div>
             <span className="text-border-hairline hidden sm:inline">•</span>
-            <span className="font-label-caps text-label-caps text-text-slate">100% OFFLINE READY</span>
+            <span className="font-label-caps text-label-caps text-text-slate">Play matches offline</span>
             <span className="text-border-hairline hidden sm:inline">•</span>
             <span className="font-label-caps text-label-caps text-secondary-fixed">
-              1,144 INTERNATIONAL PLAYERS LOADED
+              1,144 PLAYERS
             </span>
           </div>
           {/* Quick Controls */}

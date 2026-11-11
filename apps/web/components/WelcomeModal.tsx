@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import {
   Trophy,
   Shield,
@@ -24,6 +25,7 @@ interface WelcomeModalProps {
 }
 
 export function WelcomeModal({ forceOpen, onClose }: WelcomeModalProps) {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
   const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'RULES' | 'TACTICS' | 'NATION_RULE'>('OVERVIEW');
@@ -36,11 +38,12 @@ export function WelcomeModal({ forceOpen, onClose }: WelcomeModalProps) {
 
     if (typeof window !== 'undefined') {
       const dismissed = localStorage.getItem('cricket_welcome_dismissed');
-      if (!dismissed) {
+      const hasActiveMatch = Boolean(localStorage.getItem('cricket_active_match_session'));
+      if (!dismissed && pathname === '/' && !hasActiveMatch) {
         setIsOpen(true);
       }
     }
-  }, [forceOpen]);
+  }, [forceOpen, pathname]);
 
   // Listen for custom trigger event from Header or anywhere in the app
   useEffect(() => {
@@ -54,9 +57,7 @@ export function WelcomeModal({ forceOpen, onClose }: WelcomeModalProps) {
   }, []);
 
   function handleDismiss() {
-    if (dontShowAgain && typeof window !== 'undefined') {
-      localStorage.setItem('cricket_welcome_dismissed', 'true');
-    }
+    if (typeof window !== 'undefined') localStorage.setItem('cricket_welcome_dismissed', 'true');
     setIsOpen(false);
     if (onClose) onClose();
   }

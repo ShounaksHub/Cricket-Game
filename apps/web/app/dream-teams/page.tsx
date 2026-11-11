@@ -924,11 +924,11 @@ export default function DreamXIBuilderPage() {
             {!isSquadReady && (
               <div className="text-body-sm text-text-slate space-y-1 pt-1">
                 {selectedSlots.length !== 11 && (
-                  <div>• Exactly 11 players required (Current: {selectedSlots.length})</div>
+                  <div role="status">Select {Math.max(0, 11 - selectedSlots.length)} more player{11 - selectedSlots.length === 1 ? '' : 's'} to complete your XI ({selectedSlots.length}/11 selected).</div>
                 )}
                 {validationResult.errors.map((err, i) => (
-                  <div key={i} className="text-error font-medium">
-                    • {err.message}
+                    <div key={i} role="alert" className="text-error font-medium">
+                      • {err.message} — review the highlighted squad selections and remove or replace the conflicting player.
                   </div>
                 ))}
                 {nationConflicts.length > 0 && (
