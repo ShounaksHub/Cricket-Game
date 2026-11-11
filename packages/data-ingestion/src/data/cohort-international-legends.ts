@@ -216,7 +216,7 @@ export const COHORT_INTERNATIONAL_LEGENDS: RawPlayerIngestionInput[] = [
         sixes: 1,
         ballsBowled: 10088,
         runsConceded: 8272,
-        wicketsTaken: 281,
+        wicketsTaken: 293,
         bowlingAverage: 29.20,
         economyRate: 5.33,
         bowlingStrikeRate: 36.5,
