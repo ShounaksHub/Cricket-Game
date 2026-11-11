@@ -89,12 +89,12 @@ export function PreInningsManagementModal({
               </span>
             </div>
             <h3 className="text-2xl font-bold text-white tracking-tight">
-              {isBatting ? 'Configure Batting Order & Openers' : 'Select Opening Bowler'}
+              {isBatting ? 'Choose your opening pair' : 'Choose your opening bowler'}
             </h3>
             <p className="text-xs text-neutral-400 mt-0.5">
               {isBatting
-                ? 'Set your opening pair (#1 and #2) and adjust the batting sequence before the first ball is bowled.'
-                : 'Nominate which frontline bowler will deliver the inaugural over of the match.'}
+                ? 'Choose who starts at the striker’s end and who starts at the non-striker’s end. You can still adjust the rest of the order.'
+                : 'Choose who bowls the first over.'}
             </p>
           </div>
 
@@ -113,7 +113,7 @@ export function PreInningsManagementModal({
           <div className="flex-1 overflow-y-auto space-y-2 pr-1 my-2">
             <div className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider mb-2 flex items-center justify-between">
               <span>POSITION & PLAYER DETAILS</span>
-              <span>REORDER CONTROLS</span>
+              <span>BAT ORDER</span>
             </div>
 
             {currentLineup.map((slot, idx) => {
