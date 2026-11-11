@@ -88,6 +88,11 @@ import {
 } from '@cricket/data-ingestion';
 import dynamic from 'next/dynamic';
 import { CricketDreamXILogo } from '@/components/CricketDreamXILogo';
+import {
+  ACTIVE_MATCH_SESSION_STORAGE_KEY,
+  MATCH_HISTORY_STORAGE_KEY,
+  replayRecordedDeliveryEvents,
+} from '@/lib/match-persistence';
 
 const CricketVisualizerCanvas = dynamic(
   () =>
@@ -300,7 +305,7 @@ export default function MatchSimulationPage() {
         }
       }
 
-      const sessionStr = localStorage.getItem('cricket_active_match_session');
+      const sessionStr = localStorage.getItem(ACTIVE_MATCH_SESSION_STORAGE_KEY);
       if (sessionStr) {
         const parsedSession = JSON.parse(sessionStr);
         if (parsedSession && parsedSession.currentEventIndex > 0) {
@@ -343,7 +348,7 @@ export default function MatchSimulationPage() {
         }
       }
 
-      const historyStr = localStorage.getItem('cricket_match_history');
+      const historyStr = localStorage.getItem(MATCH_HISTORY_STORAGE_KEY);
       if (historyStr) {
         const parsedHistory = JSON.parse(historyStr);
         if (Array.isArray(parsedHistory)) {
@@ -365,7 +370,7 @@ export default function MatchSimulationPage() {
     events: DeliveryEvent[],
     eventIndex: number,
     modeOverride: 'MANUAL' | 'ASSISTED' | 'AUTOMATIC' = managementMode,
-    decisions: MatchDecisionEvent[] = decisionEvents,
+    decisions: MatchDecisionEvent[] = decisionEventsRef.current,
     overrides: Partial<Pick<ActiveMatchSession, 'userBowlingPlan' | 'userField' | 'userNominatedBowlerId'>> = {},
   ) {
     if (typeof window === 'undefined') return;
@@ -398,6 +403,8 @@ export default function MatchSimulationPage() {
         managementMode: modeOverride,
         decisionEvents: decisions,
         customFielders,
+        userOpeningBowlerId,
+        userBattingLineup,
         configSnapshot: {
           config: {
             ...currentState.config,
@@ -406,7 +413,7 @@ export default function MatchSimulationPage() {
           },
         },
       };
-      localStorage.setItem('cricket_active_match_session', JSON.stringify(session));
+      localStorage.setItem(ACTIVE_MATCH_SESSION_STORAGE_KEY, JSON.stringify(session));
     } catch (err) {
       console.error('Failed to save active match session:', err);
     }
@@ -463,10 +470,10 @@ export default function MatchSimulationPage() {
   function archiveCompletedMatch(result: MatchSimulationResult) {
     if (typeof window === 'undefined') return;
     try {
-      localStorage.removeItem('cricket_active_match_session');
+      localStorage.removeItem(ACTIVE_MATCH_SESSION_STORAGE_KEY);
       setActiveSession(null);
 
-      const existingHistoryStr = localStorage.getItem('cricket_match_history');
+      const existingHistoryStr = localStorage.getItem(MATCH_HISTORY_STORAGE_KEY);
       const history: ArchivedMatchRecord[] = existingHistoryStr ? JSON.parse(existingHistoryStr) : [];
 
       const inn1 = result.scorecard.innings[0];
@@ -496,7 +503,7 @@ export default function MatchSimulationPage() {
         initialStateHash: result.initialStateHash,
         totalDeliveries: result.allEvents.length,
         allEvents: [...result.allEvents],
-        decisionEvents,
+        decisionEvents: decisionEventsRef.current,
         configSnapshot: {
           config: {
             ...result.finalState.config,
@@ -507,7 +514,7 @@ export default function MatchSimulationPage() {
       };
 
       const updated = [record, ...history.filter((h) => h.id !== record.id)].slice(0, 20);
-      localStorage.setItem('cricket_match_history', JSON.stringify(updated));
+      localStorage.setItem(MATCH_HISTORY_STORAGE_KEY, JSON.stringify(updated));
       setMatchHistory(updated);
     } catch (err) {
       console.error('Failed to archive completed match:', err);
@@ -585,16 +592,12 @@ export default function MatchSimulationPage() {
     const fullResult = simulateFullMatch(config);
     setSimulationResult(fullResult);
 
-    let currentLiveState = createInitialMatchState(config);
-    const livePrng = new DeterministicPRNG(seed);
-
-    for (let i = 0; i < activeSession.currentEventIndex; i++) {
-      if (currentLiveState.status === 'COMPLETED') break;
-      const recordedAction = activeSession.visibleEvents[i]?.tactics;
-      const action = recordedAction ?? resolveAITacticalAction(currentLiveState, livePrng);
-      const { nextState } = stepDelivery(currentLiveState, action, livePrng);
-      currentLiveState = nextState;
-    }
+    const recorded = replayRecordedDeliveryEvents(
+      config,
+      activeSession.visibleEvents.slice(0, activeSession.currentEventIndex),
+    );
+    const currentLiveState = recorded.state;
+    const livePrng = recorded.prng;
 
     liveStateRef.current = currentLiveState;
     livePrngRef.current = livePrng;
@@ -633,23 +636,23 @@ export default function MatchSimulationPage() {
 
   function verifyRecordedDeliveryReplay(result: MatchSimulationResult): ReplayVerificationReport {
     const discrepancies: string[] = [];
-    const prng = new DeterministicPRNG(result.finalState.config.seed);
-    let state = createInitialMatchState(result.finalState.config);
-    for (let i = 0; i < result.allEvents.length; i++) {
+    const replay = replayRecordedDeliveryEvents(result.finalState.config, result.allEvents);
+    const state = replay.state;
+    for (let i = 0; i < replay.replayedEvents.length; i++) {
       const expected = result.allEvents[i];
-      if (!expected.tactics) {
-        discrepancies.push(`Delivery ${i + 1} has no recorded tactical action.`);
-        break;
-      }
-      const stepped = stepDelivery(state, expected.tactics, prng);
-      if (stepped.event.outcome !== expected.outcome ||
-          stepped.event.scorecardDelta.totalRuns !== expected.scorecardDelta.totalRuns ||
-          stepped.event.scorecardDelta.totalWickets !== expected.scorecardDelta.totalWickets ||
-          stepped.event.bowlerPlayerId !== expected.bowlerPlayerId) {
+      const stepped = replay.replayedEvents[i];
+      if (stepped.outcome !== expected.outcome ||
+          stepped.scorecardDelta.totalRuns !== expected.scorecardDelta.totalRuns ||
+          stepped.scorecardDelta.totalWickets !== expected.scorecardDelta.totalWickets ||
+          stepped.bowlerPlayerId !== expected.bowlerPlayerId ||
+          stepped.strikerPlayerId !== expected.strikerPlayerId ||
+          stepped.nonStrikerPlayerId !== expected.nonStrikerPlayerId) {
         discrepancies.push(`Recorded replay diverged at delivery ${i + 1}.`);
         break;
       }
-      state = stepped.nextState;
+    }
+    if (replay.missingActionIndex !== null) {
+      discrepancies.push(`Delivery ${replay.missingActionIndex + 1} has no recorded tactical action.`);
     }
     if (state.status !== result.finalState.status || state.result?.summary !== result.finalState.result?.summary) {
       discrepancies.push('Replayed final match status or result differs from the recorded match.');
@@ -670,12 +673,8 @@ export default function MatchSimulationPage() {
         seed: BigInt(record.configSnapshot.config.seed),
         playerProfiles: new Map(record.configSnapshot.config.playerProfiles),
       } as MatchSimulationConfig;
-      let recordedState = createInitialMatchState(config);
-      const replayPrng = new DeterministicPRNG(config.seed);
-      for (const event of record.allEvents) {
-        if (!event.tactics) break;
-        recordedState = stepDelivery(recordedState, event.tactics, replayPrng).nextState;
-      }
+      const replay = replayRecordedDeliveryEvents(config, record.allEvents);
+      const recordedState = replay.state;
       const result = simulateFullMatch(config);
       const recordedResult: MatchSimulationResult = {
         ...result,
@@ -758,12 +757,9 @@ export default function MatchSimulationPage() {
         seed: BigInt(record.configSnapshot.config.seed),
         playerProfiles: new Map(record.configSnapshot.config.playerProfiles),
       } as MatchSimulationConfig;
-      const livePrng = new DeterministicPRNG(config.seed);
-      let state = createInitialMatchState(config);
-      for (const event of record.allEvents) {
-        if (!event.tactics) break;
-        state = stepDelivery(state, event.tactics, livePrng).nextState;
-      }
+      const replay = replayRecordedDeliveryEvents(config, record.allEvents);
+      const state = replay.state;
+      const livePrng = replay.prng;
       liveStateRef.current = state;
       livePrngRef.current = livePrng;
       setLiveState(state);
@@ -1240,14 +1236,17 @@ export default function MatchSimulationPage() {
 
   function handleConfirmIncomingBatter() {
     if (!liveStateRef.current || !selectedNextBatterId) return;
-    const nextState = selectIncomingBatter(liveStateRef.current, selectedNextBatterId);
+    const currentState = liveStateRef.current;
+    const pendingBatterSelection = currentState.innings[currentState.currentInningsIndex]?.pendingBatterSelection;
+    const selectedBatterId = selectedNextBatterId;
+    const nextState = selectIncomingBatter(currentState, selectedBatterId);
     const recordedEvents = visibleEvents.map((event, index) =>
       index === visibleEvents.length - 1 && event.tactics
         ? {
             ...event,
             tactics: {
               ...event.tactics,
-              nextBatterPlayerId: selectedNextBatterId,
+        nextBatterPlayerId: selectedBatterId,
               pauseForBatterSelection: true,
             },
           }
@@ -1257,7 +1256,21 @@ export default function MatchSimulationPage() {
     setLiveState(nextState);
     setVisibleEvents(recordedEvents);
     setSelectedNextBatterId('');
-    saveActiveSession(nextState, recordedEvents, currentEventIndex);
+    const decisionEvent: MatchDecisionEvent = {
+      type: 'BATTER_SELECTED',
+      matchId: nextState.config.matchId,
+      inningsNumber: nextState.currentInningsIndex + 1,
+      sequenceNumber: ++decisionSequenceRef.current,
+      deliverySequenceNumber: currentEventIndex,
+      payload: {
+        playerId: selectedBatterId,
+        dismissedPlayerId: pendingBatterSelection?.dismissedPlayerId,
+      },
+    };
+    const nextDecisionEvents = [...decisionEventsRef.current, decisionEvent];
+    decisionEventsRef.current = nextDecisionEvents;
+    setDecisionEvents(nextDecisionEvents);
+    saveActiveSession(nextState, recordedEvents, currentEventIndex, managementMode, nextDecisionEvents);
   }
 
   function handleSimulateOver() {

@@ -166,7 +166,7 @@ export interface DeliveryEvent {
 }
 
 export interface MatchDecisionEvent {
-  readonly type: 'MANAGEMENT_MODE_CHANGED' | 'BOWLING_PLAN_CHANGED' | 'BOWLER_SELECTED' | 'FIELD_CHANGED';
+  readonly type: 'MANAGEMENT_MODE_CHANGED' | 'BOWLING_PLAN_CHANGED' | 'BOWLER_SELECTED' | 'FIELD_CHANGED' | 'BATTER_SELECTED';
   readonly matchId: string;
   readonly inningsNumber: number;
   readonly sequenceNumber: number;
