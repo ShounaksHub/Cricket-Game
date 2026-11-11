@@ -4,8 +4,9 @@ import path from 'path';
 import { SOUNDTRACK_PLAYLIST } from '../context/AudioContext';
 
 describe('Soundtrack Audio Files Integrity', () => {
-  it('has all 8 soundtrack playlist files existing in public/audio and non-empty', () => {
-    expect(SOUNDTRACK_PLAYLIST).toHaveLength(8);
+  it('has every soundtrack playlist file existing in public/audio and non-empty', () => {
+    expect(SOUNDTRACK_PLAYLIST.length).toBeGreaterThan(0);
+    expect(new Set(SOUNDTRACK_PLAYLIST.map((track) => track.id)).size).toBe(SOUNDTRACK_PLAYLIST.length);
 
     const publicAudioDir = path.resolve(__dirname, '../public/audio');
 

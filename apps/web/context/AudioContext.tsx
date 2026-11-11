@@ -66,6 +66,66 @@ export const SOUNDTRACK_PLAYLIST: AudioTrack[] = [
     subtitle: 'WDL • High-Octane Arena Electro',
     src: '/audio/bobs-beat.mp3',
   },
+  {
+    id: 'champion',
+    title: 'Champion',
+    subtitle: 'Matchday Celebration',
+    src: '/audio/champion.mp3',
+  },
+  {
+    id: 'dc-anthem',
+    title: 'DC Anthem',
+    subtitle: 'Delhi Capitals',
+    src: '/audio/dc-anthem.mp3',
+  },
+  {
+    id: 'gt-anthem',
+    title: 'GT Anthem',
+    subtitle: 'Gujarat Titans',
+    src: '/audio/gt-anthem.mp3',
+  },
+  {
+    id: 'lsg-anthem',
+    title: 'LSG Anthem',
+    subtitle: 'Lucknow Super Giants',
+    src: '/audio/lsg-anthem.mp3',
+  },
+  {
+    id: 'pbks-anthem',
+    title: 'PBKS Anthem',
+    subtitle: 'Punjab Kings',
+    src: '/audio/pbks-anthem.mp3',
+  },
+  {
+    id: 'rr-anthem',
+    title: 'RR Anthem',
+    subtitle: 'Rajasthan Royals',
+    src: '/audio/rr-anthem.mp3',
+  },
+  {
+    id: 'srb-anthem',
+    title: 'SRB Anthem',
+    subtitle: 'Team Anthem',
+    src: '/audio/srb-anthem.mp3',
+  },
+  {
+    id: 'lehra-do',
+    title: 'Lehra Do',
+    subtitle: 'Cricket Matchday Song',
+    src: '/audio/lehra-do.mp3',
+  },
+  {
+    id: 'cup-of-life',
+    title: 'The Cup of Life',
+    subtitle: 'Ricky Martin • Tournament Anthem',
+    src: '/audio/cup-of-life.mp3',
+  },
+  {
+    id: 'stand-by-2019-wc',
+    title: 'Stand By Me',
+    subtitle: '2019 World Cup Song',
+    src: '/audio/stand-by-2019-wc.mp3',
+  },
 ];
 
 interface AudioContextType {
@@ -155,7 +215,11 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     if (!track) return;
 
     const wasPlaying = isPlaying;
-    audio.src = track.src;
+    const isNewSrc = audio.src !== track.src && !audio.src.endsWith(track.src);
+    if (isNewSrc) {
+      audio.src = track.src;
+      audio.load();
+    }
     audio.loop = false; // We manage loop via onended to auto-cycle playlist or repeat
     audio.volume = isMuted ? 0 : volume;
 
@@ -247,8 +311,25 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     if (index >= 0 && index < SOUNDTRACK_PLAYLIST.length) {
       setCurrentTrackIndex(index);
       localStorage.setItem(STORAGE_KEY_TRACK, String(index));
+      // Directly invoke playback if unmuted to satisfy user gesture policy
+      const audio = audioRef.current;
+      if (audio) {
+        const selected = SOUNDTRACK_PLAYLIST[index];
+        if (selected) {
+          audio.src = selected.src;
+          audio.load();
+          if (!isMuted) {
+            audio.volume = volume;
+            audio.play().then(() => {
+              setIsPlaying(true);
+            }).catch((err) => {
+              console.warn('Playback error playing selected track:', selected.title, err);
+            });
+          }
+        }
+      }
     }
-  }, []);
+  }, [isMuted, volume]);
 
   const setVolume = useCallback((vol: number) => {
     const clamped = Math.max(0, Math.min(1, vol));
