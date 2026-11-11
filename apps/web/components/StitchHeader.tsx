@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { CricketDreamXILogo } from './CricketDreamXILogo';
@@ -9,6 +9,13 @@ import { HeaderAudioControls } from './HeaderAudioControls';
 export function StitchHeader() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [managerName, setManagerName] = useState('Manager');
+  useEffect(() => {
+    try {
+      const profile = JSON.parse(localStorage.getItem('cricket_user_profile') || '{}');
+      if (typeof profile.name === 'string' && profile.name.trim()) setManagerName(profile.name.trim());
+    } catch { /* Keep a neutral fallback for invalid local profile data. */ }
+  }, []);
 
   const navItems = [
     { label: 'HOME', href: '/', pathMatch: (p: string) => p === '/' },
@@ -74,13 +81,6 @@ export function StitchHeader() {
 
         {/* Right Status & Controls */}
         <div className="flex items-center gap-space-md">
-          {/* Offline Ready Badge */}
-          <div className="hidden sm:flex items-center gap-space-xs px-space-sm py-space-xs bg-surface-container rounded-full border border-border-hairline">
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            <span className="font-label-caps text-label-caps text-primary tracking-widest uppercase">
-              OFFLINE READY
-            </span>
-          </div>
 
           {/* Rules & Game Guide Modal Trigger */}
           <button
@@ -100,17 +100,10 @@ export function StitchHeader() {
           <Link
             href="/my-cricket"
             className="relative flex items-center pl-space-xs border-l border-border-hairline group cursor-pointer"
-            title="Manager Profile & Locker Room"
+            title={`${managerName} · Manager profile`}
           >
             <div className="relative">
-              <img
-                alt="Profile"
-                className="w-9 h-9 rounded-full object-cover ring-2 ring-border-focus group-hover:ring-primary transition-all"
-                src="/assets/stitch/asset-002.png"
-                onError={(e) => {
-                  e.currentTarget.src = '/assets/stitch/asset-003.png';
-                }}
-              />
+              <span aria-label={managerName} className="w-9 h-9 rounded-full bg-surface-elevated text-primary ring-1 ring-border-focus flex items-center justify-center font-bold">{managerName.slice(0, 1).toUpperCase()}</span>
               <span
                 className="absolute -bottom-1 -right-1 bg-tertiary text-on-tertiary font-label-caps text-[9px] px-1 rounded-sm leading-tight font-extrabold shadow-[0_0_8px_rgba(233,195,73,0.4)]"
                 title="Captain Rank"

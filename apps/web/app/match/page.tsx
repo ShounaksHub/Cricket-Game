@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Trophy,
@@ -190,11 +191,18 @@ export interface ArchivedMatchRecord {
 }
 
 export default function MatchSimulationPage() {
+  const searchParams = useSearchParams();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
   // --- Setup State ---
   const [phase, setPhase] = useState<MatchPhase>('SETUP');
   const [format, setFormat] = useState<MatchFormat>('T20');
+  useEffect(() => {
+    const requestedFormat = searchParams.get('format');
+    if (requestedFormat && ['T10', 'T20', 'ODI', 'TEST_RED_BALL', 'TEST_PINK_BALL'].includes(requestedFormat)) {
+      setFormat(requestedFormat as MatchFormat);
+    }
+  }, [searchParams]);
   const [selectedStadiumId, setSelectedStadiumId] = useState<string>('stadium-mcg');
   const [selectedPitch, setSelectedPitch] = useState<'HARD' | 'FLAT' | 'TURNING' | 'GREEN' | 'DUSTY'>('HARD');
   const [dewFactor, setDewFactor] = useState<number>(0.2);
