@@ -2,17 +2,20 @@ import type { MatchFormat } from '@cricket/shared-types';
 import type { OutcomeLogits } from './types.js';
 
 export const T20_BASELINE_LOGITS: OutcomeLogits = {
-  DOT: -0.994, // ~37.0%
-  RUN_1: -1.036, // ~35.5%
-  RUN_2: -2.813, // ~6.0%
+  // Calibrated against the engine's situational batting intents and matchup
+  // modifiers. The old neutral baseline produced 5.13 RPO / 54.1% dots in
+  // the 15-match calibration seed, below the declared T20 target band.
+  DOT: -1.494,
+  RUN_1: -0.736,
+  RUN_2: -2.413,
   RUN_3: -4.962, // ~0.7%
-  FOUR: -2.465, // ~8.5%
-  SIX: -3.101, // ~4.5%
+  FOUR: -1.965,
+  SIX: -2.601,
   WIDE: -3.689, // ~2.5%
   NO_BALL: -5.521, // ~0.4%
   LEG_BYE: -4.605, // ~1.0%
   BYE: -5.809, // ~0.3%
-  WICKET: -3.324, // ~3.6%
+  WICKET: -3.824,
 };
 
 export const T10_BASELINE_LOGITS: OutcomeLogits = {

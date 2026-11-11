@@ -30,6 +30,8 @@ const action = (bowlingPlan: TacticalDeliveryAction['bowlingPlan']): TacticalDel
 describe('Phase 9.7 phase-based bowling plans', () => {
   it('exposes format-specific phase boundaries without sentinel quotas', () => {
     expect(getBowlingPhases('T10').map((phase) => phase.id)).toEqual(['POWERPLAY', 'MIDDLE_OVERS', 'DEATH_OVERS']);
+    expect(getActiveBowlingPhase('T10', 2).id).toBe('POWERPLAY');
+    expect(getActiveBowlingPhase('T10', 7).id).toBe('DEATH_OVERS');
     expect(getActiveBowlingPhase('T20', 0).id).toBe('POWERPLAY');
     expect(getActiveBowlingPhase('T20', 6).id).toBe('MIDDLE_OVERS');
     expect(getActiveBowlingPhase('T20', 15).id).toBe('DEATH_OVERS');

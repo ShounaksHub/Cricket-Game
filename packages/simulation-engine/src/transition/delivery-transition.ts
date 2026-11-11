@@ -129,10 +129,10 @@ export function stepDelivery(
     overNumber: currentInnings.completedOvers,
     ballInOver: currentInnings.legalBallsInCurrentOver + 1,
     isPowerplay: ruleset.isPowerplayOver(currentInnings.completedOvers),
-    isDeathOvers:
-      state.config.format === 'T20'
-        ? currentInnings.completedOvers >= 15
-        : currentInnings.completedOvers >= 40,
+    // Keep phase boundaries in one rules module. This is especially
+    // important for T10 (death begins at over 7) and Test, which has no
+    // limited-overs death phase.
+    isDeathOvers: activePhase.id === 'DEATH_OVERS',
     isFreeHit,
     totalRuns: currentInnings.totalRuns,
     totalWickets: currentInnings.totalWickets,
@@ -233,13 +233,14 @@ export function stepDelivery(
     isOut: false,
   };
 
-  const isWideOutcome = resolution.extras.wides > 0;
   const isDismissedStriker =
     resolution.dismissal?.dismissedPlayerId === strikerId;
   const isDismissedNonStriker =
     resolution.dismissal?.dismissedPlayerId === nonStrikerId;
 
-  const newBallsFaced = isWideOutcome
+  // A batter only faces a ball when it is legal.  No-balls, like wides, do
+  // not count against the batter's balls faced even when the bat is struck.
+  const newBallsFaced = !resolution.isLegalDelivery
     ? existingStriker.ballsFaced
     : existingStriker.ballsFaced + 1;
   const newRuns = existingStriker.runs + resolution.runsBat;
