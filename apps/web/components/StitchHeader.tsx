@@ -31,7 +31,7 @@ export function StitchHeader() {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl border-b border-border-hairline shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-surface border-b border-border-hairline">
       <div className="h-20 max-w-[1440px] mx-auto px-4 md:px-margin-desktop flex items-center justify-between">
         {/* Brand */}
         <div className="flex items-center gap-space-md">
@@ -69,7 +69,7 @@ export function StitchHeader() {
                 href={item.href}
                 className={`px-space-md py-space-sm rounded-t-lg font-headline-md text-title-md tracking-wider transition-all ${
                   isActive
-                    ? 'bg-surface-elevated text-text-chalk border-b-2 border-primary shadow-[0_0_12px_rgba(76,175,80,0.2)]'
+                    ? 'bg-surface-elevated text-text-chalk border-b-2 border-primary'
                     : 'text-text-slate hover:bg-surface-elevated hover:text-on-surface'
                 }`}
               >

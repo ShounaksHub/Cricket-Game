@@ -277,7 +277,7 @@ export default function HomeScreen() {
             {/* Main 'PLAY CRICKET' CTA */}
             <Link
               href="/match"
-              className="group relative px-space-xl py-4 bg-primary text-on-primary font-headline-md text-title-md tracking-wider uppercase rounded-lg shadow-[0_4px_24px_rgba(120,220,119,0.35)] hover:shadow-[0_8px_32px_rgba(120,220,119,0.5)] transition-all transform hover:scale-[1.02] active:scale-[0.98] flex items-center gap-space-sm"
+              className="group relative px-space-xl py-4 bg-primary text-on-primary font-headline-md text-title-md rounded-lg transition-colors flex items-center gap-space-sm"
               id="btn-play-cricket"
             >
               <span className="material-symbols-outlined text-[26px] group-hover:rotate-45 transition-transform duration-300">

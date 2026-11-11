@@ -43,14 +43,14 @@ export function EnterArenaSplash() {
       </div>
 
       {/* Main Interactive Modal Card */}
-      <div className="relative z-10 max-w-lg w-full mx-4 p-8 sm:p-10 rounded-2xl bg-surface-container-high/90 border border-primary/30 shadow-[0_0_60px_rgba(0,230,118,0.15)] text-center flex flex-col items-center">
+      <div className="relative z-10 max-w-lg w-full mx-4 p-8 sm:p-10 rounded-xl bg-surface-container-high border border-border-hairline text-center flex flex-col items-center">
         {/* Official Brand Logo */}
         <div className="mb-6 flex justify-center transform hover:scale-105 transition-transform">
           <CricketDreamXILogo variant="horizontal" theme="dark" height={52} priority />
         </div>
 
         {/* Tactical Subtitle & Welcome Heading */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-elevated border border-primary/40 text-primary font-mono text-[11px] tracking-widest uppercase mb-4 shadow-[0_0_15px_rgba(0,230,118,0.2)]">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-elevated border border-border-hairline text-primary text-[11px] mb-4">
           <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
           <span>BROADCAST STADIUM READY • 60 FPS</span>
         </div>
@@ -85,7 +85,7 @@ export function EnterArenaSplash() {
           onClick={handleEnter}
           disabled={isEntering}
           type="button"
-          className="group relative w-full py-4 px-8 rounded-xl font-headline-md text-headline-md text-on-primary bg-primary hover:bg-primary-fixed shadow-[0_0_30px_rgba(0,230,118,0.4)] hover:shadow-[0_0_45px_rgba(0,230,118,0.6)] active:scale-95 transition-all flex items-center justify-center gap-3 cursor-pointer overflow-hidden font-black tracking-wider uppercase"
+          className="group relative w-full py-4 px-8 rounded-lg font-headline-md text-headline-md text-on-primary bg-primary hover:bg-primary-fixed active:scale-[0.99] transition-all flex items-center justify-center gap-3 cursor-pointer overflow-hidden font-bold"
         >
           <span className="material-symbols-outlined text-[24px] group-hover:scale-110 transition-transform">
             sports_cricket

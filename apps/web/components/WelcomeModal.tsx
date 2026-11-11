@@ -65,8 +65,8 @@ export function WelcomeModal({ forceOpen, onClose }: WelcomeModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-surface-card border border-border-hairline rounded-2xl shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 animate-in fade-in duration-200">
+      <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-surface-card border border-border-hairline rounded-xl shadow-xl overflow-hidden">
         {/* Modal Top Banner */}
         <div className="relative px-6 py-5 bg-gradient-to-r from-surface-recessed via-surface-card to-surface-elevated border-b border-border-hairline flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -116,7 +116,7 @@ export function WelcomeModal({ forceOpen, onClose }: WelcomeModalProps) {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-2 py-3 px-3.5 text-xs font-semibold border-b-2 transition whitespace-nowrap font-headline-md tracking-wider ${
                   active
-                    ? 'border-primary text-primary bg-surface-elevated shadow-[0_0_12px_rgba(76,175,80,0.2)]'
+                    ? 'border-primary text-primary bg-surface-elevated'
                     : 'border-transparent text-text-slate hover:text-text-chalk hover:bg-surface-card'
                 }`}
               >
@@ -335,7 +335,7 @@ export function WelcomeModal({ forceOpen, onClose }: WelcomeModalProps) {
 
             <button
               onClick={handleDismiss}
-              className="flex-1 sm:flex-none px-5 py-2 rounded-lg bg-primary hover:bg-primary-container text-on-primary text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-[0_4px_16px_rgba(76,175,80,0.25)]"
+              className="flex-1 sm:flex-none px-5 py-2 rounded-lg bg-primary hover:bg-primary-container text-on-primary text-xs font-bold transition flex items-center justify-center gap-1.5"
             >
               <span>Enter Pavilion</span>
             </button>

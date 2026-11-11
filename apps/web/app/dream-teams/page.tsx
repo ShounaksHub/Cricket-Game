@@ -949,7 +949,7 @@ export default function DreamXIBuilderPage() {
             <button
               onClick={handleProceedToMatch}
               disabled={!isSquadReady}
-              className="w-full mt-2 py-3 bg-primary text-on-primary font-headline-md text-title-md uppercase tracking-wider rounded-lg font-extrabold shadow-[0_4px_24px_rgba(120,220,119,0.35)] hover:shadow-[0_8px_32px_rgba(120,220,119,0.5)] transition-all flex items-center justify-center gap-space-xs disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full mt-2 py-3 bg-primary text-on-primary font-headline-md text-title-md rounded-lg font-bold transition-colors flex items-center justify-center gap-space-xs disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               type="button"
             >
               <span className="material-symbols-outlined text-[20px]">sports_cricket</span>

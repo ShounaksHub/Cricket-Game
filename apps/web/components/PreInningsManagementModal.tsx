@@ -71,11 +71,10 @@ export function PreInningsManagementModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-fade-in"
     >
-      <div className="bg-[#0b1410] border border-emerald-500/30 rounded-2xl max-w-3xl w-full p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="bg-surface-card border border-border-hairline rounded-xl max-w-3xl w-full p-6 shadow-xl relative overflow-hidden flex flex-col max-h-[92vh]">
         {/* Glow */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl -z-10 pointer-events-none" />
 
         {/* Header */}
         <div className="flex items-start justify-between gap-4 mb-4 border-b border-emerald-950/60 pb-3">

@@ -65,11 +65,10 @@ export function DecisionModal({
       aria-labelledby="decision-modal-title"
       tabIndex={-1}
       ref={dialogRef}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-fade-in"
     >
-      <div className="bg-[#0b1410] border border-emerald-500/30 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-surface-card border border-border-hairline rounded-xl max-w-2xl w-full p-6 shadow-xl relative overflow-hidden flex flex-col max-h-[90vh]">
         {/* Decorative glow */}
-        <div className="absolute top-0 right-0 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl -z-10 pointer-events-none" />
 
         {/* Modal Header */}
         <div className="flex items-start justify-between gap-4 mb-4 border-b border-emerald-950/60 pb-3">

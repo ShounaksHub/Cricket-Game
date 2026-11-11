@@ -2147,7 +2147,7 @@ export default function MatchSimulationPage() {
           <div className="pt-2 flex flex-col gap-2">
             <button
               onClick={() => setPhase('TOSS')}
-              className="w-full py-4 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-headline-md text-headline-md tracking-tight uppercase flex items-center justify-center gap-2 shadow-[0_4px_24px_rgba(120,220,119,0.35)] hover:scale-[1.01] transition-all cursor-pointer font-extrabold"
+              className="w-full py-4 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-headline-md text-headline-md flex items-center justify-center gap-2 transition-colors cursor-pointer font-bold"
               type="button"
             >
               <span className="material-symbols-outlined text-[24px]">monetization_on</span>

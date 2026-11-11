@@ -963,7 +963,7 @@ export default function PlayerCataloguePage() {
                   <div className="pt-2 flex flex-col gap-2.5">
                     <button
                       onClick={() => handleDraftPlayer(activePlayer)}
-                      className="w-full py-4 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-headline-md text-headline-md tracking-tight uppercase flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(120,220,119,0.3)] hover:scale-[1.01] transition-all cursor-pointer"
+                      className="w-full py-4 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-headline-md text-headline-md flex items-center justify-center gap-2 transition-colors cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[24px]">group_add</span>
                       <span>
