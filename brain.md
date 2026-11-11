@@ -480,4 +480,9 @@ c:\Users\shoun\OneDrive\Desktop\cricket game\
 - **Decision:** Persist captain mode, plan, bowler, and field changes immediately as match-scoped decision events, in addition to storing the effective tactical action on each delivery. Keep the delivery action as the simulation authority and replay it through the same `stepDelivery` transition with the original seed. Completed local history records retain the exact match config, profile map, delivery events, and captain decisions so interactive matches can be inspected and reconstructed without synthesizing teams from a seed. A selected high-level plan supplies line, length, variation, pace, and intent unless the selected plan is Balanced and advanced overrides are active; the selected field remains independently honored.
 - **Limit:** Decision-event history is currently a local browser snapshot. Cross-browser automation/screenshots and interactive replay validation require an attached browser session and remain environment-dependent.
 
+### ADR-021: Engine Regression Gates and Recorded Replay Integrity (Phase 9.8.2)
+- **Status:** Accepted (November 2026)
+- **Decision:** Treat the simulation engine's full test suite, typecheck, build, calibration bounds, and five-format deterministic replay as release gates. Use shared format phase definitions for AI and transition behavior. Validate match state against event-derived scorecard data, including legal balls, extras, player figures, delivery deltas, event sequence, and result identity. Resume and history replay must consume recorded delivery actions and fail explicitly when an action is missing; they must never synthesize a replacement AI action for a damaged interactive record.
+- **Scope:** Phase 9.8.2 is automated verification only. Browser gameplay, screenshots, and viewport acceptance remain a separate phase concern.
+
 *End of Master Project Brain (`brain.md`) — Maintained by Antigravity AI Engine & Engineering Team.*
