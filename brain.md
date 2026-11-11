@@ -492,4 +492,11 @@ c:\Users\shoun\OneDrive\Desktop\cricket game\
 - **Decision:** `/players` is a read-only archive. It may search, filter, sort and inspect `PlayerProfile.formatStats`, identity and provenance. It must render `null` or omitted source fields as unavailable and never substitute invented values. It has no squad-local-storage writes, selection/drafting actions, player prices, salary-cap or money UI. `/dream-teams` remains the sole owned surface for XI composition, validation, captaincy, wicketkeeper assignment, batting order and saved-squad persistence. A future auction system will be introduced as a separate explicit feature rather than simulated in the archive.
 - **Data Boundary:** `formatStats` is real-world career data; ratings, attributes and era metrics are derived simulation calibration and are not presented as archival career figures.
 
+### ADR-023: Source-Backed International Statistics Refresh (November 2026)
+- **Status:** Accepted
+- **Decision:** International Test, ODI and T20 raw records may be refreshed from the official Cricsheet JSON snapshot using `packages/data-ingestion/scripts/refresh_international_stats.py`. The updater aggregates delivery-level runs, balls, wickets, bowling figures, highest scores, milestones and fielding events, preserves player UUIDs, records the snapshot version, and refuses to overwrite a record when the matched source identity contains fewer matches than the existing career record.
+- **Identity Safety:** Exact player-name matches are not treated as sufficient evidence for abbreviated aliases. Partial matches are left unchanged until a verified registry/alias mapping exists. The refresh report records the snapshot, match count, matched players and changed cohort records.
+- **Domestic Scope:** Domestic cohorts are not merged into `TEST_RED_BALL`, `ODI` or `T20` totals. First-class, List A, IPL, county, BBL, Ranji and other competition totals require separate competition-aware fields before a safe full refresh can be performed.
+- **Current Refresh:** Snapshot `cricsheet-2026-11-03`; 68 international records refreshed; 304 contemporary and 277 legend records remain covered by explicit audit reports, with blocked records preserved rather than guessed.
+
 *End of Master Project Brain (`brain.md`) — Maintained by Antigravity AI Engine & Engineering Team.*
