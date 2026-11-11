@@ -240,4 +240,23 @@ describe('Transition Feature P4.7: Over Accounting, Strike Rotation & Innings Tr
       }
     }
   });
+
+  it('should not charge a no-ball to the striker balls-faced count', () => {
+    let state = createTestMatchState(1n);
+    const prng = new DeterministicPRNG(1n);
+    let noBallEvent: ReturnType<typeof stepDelivery>['event'] | undefined;
+    let beforeNoBall: MatchState | undefined;
+
+    for (let i = 0; i < 250 && !noBallEvent; i++) {
+      beforeNoBall = state;
+      const result = stepDelivery(state, defaultTactics, prng);
+      state = result.nextState;
+      if (result.event.extras.noBalls > 0) noBallEvent = result.event;
+    }
+
+    expect(noBallEvent).toBeDefined();
+    const strikerBefore = beforeNoBall!.innings[beforeNoBall!.currentInningsIndex].batters.get(noBallEvent!.strikerPlayerId);
+    const strikerAfter = state.innings[beforeNoBall!.currentInningsIndex].batters.get(noBallEvent!.strikerPlayerId);
+    expect(strikerAfter?.ballsFaced).toBe(strikerBefore?.ballsFaced);
+  });
 });

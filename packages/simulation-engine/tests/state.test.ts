@@ -136,4 +136,43 @@ describe('Multi-Format Match & Innings State Foundation (P4.2)', () => {
     expect(check.isValid).toBe(false);
     expect(check.violations.some((v) => v.includes('Fall of wickets count'))).toBe(true);
   });
+
+  it('detects scorecard figures and result identity mismatches', () => {
+    const state = createInitialMatchState(createTestConfig('T20'));
+    const inn = state.innings[0] as any;
+    inn.events = [{
+      sequenceNumber: 1,
+      inningsNumber: 1,
+      overNumber: 0,
+      ballInOver: 1,
+      isLegalDelivery: true,
+      bowlerPlayerId: 'aus-p1',
+      strikerPlayerId: 'ind-p1',
+      nonStrikerPlayerId: 'ind-p2',
+      outcome: 'FOUR',
+      runsBat: 4,
+      extras: { wides: 0, noBalls: 0, byes: 0, legByes: 0, penalty: 0 },
+      commentary: 'Four',
+      scorecardDelta: { totalRuns: 4, totalWickets: 0 },
+    }];
+    inn.totalRuns = 4;
+    inn.batters.get('ind-p1').runs = 4;
+    inn.batters.get('ind-p1').ballsFaced = 1;
+    inn.batters.get('ind-p1').fours = 1;
+    inn.bowlers.get('aus-p1').runsConceded = 3;
+    const invalidState = {
+      ...state,
+      result: {
+        winningTeamId: 'missing-team',
+        isTie: false,
+        isDraw: false,
+        summary: 'invalid',
+      },
+    } as any;
+
+    const check = verifyMatchInvariants(invalidState);
+    expect(check.isValid).toBe(false);
+    expect(check.violations.some((v) => v.includes('bowler figures mismatch'))).toBe(true);
+    expect(check.violations.some((v) => v.includes('unknown winning team'))).toBe(true);
+  });
 });

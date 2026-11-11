@@ -144,6 +144,21 @@ export function verifyMatchInvariants(state: MatchState): {
 } {
   const violations: string[] = [];
 
+  const teamIds = new Set([state.config.team1.id, state.config.team2.id]);
+  if (state.result?.winningTeamId && !teamIds.has(state.result.winningTeamId)) {
+    violations.push(
+      `Match result references unknown winning team (${state.result.winningTeamId})`,
+    );
+  }
+  if (state.result && state.result.marginRuns !== undefined && state.result.marginRuns < 0) {
+    violations.push('Match result has a negative runs margin');
+  }
+  if (state.result && state.result.marginWickets !== undefined && state.result.marginWickets < 0) {
+    violations.push('Match result has a negative wickets margin');
+  }
+
+  let expectedSequenceNumber = 1;
+
   for (const inn of state.innings) {
     // 1. Wickets Invariant: TotalWickets <= 10
     if (inn.totalWickets > 10) {
@@ -172,14 +187,92 @@ export function verifyMatchInvariants(state: MatchState): {
 
     let sumExtras = 0;
     let legalEventsCount = 0;
+    let eventRuns = 0;
+    let eventWickets = 0;
+    const derivedBatters = new Map<string, {
+      runs: number;
+      ballsFaced: number;
+      fours: number;
+      sixes: number;
+      isOut: boolean;
+    }>();
+    const derivedBowlers = new Map<string, {
+      ballsBowled: number;
+      runsConceded: number;
+      wickets: number;
+      wides: number;
+      noBalls: number;
+    }>();
+
     for (const e of inn.events) {
-      sumExtras +=
+      const eventExtras =
         e.extras.wides +
         e.extras.noBalls +
         e.extras.byes +
         e.extras.legByes +
         e.extras.penalty;
+      if (Object.values(e.extras).some((value) => value < 0)) {
+        violations.push(
+          `Innings ${inn.inningsNumber}: delivery ${e.sequenceNumber} contains negative extras`,
+        );
+      }
+      sumExtras += eventExtras;
+      eventRuns += e.runsBat + eventExtras;
       if (e.isLegalDelivery) legalEventsCount++;
+      if (e.dismissal) eventWickets++;
+
+      if (e.sequenceNumber !== expectedSequenceNumber) {
+        violations.push(
+          `Innings ${inn.inningsNumber}: event sequence expected ${expectedSequenceNumber}, got ${e.sequenceNumber}`,
+        );
+      }
+      expectedSequenceNumber++;
+
+      const batter = derivedBatters.get(e.strikerPlayerId) ?? {
+        runs: 0,
+        ballsFaced: 0,
+        fours: 0,
+        sixes: 0,
+        isOut: false,
+      };
+      batter.runs += e.runsBat;
+      if (e.isLegalDelivery) batter.ballsFaced++;
+      if (e.runsBat === 4) batter.fours++;
+      if (e.runsBat === 6) batter.sixes++;
+      if (e.dismissal?.dismissedPlayerId === e.strikerPlayerId) batter.isOut = true;
+      derivedBatters.set(e.strikerPlayerId, batter);
+
+      if (e.dismissal && e.dismissal.dismissedPlayerId !== e.strikerPlayerId) {
+        const dismissed = derivedBatters.get(e.dismissal.dismissedPlayerId) ?? {
+          runs: 0,
+          ballsFaced: 0,
+          fours: 0,
+          sixes: 0,
+          isOut: false,
+        };
+        dismissed.isOut = true;
+        derivedBatters.set(e.dismissal.dismissedPlayerId, dismissed);
+      }
+
+      const bowler = derivedBowlers.get(e.bowlerPlayerId) ?? {
+        ballsBowled: 0,
+        runsConceded: 0,
+        wickets: 0,
+        wides: 0,
+        noBalls: 0,
+      };
+      if (e.isLegalDelivery) bowler.ballsBowled++;
+      bowler.runsConceded += e.runsBat + e.extras.wides + e.extras.noBalls;
+      bowler.wides += e.extras.wides;
+      bowler.noBalls += e.extras.noBalls;
+      if (e.dismissal && e.dismissal.mode !== 'RUN_OUT') bowler.wickets++;
+      derivedBowlers.set(e.bowlerPlayerId, bowler);
+
+      if (e.scorecardDelta.totalRuns !== eventRuns || e.scorecardDelta.totalWickets !== eventWickets) {
+        violations.push(
+          `Innings ${inn.inningsNumber}: delivery ${e.sequenceNumber} scorecard delta does not match event totals`,
+        );
+      }
     }
 
     const calculatedTotal = sumBatRuns + sumExtras;
@@ -187,6 +280,38 @@ export function verifyMatchInvariants(state: MatchState): {
       violations.push(
         `Innings ${inn.inningsNumber}: Total runs mismatch. Recorded: ${inn.totalRuns}, Calculated (Bat + Extras): ${calculatedTotal}`
       );
+    }
+
+    const expectedLegalBalls = inn.completedOvers * 6 + inn.legalBallsInCurrentOver;
+    if (legalEventsCount !== expectedLegalBalls) {
+      violations.push(
+        `Innings ${inn.inningsNumber}: legal-ball count mismatch. Recorded: ${expectedLegalBalls}, events: ${legalEventsCount}`,
+      );
+    }
+    if (eventRuns !== inn.totalRuns) {
+      violations.push(
+        `Innings ${inn.inningsNumber}: event total mismatch. Recorded: ${inn.totalRuns}, events: ${eventRuns}`,
+      );
+    }
+    if (eventWickets !== inn.totalWickets) {
+      violations.push(
+        `Innings ${inn.inningsNumber}: wicket total mismatch. Recorded: ${inn.totalWickets}, events: ${eventWickets}`,
+      );
+    }
+
+    for (const [playerId, expected] of derivedBatters) {
+      const actual = inn.batters.get(playerId);
+      if (!actual || actual.runs !== expected.runs || actual.ballsFaced !== expected.ballsFaced ||
+        actual.fours !== expected.fours || actual.sixes !== expected.sixes || actual.isOut !== expected.isOut) {
+        violations.push(`Innings ${inn.inningsNumber}: batter figures mismatch for ${playerId}`);
+      }
+    }
+    for (const [playerId, expected] of derivedBowlers) {
+      const actual = inn.bowlers.get(playerId);
+      if (!actual || actual.ballsBowled !== expected.ballsBowled || actual.runsConceded !== expected.runsConceded ||
+        actual.wickets !== expected.wickets || actual.wides !== expected.wides || actual.noBalls !== expected.noBalls) {
+        violations.push(`Innings ${inn.inningsNumber}: bowler figures mismatch for ${playerId}`);
+      }
     }
 
     // 4. Fall of wickets count invariant
