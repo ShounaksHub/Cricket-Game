@@ -3340,15 +3340,16 @@ export default function MatchSimulationPage() {
                   <div className="flex items-center justify-between">
                     <span className="font-label-caps text-label-caps text-primary uppercase font-bold flex items-center gap-1">
                       <span className="material-symbols-outlined text-[16px]">sports_baseball</span>
-                      BATTER SHOT INTENT
+                      BATTING PLAN
                     </span>
-                    <span className="font-label-caps text-[10px] text-text-subdued uppercase">DIRECT CONTROL</span>
+                    <span className="font-label-caps text-[10px] text-text-subdued uppercase">YOUR CHOICE</span>
                   </div>
+                  <p className="-mt-1 text-[10px] text-text-subdued">Choose how your batter approaches the next ball.</p>
                   {pendingBatterDecision && (
                     <div className="rounded-lg border border-primary/50 bg-primary/10 p-3 flex flex-col gap-2">
                       <div>
-                        <p className="text-xs font-bold text-text-chalk">Wicket down — choose the next batter</p>
-                        <p className="text-[10px] text-text-subdued">Select who takes {pendingBatterDecision.replacesAt === 'STRIKER' ? 'strike' : 'the non-striker’s end'} before play resumes.</p>
+                        <p className="text-xs font-bold text-text-chalk">Choose the next batter</p>
+                        <p className="text-[10px] text-text-subdued">Pick who comes in. We will place them at the correct end automatically.</p>
                       </div>
                       <select
                         value={selectedNextBatterId}
@@ -3356,7 +3357,7 @@ export default function MatchSimulationPage() {
                         className="bg-surface-card border border-border-hairline rounded px-2 py-2 text-xs text-text-chalk"
                         aria-label="Select incoming batter"
                       >
-                        <option value="">Choose a batter</option>
+                        <option value="">Choose next batter</option>
                         {availableIncomingBatters.map((slot) => (
                           <option key={slot.playerId} value={slot.playerId}>
                             #{slot.battingOrder} {getPlayerDisplayName(slot.playerId)}
@@ -3369,7 +3370,7 @@ export default function MatchSimulationPage() {
                         onClick={handleConfirmIncomingBatter}
                         className="rounded bg-primary px-3 py-2 text-xs font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        SEND BATTER IN
+                        CONFIRM NEXT BATTER
                       </button>
                     </div>
                   )}
@@ -3749,7 +3750,7 @@ export default function MatchSimulationPage() {
                   type="button"
                 >
                   <span className="material-symbols-outlined text-[24px]">sports_cricket</span>
-                  <span>{pendingBatterDecision ? 'SELECT NEXT BATTER' : isUserBatting ? 'TAKE STRIKE [SPACE]' : 'BOWL NEXT BALL [SPACE]'}</span>
+                  <span>{pendingBatterDecision ? 'CHOOSE NEXT BATTER' : isUserBatting ? 'PLAY NEXT BALL' : 'BOWL NEXT BALL'}</span>
                 </button>
 
                 {/* Simulation Steppers Bar (Disabled on match completion) */}
