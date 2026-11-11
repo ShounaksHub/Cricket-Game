@@ -2332,7 +2332,7 @@ export default function MatchSimulationPage() {
                       type="button"
                     >
                       <span className="material-symbols-outlined text-[20px]">monetization_on</span>
-                      <span>SPIN THE COIN</span>
+                      <span>Toss the coin</span>
                     </button>
                   </div>
                 ) : (
@@ -3755,7 +3755,9 @@ export default function MatchSimulationPage() {
                 </button>
 
                 {/* Simulation Steppers Bar (Disabled on match completion) */}
-                <div className="grid grid-cols-3 gap-1.5 pt-1">
+                <details className="mt-2 rounded-lg border border-border-hairline bg-surface-recessed px-3 py-2">
+                  <summary className="cursor-pointer text-xs text-text-subdued">Simulation controls</summary>
+                  <div className="grid grid-cols-3 gap-1.5 pt-2">
                   <button
                     onClick={handleSimulateOver}
                     disabled={phase === 'COMPLETED'}
@@ -3792,7 +3794,8 @@ export default function MatchSimulationPage() {
                   >
                     SIM MATCH
                   </button>
-                </div>
+                  </div>
+                </details>
               </div>
             </div>
           </div>
@@ -4071,13 +4074,13 @@ export default function MatchSimulationPage() {
                         onClick={() => handleVerifyArchivedMatch(m)}
                         className="px-2.5 py-1 rounded bg-surface-recessed hover:bg-surface-container border border-border-hairline text-[11px] text-primary font-medium transition cursor-pointer font-label-caps"
                       >
-                        AUDIT PARITY
+                        Verify replay
                       </button>
                       <button
                         onClick={() => handleLoadArchivedReplay(m)}
                         className="px-2.5 py-1 rounded bg-primary text-on-primary text-[11px] font-bold transition cursor-pointer font-label-caps"
                       >
-                        LOAD SEED
+                        Replay match
                       </button>
                     </div>
                   </div>
