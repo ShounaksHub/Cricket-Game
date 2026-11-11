@@ -9,7 +9,69 @@ import type {
 } from '../contracts/types.js';
 import type { DeterministicPRNG } from '../prng/splitmix64.js';
 import { isSpinBowling } from '../pipeline/matchup-matrix.js';
-import { getRulesetForFormat } from '../rulesets/t20-ruleset.js';
+import {
+  getRulesetForFormat,
+} from '../rulesets/t20-ruleset.js';
+import {
+  getActiveBowlingPhase,
+  type BowlingPhase,
+} from '../contracts/bowling-plans.js';
+
+function isTestFormat(format: MatchState['config']['format']): boolean {
+  return format === 'TEST_RED_BALL' || format === 'TEST_PINK_BALL';
+}
+
+function isBowlingEligible(
+  state: MatchState,
+  playerId: string,
+  previousBowlerId: string,
+): boolean {
+  const innings = state.innings[state.currentInningsIndex];
+  const profile = state.config.playerProfiles.get(playerId);
+  if (!innings || (profile && profile.bowlingStyle === 'NONE')) return false;
+  if (playerId === previousBowlerId) return false;
+
+  const ruleset = getRulesetForFormat(state.config.format);
+  const figures = innings.bowlers.get(playerId);
+  const oversBowled = (figures?.ballsBowled ?? 0) / ruleset.legalBallsPerOver;
+  return oversBowled < ruleset.maxOversPerBowler;
+}
+
+/**
+ * Returns the deterministic, legal next-over candidates in captain priority order.
+ * The transition layer remains the final authority and revalidates the choice.
+ */
+export function getEligibleNextBowlerIds(state: MatchState): string[] {
+  const innings = state.innings[state.currentInningsIndex];
+  if (!innings || innings.legalBallsInCurrentOver !== 5) return [];
+
+  const bowlingTeam = innings.bowlingTeamId === state.config.team1.id
+    ? state.config.team1
+    : state.config.team2;
+
+  return bowlingTeam.lineup
+    .filter((slot) => isBowlingEligible(state, slot.playerId, innings.currentBowlerPlayerId))
+    .sort((a, b) => (a.bowlingPriority ?? 99) - (b.bowlingPriority ?? 99))
+    .map((slot) => slot.playerId);
+}
+
+function planForPhase(
+  phase: BowlingPhase,
+  isNewBatter: boolean,
+): NonNullable<TacticalDeliveryAction['bowlingPlan']> {
+  if (phase.id === 'DEATH_OVERS' || phase.id === 'CONTAINMENT') return 'DEFENSIVE';
+  if (
+    isNewBatter ||
+    phase.id === 'POWERPLAY' ||
+    phase.id === 'FINAL_POWERPLAY' ||
+    phase.id === 'NEW_BALL_ATTACK' ||
+    phase.id === 'SWING_SEAM_ATTACK' ||
+    phase.id === 'SPIN_ATTACK' ||
+    phase.id === 'PARTNERSHIP_BREAKING' ||
+    phase.id === 'TAIL_END_ATTACK'
+  ) return 'ATTACK';
+  return 'BALANCED';
+}
 
 /**
  * Intelligent tactical decision engine simulating captaincy & player situational awareness:
@@ -35,12 +97,27 @@ export function resolveAITacticalAction(
   const ruleset = getRulesetForFormat(state.config.format);
   const over = currentInnings.completedOvers;
   const format = state.config.format;
-  const isTest = format === 'TEST_RED_BALL' || format === 'TEST_PINK_BALL';
+  const isTest = isTestFormat(format);
   const isT10 = format === 'T10';
   const isODI = format === 'ODI';
 
-  const isPowerplay = ruleset.isPowerplayActive(over);
-  const isDeath = isT10 ? over >= 7 : isODI ? over >= 40 : over >= 15;
+  const activePhase = getActiveBowlingPhase(
+    format,
+    over,
+    state.currentSessionNumber ?? 1,
+    currentInnings.totalWickets,
+  );
+  const isPowerplay = !isTest && activePhase.id === 'POWERPLAY';
+  const isDeath = activePhase.id === 'DEATH_OVERS';
+  const isFinalPowerplay = activePhase.id === 'FINAL_POWERPLAY';
+  const isAttackPhase = isTest && [
+    'NEW_BALL_ATTACK',
+    'SWING_SEAM_ATTACK',
+    'SPIN_ATTACK',
+    'PARTNERSHIP_BREAKING',
+    'TAIL_END_ATTACK',
+  ].includes(activePhase.id);
+  const isContainmentPhase = isTest && activePhase.id === 'CONTAINMENT';
   const isMiddle = !isTest && !isPowerplay && !isDeath;
 
   const lastEvent = currentInnings.events[currentInnings.events.length - 1];
@@ -157,8 +234,8 @@ export function resolveAITacticalAction(
   let bowlerLine: BowlingLine = 'OUTSIDE_OFF';
   let bowlerVariation: BowlingVariation = 'STOCK';
 
-  if (isDeath) {
-    // Death overs execution: Yorkers and cutters/slower balls
+  if (isDeath || isContainmentPhase) {
+    // Containment and death execution: protect the boundary with variation.
     const lengthRoll = prng.nextFloat();
     if (lengthRoll < 0.55) {
       bowlerLength = 'YORKER';
@@ -178,7 +255,7 @@ export function resolveAITacticalAction(
     } else {
       bowlerVariation = 'STOCK';
     }
-  } else if (isPowerplay) {
+  } else if (isPowerplay || isFinalPowerplay || isAttackPhase) {
     // Powerplay execution: Test corridor of uncertainty, occasional bouncer
     const lengthRoll = prng.nextFloat();
     if (lengthRoll < 0.65) {
@@ -197,7 +274,7 @@ export function resolveAITacticalAction(
     } else {
       bowlerVariation = 'STOCK';
     }
-  } else if (isSpinner) {
+  } else if (isSpinner || activePhase.id === 'SPIN_ATTACK') {
     // Spinner in middle overs
     bowlerLength = prng.nextFloat() < 0.75 ? 'GOOD_LENGTH' : 'FULL';
     bowlerLine = prng.nextFloat() < 0.55 ? 'STUMPS' : 'OUTSIDE_OFF';
@@ -279,26 +356,11 @@ export function resolveAITacticalAction(
     }
   }
 
-  const bowlingPlan = isDeath
-    ? 'DEFENSIVE' as const
-    : isPowerplay || isNewBatter
-      ? 'ATTACK' as const
-      : 'BALANCED' as const;
+  const bowlingPlan = planForPhase(activePhase, isNewBatter);
 
   // Recommend a legal next-over bowler from the actual bowling workload. The
   // transition layer remains the final authority and revalidates this choice.
-  const bowlingTeam = currentInnings.bowlingTeamId === state.config.team1.id
-    ? state.config.team1
-    : state.config.team2;
-  const nextBowlerPlayerId = currentInnings.legalBallsInCurrentOver === 5
-    ? bowlingTeam.lineup
-        .filter((slot) => slot.playerId !== currentInnings.currentBowlerPlayerId)
-        .filter((slot) => {
-          const figures = currentInnings.bowlers.get(slot.playerId);
-          return (figures?.ballsBowled ?? 0) / 6 < getRulesetForFormat(format).maxOversPerBowler;
-        })
-        .sort((a, b) => (a.bowlingPriority ?? 99) - (b.bowlingPriority ?? 99))[0]?.playerId
-    : undefined;
+  const nextBowlerPlayerId = getEligibleNextBowlerIds(state)[0];
 
   return {
     batterIntent,
@@ -310,6 +372,7 @@ export function resolveAITacticalAction(
     declareInnings,
     enforceFollowOn,
     bowlingPlan,
+    activePhase: activePhase.id,
     nextBowlerPlayerId,
   };
 }

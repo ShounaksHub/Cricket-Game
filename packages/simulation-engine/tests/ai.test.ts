@@ -3,6 +3,7 @@ import {
   getStadiumById,
   calculateStadiumDeltas,
   resolveAITacticalAction,
+  getEligibleNextBowlerIds,
   createInitialMatchState,
   stepDelivery,
   DeterministicPRNG,
@@ -203,5 +204,67 @@ describe('AI Feature P4.9: Stadium Integration & Tactical AI Captaincy', () => {
 
     expect(state.innings[0].events.length).toBe(12);
     expect(state.innings[0].completedOvers).toBeGreaterThanOrEqual(1);
+  });
+
+  it('uses the shared phase model for limited-overs plans and action metadata', () => {
+    const state = createMockMatchState();
+    const action = resolveAITacticalAction({
+      ...state,
+      innings: [{ ...state.innings[0], completedOvers: 15 }],
+    }, new DeterministicPRNG(42n));
+
+    expect(action.activePhase).toBe('DEATH_OVERS');
+    expect(action.bowlingPlan).toBe('DEFENSIVE');
+  });
+
+  it('selects a contextual Test plan instead of collapsing all Test overs into limited-overs phases', () => {
+    const state = createMockMatchState();
+    const testState: MatchState = {
+      ...state,
+      config: { ...state.config, format: 'TEST_RED_BALL' },
+      currentSessionNumber: 2,
+      innings: [{ ...state.innings[0], completedOvers: 30, totalWickets: 0 }],
+    };
+
+    const action = resolveAITacticalAction(testState, new DeterministicPRNG(43n));
+    expect(action.activePhase).toBe('CONTAINMENT');
+    expect(action.bowlingPlan).toBe('DEFENSIVE');
+  });
+
+  it('recommends only eligible, non-consecutive bowlers under the format quota', () => {
+    const state = createMockMatchState();
+    const profiles = new Map(state.config.playerProfiles);
+    for (const playerId of ['t2-p1', 't2-p2', 't2-p3', 't2-p4', 't2-p5']) {
+      const profile = profiles.get(playerId);
+      if (!profile) throw new Error(`missing test profile ${playerId}`);
+      profiles.set(playerId, { ...profile, bowlingStyle: 'NONE' });
+    }
+    const ineligible = profiles.get('t2-p6');
+    if (!ineligible) throw new Error('missing test profile');
+    profiles.set('t2-p6', { ...ineligible, bowlingStyle: 'NONE' });
+
+    const bowlers = new Map(state.innings[0].bowlers);
+    bowlers.set('t2-p7', { ...bowlers.get('t2-p7')!, ballsBowled: 24 });
+    const constrainedState: MatchState = {
+      ...state,
+      config: { ...state.config, playerProfiles: profiles },
+      innings: [{
+        ...state.innings[0],
+        legalBallsInCurrentOver: 5,
+        currentBowlerPlayerId: 't2-p11',
+        bowlers,
+      }],
+    };
+
+    expect(getEligibleNextBowlerIds(constrainedState)).toEqual([
+      't2-p8', 't2-p9', 't2-p10',
+    ]);
+  });
+
+  it('produces deterministic recommendations for the same state and seed', () => {
+    const state = createMockMatchState();
+    const first = resolveAITacticalAction(state, new DeterministicPRNG(9876n));
+    const second = resolveAITacticalAction(state, new DeterministicPRNG(9876n));
+    expect(second).toEqual(first);
   });
 });
