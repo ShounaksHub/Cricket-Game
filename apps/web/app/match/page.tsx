@@ -153,6 +153,11 @@ export interface ActiveMatchSession {
   userField?: FieldPreset;
   customFielders?: InteractiveFielder[];
   userOpeningBowlerId?: string;
+  openingBatter1Id?: string;
+  openingBatter2Id?: string;
+  battingSetupStep?: 1 | 2 | 3 | 4;
+  bowlingSetupStep?: 1 | 2 | 3 | 4;
+  preMatchDecisionLog?: Array<{ type: string; sequenceNumber: number; payload: Record<string, unknown>; timestamp: string }>;
   userNominatedBowlerId?: string;
   userBattingLineup?: DreamTeamPlayerSlotInput[];
   configSnapshot?: {
@@ -251,7 +256,16 @@ export default function MatchSimulationPage() {
   const [userBowlingIntent, setUserBowlingIntent] = useState<BowlingIntent>('ATTACKING');
   const [userBowlingPlan, setUserBowlingPlan] = useState<BowlingPlan>('BALANCED');
   const [managementMode, setManagementMode] = useState<'MANUAL' | 'ASSISTED' | 'AUTOMATIC'>('ASSISTED');
-  const [showAdvancedTactics, setShowAdvancedTactics] = useState(false);
+  const [showBowlingAdvanced, setShowBowlingAdvanced] = useState(false);
+  const [battingSetupStep, setBattingSetupStep] = useState<1 | 2 | 3 | 4>(1);
+  const [bowlingSetupStep, setBowlingSetupStep] = useState<1 | 2 | 3 | 4>(1);
+  const [openingBatter1Id, setOpeningBatter1Id] = useState<string>('');
+  const [openingBatter2Id, setOpeningBatter2Id] = useState<string>('');
+  const [candidateBatter1Id, setCandidateBatter1Id] = useState<string>('');
+  const [candidateBatter2Id, setCandidateBatter2Id] = useState<string>('');
+  const [preMatchDecisionLog, setPreMatchDecisionLog] = useState<
+    Array<{ type: string; sequenceNumber: number; payload: Record<string, unknown>; timestamp: string }>
+  >([]);
   const [overDecisionPending, setOverDecisionPending] = useState(false);
   const [lastCompletedOverSummary, setLastCompletedOverSummary] = useState<{ over: number; runs: number; wickets: number; phaseChanged: boolean } | null>(null);
   const [userNominatedBowlerId, setUserNominatedBowlerId] = useState<string>('');
@@ -347,6 +361,11 @@ export default function MatchSimulationPage() {
             if (preMatch.userField) setUserField(preMatch.userField);
             if (preMatch.userBowlingPlan) setUserBowlingPlan(preMatch.userBowlingPlan);
             if (preMatch.managementMode) setManagementMode(preMatch.managementMode);
+            if (preMatch.openingBatter1Id) setOpeningBatter1Id(preMatch.openingBatter1Id);
+            if (preMatch.openingBatter2Id) setOpeningBatter2Id(preMatch.openingBatter2Id);
+            if (preMatch.battingSetupStep) setBattingSetupStep(preMatch.battingSetupStep);
+            if (preMatch.bowlingSetupStep) setBowlingSetupStep(preMatch.bowlingSetupStep);
+            if (Array.isArray(preMatch.decisionLog)) setPreMatchDecisionLog(preMatch.decisionLog);
             setPhase('POST_TOSS_MANAGEMENT');
           }
         } catch {
@@ -410,6 +429,11 @@ export default function MatchSimulationPage() {
         decisionEvents: decisions,
         customFielders,
         userOpeningBowlerId,
+        openingBatter1Id,
+        openingBatter2Id,
+        battingSetupStep,
+        bowlingSetupStep,
+        preMatchDecisionLog,
         userBattingLineup,
         configSnapshot: {
           config: {
@@ -621,6 +645,11 @@ export default function MatchSimulationPage() {
     decisionSequenceRef.current = Math.max(0, ...(activeSession.decisionEvents ?? []).map((event) => event.sequenceNumber));
     if (activeSession.userField) setUserField(activeSession.userField);
     if (activeSession.userNominatedBowlerId) setUserNominatedBowlerId(activeSession.userNominatedBowlerId);
+    if (activeSession.openingBatter1Id) setOpeningBatter1Id(activeSession.openingBatter1Id);
+    if (activeSession.openingBatter2Id) setOpeningBatter2Id(activeSession.openingBatter2Id);
+    if (activeSession.battingSetupStep) setBattingSetupStep(activeSession.battingSetupStep);
+    if (activeSession.bowlingSetupStep) setBowlingSetupStep(activeSession.bowlingSetupStep);
+    if (activeSession.preMatchDecisionLog) setPreMatchDecisionLog(activeSession.preMatchDecisionLog);
     if (activeSession.customFielders && activeSession.customFielders.length === 9) {
       setCustomFielders(activeSession.customFielders);
     }
@@ -976,43 +1005,100 @@ export default function MatchSimulationPage() {
     });
   }
 
+  /**
+   * Persist the post-toss pre-match configuration, including the independently
+   * recorded decision log and the sequential selection steps.
+   */
+  function persistPreMatch(
+    overrides: Record<string, unknown> = {},
+    overridesBattingLineup?: DreamTeamPlayerSlotInput[],
+  ) {
+    if (typeof window === 'undefined') return;
+    try {
+      const { team1 } = prepareSimulationSquads();
+      const lineup = overridesBattingLineup
+        ? overridesBattingLineup
+        : userBattingLineup.length === 11
+          ? userBattingLineup
+          : team1.lineup;
+      const preMatch = {
+        format,
+        selectedStadiumId,
+        selectedPitch,
+        dewFactor,
+        temperature,
+        humidity,
+        cloudCover,
+        seedInput,
+        userTeamName,
+        aiTeamName,
+        aiDifficulty,
+        tossResult,
+        userOpeningBowlerId,
+        userBattingLineup: lineup,
+        customFielders,
+        userField,
+        userBowlingPlan,
+        managementMode,
+        openingBatter1Id,
+        openingBatter2Id,
+        battingSetupStep,
+        bowlingSetupStep,
+        decisionLog: preMatchDecisionLog,
+        ...overrides,
+      };
+      localStorage.setItem('cricket_active_pre_match', JSON.stringify(preMatch));
+    } catch {
+      // Ignore
+    }
+  }
+
+  /** Append an ordered pre-match decision event and persist immediately. */
+  function recordPreMatchDecision(
+    type: string,
+    payload: Record<string, unknown>,
+    overrides: Record<string, unknown> = {},
+    overridesBattingLineup?: DreamTeamPlayerSlotInput[],
+  ) {
+    const entry = {
+      type,
+      sequenceNumber: preMatchDecisionLog.length + 1,
+      payload,
+      timestamp: new Date().toISOString(),
+    };
+    const nextLog = [...preMatchDecisionLog, entry];
+    setPreMatchDecisionLog(nextLog);
+    persistPreMatch({ ...overrides, decisionLog: nextLog }, overridesBattingLineup);
+    return nextLog;
+  }
+
   function handleProceedToManagement() {
     if (!tossResult) return;
     const { team1 } = prepareSimulationSquads();
+    const baseLineup = userBattingLineup.length === 11 ? userBattingLineup : team1.lineup;
     if (userBattingLineup.length !== 11) {
-      setUserBattingLineup(team1.lineup);
+      setUserBattingLineup(baseLineup);
     }
+    const nextOpeningBowlerId =
+      userOpeningBowlerId ||
+      team1.lineup.find((s) => s.bowlingPriority === 1)?.playerId ||
+      team1.lineup[team1.lineup.length - 1].playerId;
     if (!userOpeningBowlerId) {
-      const p1 = team1.lineup.find((s) => s.bowlingPriority === 1);
-      const chosen = p1 ? p1.playerId : team1.lineup[team1.lineup.length - 1].playerId;
-      setUserOpeningBowlerId(chosen);
+      setUserOpeningBowlerId(nextOpeningBowlerId);
     }
-    // Save to pre-match storage
-    if (typeof window !== 'undefined') {
-      try {
-        const preMatch = {
-          format,
-          selectedStadiumId,
-          selectedPitch,
-          dewFactor,
-          temperature,
-          humidity,
-          cloudCover,
-          seedInput,
-          userTeamName,
-          aiTeamName,
-          aiDifficulty,
-          tossResult,
-          userOpeningBowlerId: userOpeningBowlerId || (team1.lineup.find((s) => s.bowlingPriority === 1)?.playerId || team1.lineup[10].playerId),
-          userBattingLineup: userBattingLineup.length === 11 ? userBattingLineup : team1.lineup,
-          customFielders,
-          userField,
-        };
-        localStorage.setItem('cricket_active_pre_match', JSON.stringify(preMatch));
-      } catch {
-        // Ignore
-      }
-    }
+    // Sequential flows restart at their first step unless a saved selection exists.
+    const nextBattingStep = openingBatter1Id ? (openingBatter2Id ? 3 : 2) : 1;
+    const nextBowlingStep = userOpeningBowlerId ? 2 : 1;
+    setBattingSetupStep(nextBattingStep);
+    setBowlingSetupStep(nextBowlingStep);
+    persistPreMatch(
+      {
+        userOpeningBowlerId: nextOpeningBowlerId,
+        battingSetupStep: nextBattingStep,
+        bowlingSetupStep: nextBowlingStep,
+      },
+      baseLineup,
+    );
     setPhase('POST_TOSS_MANAGEMENT');
   }
 
@@ -1088,6 +1174,20 @@ export default function MatchSimulationPage() {
     liveStateRef.current = initialLiveState;
     livePrngRef.current = livePrng;
 
+    // Carry the independently recorded pre-match decisions into the session log so
+    // confirmed openers, bowler, field and plan are part of the match record.
+    const seededDecisions: MatchDecisionEvent[] = preMatchDecisionLog.map((entry) => ({
+      type: 'BATTER_SELECTED',
+      matchId: config.matchId,
+      inningsNumber: 1,
+      sequenceNumber: entry.sequenceNumber,
+      deliverySequenceNumber: 0,
+      payload: entry.payload,
+    }));
+    decisionEventsRef.current = seededDecisions;
+    setDecisionEvents(seededDecisions);
+    decisionSequenceRef.current = seededDecisions.length;
+
     // Clear pre-match storage now that match has commenced
     if (typeof window !== 'undefined') {
       localStorage.removeItem('cricket_active_pre_match');
@@ -1136,13 +1236,13 @@ export default function MatchSimulationPage() {
 
     const action: TacticalDeliveryAction = {
       batterIntent: isUserBatting ? userIntent : aiAction.batterIntent,
-      bowlerLength: isUserBowling && !automaticBowling ? showAdvancedTactics ? userLength : userBowlingPlan === 'ATTACK' ? 'FULL' : userBowlingPlan === 'DEFENSIVE' ? 'BACK_OF_LENGTH' : userLength : aiAction.bowlerLength,
-      bowlerLine: isUserBowling && !automaticBowling ? showAdvancedTactics ? userLine : userBowlingPlan === 'ATTACK' ? 'STUMPS' : userBowlingPlan === 'DEFENSIVE' ? 'OUTSIDE_OFF' : userLine : aiAction.bowlerLine,
-      bowlerVariation: isUserBowling && !automaticBowling ? showAdvancedTactics ? userVariation : userBowlingPlan === 'DEFENSIVE' ? 'SLOWER_BALL' : userVariation : aiAction.bowlerVariation,
+      bowlerLength: isUserBowling && !automaticBowling ? showBowlingAdvanced ? userLength : userBowlingPlan === 'ATTACK' ? 'FULL' : userBowlingPlan === 'DEFENSIVE' ? 'BACK_OF_LENGTH' : userLength : aiAction.bowlerLength,
+      bowlerLine: isUserBowling && !automaticBowling ? showBowlingAdvanced ? userLine : userBowlingPlan === 'ATTACK' ? 'STUMPS' : userBowlingPlan === 'DEFENSIVE' ? 'OUTSIDE_OFF' : userLine : aiAction.bowlerLine,
+      bowlerVariation: isUserBowling && !automaticBowling ? showBowlingAdvanced ? userVariation : userBowlingPlan === 'DEFENSIVE' ? 'SLOWER_BALL' : userVariation : aiAction.bowlerVariation,
       fieldPreset: isUserBowling && !automaticBowling ? userField : aiAction.fieldPreset,
       customFieldPositions: isUserBowling && !automaticBowling && mappedCustomField.length > 0 ? mappedCustomField : undefined,
-      bowlingPaceStrategy: isUserBowling && !automaticBowling ? showAdvancedTactics ? userPaceStrategy : userBowlingPlan === 'ATTACK' ? 'EFFORT_BALL' : userBowlingPlan === 'DEFENSIVE' ? 'CONSERVE' : userPaceStrategy : aiAction.bowlingPaceStrategy,
-      bowlingIntent: isUserBowling && !automaticBowling ? showAdvancedTactics ? userBowlingIntent : userBowlingPlan === 'ATTACK' ? 'WICKET_TAKING' : userBowlingPlan === 'DEFENSIVE' ? 'CONTAINMENT' : userBowlingIntent : aiAction.bowlingIntent,
+      bowlingPaceStrategy: isUserBowling && !automaticBowling ? showBowlingAdvanced ? userPaceStrategy : userBowlingPlan === 'ATTACK' ? 'EFFORT_BALL' : userBowlingPlan === 'DEFENSIVE' ? 'CONSERVE' : userPaceStrategy : aiAction.bowlingPaceStrategy,
+      bowlingIntent: isUserBowling && !automaticBowling ? showBowlingAdvanced ? userBowlingIntent : userBowlingPlan === 'ATTACK' ? 'WICKET_TAKING' : userBowlingPlan === 'DEFENSIVE' ? 'CONTAINMENT' : userBowlingIntent : aiAction.bowlingIntent,
       bowlingPlan: isUserBowling && !automaticBowling ? userBowlingPlan : aiAction.bowlingPlan,
       activePhase: getActiveBowlingPhase(
         state.config.format,
@@ -2507,10 +2607,17 @@ export default function MatchSimulationPage() {
         const isBattingValid = uniqueBatters.size === 11 && activeLineup.length === 11;
 
         // Overall readiness
-        const isReadyToStart = isBattingValid && (!isUserBowlingFirst || (Boolean(activeOpeningBowlerId) && isFieldValid));
+        const battingSelectionComplete = Boolean(
+          openingBatter1Id && openingBatter2Id && openingBatter1Id !== openingBatter2Id && battingSetupStep === 4,
+        );
+        const bowlingSelectionComplete = Boolean(
+          activeOpeningBowlerId && isFieldValid && userBowlingPlan && bowlingSetupStep === 4,
+        );
+        const isReadyToStart = isBattingValid && (isUserBattingFirst ? battingSelectionComplete : bowlingSelectionComplete);
 
         function moveSlot(currIdx: number, targetIdx: number) {
-          if (targetIdx < 0 || targetIdx >= activeLineup.length) return;
+          // The confirmed opening pair is locked: never swap into positions #1 or #2.
+          if (targetIdx < 2 || targetIdx >= activeLineup.length) return;
           const updated = [...activeLineup];
           const temp = updated[currIdx];
           updated[currIdx] = updated[targetIdx];
@@ -2528,7 +2635,98 @@ export default function MatchSimulationPage() {
         }
 
         function handleAutoSelectBatting() {
-          setUserBattingLineup(team1.lineup);
+          const auto = team1.lineup;
+          setUserBattingLineup(auto);
+          setOpeningBatter1Id(auto[0]?.playerId ?? '');
+          setOpeningBatter2Id(auto[1]?.playerId ?? '');
+          setBattingSetupStep(4);
+          persistPreMatch(
+            { openingBatter1Id: auto[0]?.playerId ?? '', openingBatter2Id: auto[1]?.playerId ?? '', battingSetupStep: 4 },
+            auto,
+          );
+        }
+
+        // --- Sequential opening batter selection (Phase 9.10.1) ---
+        function confirmOpeningBatter1() {
+          if (!candidateBatter1Id) return;
+          const first = activeLineup.find((s) => s.playerId === candidateBatter1Id);
+          if (!first) return;
+          const rest = activeLineup.filter((s) => s.playerId !== candidateBatter1Id);
+          const next = [first, ...rest].map((slot, i) => ({ ...slot, battingOrder: i + 1 }));
+          setUserBattingLineup(next);
+          setOpeningBatter1Id(candidateBatter1Id);
+          setOpeningBatter2Id('');
+          setCandidateBatter2Id('');
+          setBattingSetupStep(2);
+          recordPreMatchDecision(
+            'BATTER_SELECTED',
+            { openingSlot: 1, playerId: candidateBatter1Id, phase: 'PRE_MATCH' },
+            { openingBatter1Id: candidateBatter1Id, openingBatter2Id: '', battingSetupStep: 2 },
+            next,
+          );
+        }
+
+        function confirmOpeningBatter2() {
+          if (!candidateBatter2Id || candidateBatter2Id === openingBatter1Id) return;
+          const first = activeLineup.find((s) => s.playerId === openingBatter1Id);
+          const second = activeLineup.find((s) => s.playerId === candidateBatter2Id);
+          if (!first || !second) return;
+          const rest = activeLineup.filter(
+            (s) => s.playerId !== first.playerId && s.playerId !== second.playerId,
+          );
+          const next = [first, second, ...rest].map((slot, i) => ({ ...slot, battingOrder: i + 1 }));
+          setUserBattingLineup(next);
+          setOpeningBatter2Id(candidateBatter2Id);
+          setBattingSetupStep(3);
+          recordPreMatchDecision(
+            'BATTER_SELECTED',
+            { openingSlot: 2, playerId: candidateBatter2Id, phase: 'PRE_MATCH' },
+            { openingBatter2Id: candidateBatter2Id, battingSetupStep: 3 },
+            next,
+          );
+        }
+
+        function confirmBattingOrder() {
+          const ids = activeLineup.map((s) => s.playerId);
+          if (new Set(ids).size !== 11 || !openingBatter1Id || !openingBatter2Id) return;
+          setBattingSetupStep(4);
+          recordPreMatchDecision(
+            'BATTER_SELECTED',
+            { battingOrder: ids, phase: 'PRE_MATCH' },
+            { battingSetupStep: 4 },
+            activeLineup,
+          );
+        }
+
+        // --- Sequential bowling setup (Phase 9.10.1) ---
+        function confirmOpeningBowler() {
+          if (!activeOpeningBowlerId) return;
+          setUserOpeningBowlerId(activeOpeningBowlerId);
+          setBowlingSetupStep(2);
+          recordPreMatchDecision(
+            'BOWLER_SELECTED',
+            { playerId: activeOpeningBowlerId, phase: 'PRE_MATCH' },
+            { userOpeningBowlerId: activeOpeningBowlerId, bowlingSetupStep: 2 },
+          );
+        }
+
+        function confirmFieldPlacement() {
+          if (!isFieldValid) return;
+          setBowlingSetupStep(3);
+          recordPreMatchDecision(
+            'FIELD_CHANGED',
+            { field: userField, fielders: customFielders.length, phase: 'PRE_MATCH' },
+            { bowlingSetupStep: 3 },
+          );
+        }
+
+        function confirmBowlingPlan() {
+          setBowlingSetupStep(4);
+          recordPreMatchDecision(
+            'BOWLING_PLAN_CHANGED',
+            { plan: userBowlingPlan, managementMode, phase: 'PRE_MATCH' },
+            { userBowlingPlan, managementMode, bowlingSetupStep: 4 },
+          );
         }
 
         return (
@@ -2574,7 +2772,7 @@ export default function MatchSimulationPage() {
             {/* Main Management Cockpit */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-md">
               {/* SECTION: If user bats first -> Batting Lineup Management */}
-              {(
+              {isUserBattingFirst && (
                 <div className="lg:col-span-12 flex flex-col gap-space-md">
                   <div className="bg-surface-card rounded-xl p-space-md shadow-xl border border-border-hairline flex flex-col gap-space-md">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-border-hairline gap-2">
@@ -2598,92 +2796,240 @@ export default function MatchSimulationPage() {
                       </button>
                     </div>
 
-                    {/* Opening Batting Pair Spotlight */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 bg-surface-recessed p-3 rounded-xl border border-border-hairline">
-                      {[0, 1].map((idx) => {
-                        const slot = activeLineup[idx];
-                        const prof = slot ? profiles.get(slot.playerId) : undefined;
-                        const pName = prof?.fullName || prof?.displayName || 'Unknown Batter';
-                        const pImg = getAuthoritativePlayerImage(slot?.playerId, pName, prof?.primaryRole, prof?.primaryNationality);
-                        const isStriker = idx === 0;
+{/* Sequential opening batter selection — one decision per step */}
+                    <div className="rounded-xl border border-border-hairline bg-surface-recessed p-3 flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-mono uppercase tracking-wider text-text-subdued">
+                          STEP {battingSetupStep} OF 4
+                        </span>
+                        <span className="text-[11px] font-mono text-primary font-bold uppercase">
+                          {battingSetupStep === 1
+                            ? 'OPENING BATTER 1'
+                            : battingSetupStep === 2
+                              ? 'OPENING BATTER 2'
+                              : battingSetupStep === 3
+                                ? 'BATTING ORDER'
+                                : 'REVIEW'}
+                        </span>
+                      </div>
 
-                        return (
-                          <div
-                            key={slot?.playerId || idx}
-                            className="flex items-center gap-3 p-3 bg-surface-card rounded-xl border border-primary/30 shadow-md"
-                          >
-                            <span className="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-scoreboard-md text-sm font-bold flex-shrink-0">
-                              #{idx + 1}
-                            </span>
-                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-surface-recessed border border-border-hairline flex-shrink-0">
-                              <img src={pImg} alt={pName} className="w-full h-full object-cover" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-1.5">
-                                <span className="font-bold text-sm text-text-chalk truncate">{pName}</span>
-                                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-primary/20 text-primary uppercase font-bold">
-                                  {isStriker ? 'STRIKER' : 'NON-STRIKER'}
-                                </span>
-                              </div>
-                              <div className="text-[11px] text-text-subdued truncate">
-                                {prof?.primaryRole?.replace(/_/g, ' ')} • {prof?.battingHand?.replace(/_/g, ' ')} • OVR {typeof prof?.formatRating === 'number' ? prof.formatRating : 85}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Full 11-Player Interactive Batting Lineup */}
-                    <div className="space-y-1.5">
-                      <span className="text-[11px] font-mono uppercase tracking-wider text-text-subdued px-1">
-                        REMAINING BATTING ORDER (#3 TO #11)
-                      </span>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                        {activeLineup.slice(2).map((slot, offsetIdx) => {
-                          const realIdx = offsetIdx + 2;
-                          const prof = profiles.get(slot.playerId);
-                          const pName = prof?.fullName || prof?.displayName || 'Player';
-
-                          return (
-                            <div
-                              key={slot.playerId}
-                              className="flex items-center justify-between p-2.5 rounded-lg bg-surface-recessed border border-border-hairline hover:border-border-hairline/80 transition"
-                            >
-                              <div className="flex items-center gap-2.5 min-w-0">
-                                <span className="text-xs font-mono font-bold text-text-subdued w-6">
-                                  #{realIdx + 1}
-                                </span>
-                                <div className="truncate">
-                                  <div className="text-xs font-bold text-text-chalk truncate">{pName}</div>
+                      {battingSetupStep === 1 && (
+                        <div className="flex flex-col gap-2">
+                          <p className="text-xs text-text-subdued">
+                            Select Opening Batter 1. This player takes strike for the first ball.
+                          </p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[340px] overflow-y-auto pr-1">
+                            {activeLineup.map((slot) => {
+                              const prof = profiles.get(slot.playerId);
+                              const pName = prof?.fullName || prof?.displayName || 'Player';
+                              const isSelected = candidateBatter1Id === slot.playerId;
+                              return (
+                                <button
+                                  key={slot.playerId}
+                                  type="button"
+                                  onClick={() => setCandidateBatter1Id(slot.playerId)}
+                                  className={`p-2.5 rounded-lg border text-left transition cursor-pointer ${
+                                    isSelected
+                                      ? 'bg-primary/20 border-primary text-text-chalk ring-1 ring-primary'
+                                      : 'bg-surface-card border-border-hairline text-text-slate hover:bg-surface-elevated'
+                                  }`}
+                                >
+                                  <div className="text-xs font-bold truncate">{pName}</div>
                                   <div className="text-[10px] text-text-subdued truncate">
-                                    {prof?.primaryRole?.replace(/_/g, ' ')} • OVR {typeof prof?.formatRating === 'number' ? prof.formatRating : 80}
+                                    {prof?.primaryRole?.replace(/_/g, ' ')} • {prof?.battingHand?.replace(/_/g, ' ')} • OVR{' '}
+                                    {typeof prof?.formatRating === 'number' ? prof.formatRating : 85}
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                          <button
+                            type="button"
+                            disabled={!candidateBatter1Id}
+                            onClick={confirmOpeningBatter1}
+                            className="self-start px-4 py-2 rounded-lg bg-primary text-on-primary text-xs font-bold uppercase disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            CONFIRM OPENING BATTER 1
+                          </button>
+                        </div>
+                      )}
+
+                      {battingSetupStep === 2 && (
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center gap-2 text-xs text-text-chalk">
+                            <span className="px-2 py-0.5 rounded bg-primary/20 text-primary font-mono text-[10px] font-bold">#1 CONFIRMED</span>
+                            <span className="font-bold">{profiles.get(openingBatter1Id)?.fullName || 'Opening Batter 1'}</span>
+                          </div>
+                          <p className="text-xs text-text-subdued">
+                            Select Opening Batter 2. The confirmed first opener is excluded from these choices.
+                          </p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[340px] overflow-y-auto pr-1">
+                            {activeLineup
+                              .filter((slot) => slot.playerId !== openingBatter1Id)
+                              .map((slot) => {
+                                const prof = profiles.get(slot.playerId);
+                                const pName = prof?.fullName || prof?.displayName || 'Player';
+                                const isSelected = candidateBatter2Id === slot.playerId;
+                                return (
+                                  <button
+                                    key={slot.playerId}
+                                    type="button"
+                                    onClick={() => setCandidateBatter2Id(slot.playerId)}
+                                    className={`p-2.5 rounded-lg border text-left transition cursor-pointer ${
+                                      isSelected
+                                        ? 'bg-primary/20 border-primary text-text-chalk ring-1 ring-primary'
+                                        : 'bg-surface-card border-border-hairline text-text-slate hover:bg-surface-elevated'
+                                    }`}
+                                  >
+                                    <div className="text-xs font-bold truncate">{pName}</div>
+                                    <div className="text-[10px] text-text-subdued truncate">
+                                      {prof?.primaryRole?.replace(/_/g, ' ')} • {prof?.battingHand?.replace(/_/g, ' ')} • OVR{' '}
+                                      {typeof prof?.formatRating === 'number' ? prof.formatRating : 85}
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setBattingSetupStep(1)}
+                              className="px-3 py-2 rounded-lg border border-border-hairline bg-surface-card text-text-slate text-xs font-bold uppercase"
+                            >
+                              ← CHANGE BATTER 1
+                            </button>
+                            <button
+                              type="button"
+                              disabled={!candidateBatter2Id || candidateBatter2Id === openingBatter1Id}
+                              onClick={confirmOpeningBatter2}
+                              className="px-4 py-2 rounded-lg bg-primary text-on-primary text-xs font-bold uppercase disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                              CONFIRM OPENING BATTER 2
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {battingSetupStep >= 3 && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {[openingBatter1Id, openingBatter2Id].map((playerId, idx) => {
+                            const prof = profiles.get(playerId);
+                            const pName = prof?.fullName || prof?.displayName || 'Opening Batter';
+                            const pImg = getAuthoritativePlayerImage(playerId, pName, prof?.primaryRole, prof?.primaryNationality);
+                            return (
+                              <div key={playerId || idx} className="flex items-center gap-3 p-3 bg-surface-card rounded-xl border border-primary/30 shadow-md">
+                                <span className="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-scoreboard-md text-sm font-bold flex-shrink-0">
+                                  #{idx + 1}
+                                </span>
+                                <div className="w-12 h-12 rounded-lg overflow-hidden bg-surface-recessed border border-border-hairline flex-shrink-0">
+                                  <img src={pImg} alt={pName} className="w-full h-full object-cover" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-bold text-sm text-text-chalk truncate">{pName}</span>
+                                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-primary/20 text-primary uppercase font-bold">
+                                      {idx === 0 ? 'STRIKER' : 'NON-STRIKER'}
+                                    </span>
+                                  </div>
+                                  <div className="text-[11px] text-text-subdued truncate">
+                                    {prof?.primaryRole?.replace(/_/g, ' ')} • {prof?.battingHand?.replace(/_/g, ' ')} • OVR{' '}
+                                    {typeof prof?.formatRating === 'number' ? prof.formatRating : 85}
                                   </div>
                                 </div>
                               </div>
+                            );
+                          })}
+                        </div>
+                      )}
 
-                              <div className="flex items-center gap-1">
-                                <button
-                                  type="button"
-                                  onClick={() => moveSlot(realIdx, realIdx - 1)}
-                                  className="p-1 rounded bg-surface-elevated hover:bg-surface-bright text-text-slate hover:text-text-chalk text-xs transition cursor-pointer"
-                                  title="Move Up"
-                                >
-                                  ▲
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => moveSlot(realIdx, realIdx + 1)}
-                                  className="p-1 rounded bg-surface-elevated hover:bg-surface-bright text-text-slate hover:text-text-chalk text-xs transition cursor-pointer"
-                                  title="Move Down"
-                                >
-                                  ▼
-                                </button>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
+                      {battingSetupStep === 3 && (
+                        <div className="space-y-1.5">
+                          <span className="text-[11px] font-mono uppercase tracking-wider text-text-subdued px-1">
+                            REMAINING BATTING ORDER (#3 TO #11) — OPENING PAIR IS LOCKED
+                          </span>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                            {activeLineup.slice(2).map((slot, offsetIdx) => {
+                              const realIdx = offsetIdx + 2;
+                              const prof = profiles.get(slot.playerId);
+                              const pName = prof?.fullName || prof?.displayName || 'Player';
+                              return (
+                                <div key={slot.playerId} className="flex items-center justify-between p-2.5 rounded-lg bg-surface-card border border-border-hairline">
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    <span className="text-xs font-mono font-bold text-text-subdued w-6">#{realIdx + 1}</span>
+                                    <div className="truncate">
+                                      <div className="text-xs font-bold text-text-chalk truncate">{pName}</div>
+                                      <div className="text-[10px] text-text-subdued truncate">
+                                        {prof?.primaryRole?.replace(/_/g, ' ')} • OVR {typeof prof?.formatRating === 'number' ? prof.formatRating : 80}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <button
+                                      type="button"
+                                      disabled={realIdx === 2}
+                                      onClick={() => moveSlot(realIdx, realIdx - 1)}
+                                      className="p-1 rounded bg-surface-elevated hover:bg-surface-bright disabled:opacity-30 text-text-slate hover:text-text-chalk text-xs transition cursor-pointer"
+                                      title="Move Up"
+                                    >
+                                      ▲
+                                    </button>
+                                    <button
+                                      type="button"
+                                      disabled={realIdx === 10}
+                                      onClick={() => moveSlot(realIdx, realIdx + 1)}
+                                      className="p-1 rounded bg-surface-elevated hover:bg-surface-bright disabled:opacity-30 text-text-slate hover:text-text-chalk text-xs transition cursor-pointer"
+                                      title="Move Down"
+                                    >
+                                      ▼
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={confirmBattingOrder}
+                            className="mt-1 px-4 py-2 rounded-lg bg-primary text-on-primary text-xs font-bold uppercase"
+                          >
+                            CONFIRM BATTING ORDER
+                          </button>
+                        </div>
+                      )}
+
+                      {battingSetupStep === 4 && (
+                        <div className="flex flex-col gap-2">
+                          <span className="text-[11px] font-mono uppercase tracking-wider text-text-subdued">
+                            FINAL BATTING LINEUP REVIEW
+                          </span>
+                          <ol className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                            {activeLineup.map((slot, idx) => {
+                              const prof = profiles.get(slot.playerId);
+                              return (
+                                <li key={slot.playerId + idx} className="flex items-center gap-2 p-1.5 rounded bg-surface-card border border-border-hairline">
+                                  <span className="w-5 text-[10px] font-mono text-text-subdued">#{idx + 1}</span>
+                                  <span className="text-xs font-bold text-text-chalk truncate">
+                                    {prof?.fullName || prof?.displayName || 'Player'}
+                                  </span>
+                                  {idx < 2 && (
+                                    <span className="text-[9px] font-mono text-primary uppercase">OPENER</span>
+                                  )}
+                                </li>
+                              );
+                            })}
+                          </ol>
+                          <div className="text-[11px] font-mono text-text-subdued">
+                            MANAGEMENT MODE: <span className="text-text-chalk font-bold">{managementMode}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setBattingSetupStep(3)}
+                            className="self-start px-3 py-1.5 rounded-lg border border-border-hairline bg-surface-card text-text-slate text-[11px] font-bold uppercase"
+                          >
+                            ← EDIT LOWER ORDER
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -2692,7 +3038,8 @@ export default function MatchSimulationPage() {
               {/* SECTION: If user bowls first -> Opening Bowler & Field Setup */}
               {isUserBowlingFirst && (
                 <>
-                  {/* Left Column: Opening Bowler Selection */}
+                  {/* Left Column: Opening Bowler Selection (Step 1) */}
+                  {bowlingSetupStep === 1 && (
                   <div className="lg:col-span-5 flex flex-col gap-space-md">
                     <div className="bg-surface-card rounded-xl p-space-md shadow-xl border border-border-hairline flex flex-col gap-3">
                       <div className="flex items-center justify-between pb-2 border-b border-border-hairline">
@@ -2788,10 +3135,86 @@ export default function MatchSimulationPage() {
                           })}
                         </div>
                       </div>
+                      <button
+                        type="button"
+                        onClick={confirmOpeningBowler}
+                        className="self-start px-4 py-2 rounded-lg bg-secondary text-on-secondary text-xs font-bold uppercase cursor-pointer"
+                      >
+                        CONFIRM OPENING BOWLER
+                      </button>
                     </div>
                   </div>
+                  )}
 
-                  {/* Right Column: Pre-Match Opening Field Placement */}
+                  {/* Bowling plan + management mode (Step 3) */}
+                  {bowlingSetupStep === 3 && (
+                  <div className="lg:col-span-5 flex flex-col gap-space-md">
+                    <div className="bg-surface-card rounded-xl p-space-md shadow-xl border border-border-hairline flex flex-col gap-3">
+                      <div className="flex items-center justify-between pb-2 border-b border-border-hairline">
+                        <div className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-secondary text-[20px]">tune</span>
+                          <h2 className="text-sm font-extrabold text-text-chalk uppercase tracking-wider font-headline-md">
+                            CHOOSE BOWLING PLAN
+                          </h2>
+                        </div>
+                      </div>
+                      <p className="text-xs text-text-subdued">
+                        Select how your attack approaches the innings. Advanced line, length, variation and intent controls remain available under Advanced Settings.
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        {([
+                          ['ATTACK', 'Take wickets early', 'Aggressive fields, full pace, attacking lines.'],
+                          ['BALANCED', 'Control the game', 'Line and length with measured aggression.'],
+                          ['DEFENSIVE', 'Protect runs', 'Containment fields, slower balls, wide lines.'],
+                        ] as const).map(([id, label, desc]) => (
+                          <button
+                            key={id}
+                            type="button"
+                            onClick={() => setUserBowlingPlan(id)}
+                            className={`p-3 rounded-lg text-left transition border cursor-pointer flex flex-col gap-1 ${
+                              userBowlingPlan === id
+                                ? 'bg-secondary/20 border-secondary text-text-chalk shadow-sm ring-1 ring-secondary'
+                                : 'bg-surface-recessed border-border-hairline text-text-slate hover:bg-surface-elevated'
+                            }`}
+                          >
+                            <span className="font-bold text-xs uppercase">{label}</span>
+                            <span className="text-[10px] opacity-80">{desc}</span>
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-between gap-2 pt-1">
+                        <span className="text-[10px] font-mono text-text-subdued uppercase">Management mode</span>
+                        <select
+                          value={managementMode}
+                          onChange={(e) => handleManagementModeChange(e.target.value as 'MANUAL' | 'ASSISTED' | 'AUTOMATIC')}
+                          className="bg-surface-card border border-border-hairline text-text-slate rounded px-2 py-1 text-[10px]"
+                          aria-label="Management mode"
+                        >
+                          <option value="MANUAL">Manual</option>
+                          <option value="ASSISTED">Assisted</option>
+                          <option value="AUTOMATIC">Automatic</option>
+                        </select>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowBowlingAdvanced((v) => !v)}
+                        className="text-[10px] font-mono text-text-subdued hover:text-text-chalk uppercase text-left"
+                      >
+                        {showBowlingAdvanced ? '▾ Hide advanced settings' : '▸ Advanced settings (line, length, variation, intent)'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={confirmBowlingPlan}
+                        className="self-start px-4 py-2 rounded-lg bg-secondary text-on-secondary text-xs font-bold uppercase cursor-pointer"
+                      >
+                        CONFIRM BOWLING PLAN
+                      </button>
+                    </div>
+                  </div>
+                  )}
+
+                  {/* Right Column: Pre-Match Opening Field Placement (Step 2) */}
+                  {bowlingSetupStep === 2 && (
                   <div className="lg:col-span-7 flex flex-col gap-space-md">
                     <div className="bg-surface-card rounded-xl p-space-md shadow-xl border border-border-hairline flex flex-col gap-3">
                       <div className="flex items-center justify-between pb-2 border-b border-border-hairline">
@@ -2886,8 +3309,55 @@ export default function MatchSimulationPage() {
                           </span>
                         </div>
                       )}
+                      <button
+                        type="button"
+                        disabled={!isFieldValid}
+                        onClick={confirmFieldPlacement}
+                        className="self-start px-4 py-2 rounded-lg bg-primary text-on-primary text-xs font-bold uppercase disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        CONFIRM FIELD PLACEMENT
+                      </button>
                     </div>
                   </div>
+                  )}
+
+                  {bowlingSetupStep === 4 && (
+                    <div className="lg:col-span-12">
+                      <div className="bg-surface-card rounded-xl p-space-md shadow-xl border border-border-hairline flex flex-col gap-3">
+                        <div className="flex items-center justify-between pb-2 border-b border-border-hairline">
+                          <h2 className="text-sm font-extrabold text-text-chalk uppercase tracking-wider font-headline-md">
+                            REVIEW BOWLING SETUP
+                          </h2>
+                          <span className="text-[10px] font-mono text-secondary uppercase font-bold">STEP 4 OF 4</span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                          <div className="p-3 rounded-lg bg-surface-recessed border border-border-hairline">
+                            <div className="text-[10px] font-mono uppercase text-text-subdued">Opening bowler</div>
+                            <div className="font-bold text-text-chalk mt-0.5">
+                              {profiles.get(activeOpeningBowlerId)?.fullName || 'Selected'}
+                            </div>
+                          </div>
+                          <div className="p-3 rounded-lg bg-surface-recessed border border-border-hairline">
+                            <div className="text-[10px] font-mono uppercase text-text-subdued">Field placement</div>
+                            <div className="font-bold text-text-chalk mt-0.5">{userField}</div>
+                            <div className="text-[10px] text-text-subdued">
+                              {customFielders.length} fielders • {isFieldValid ? 'LEGAL' : 'ILLEGAL'}
+                            </div>
+                          </div>
+                          <div className="p-3 rounded-lg bg-surface-recessed border border-border-hairline">
+                            <div className="text-[10px] font-mono uppercase text-text-subdued">Bowling plan</div>
+                            <div className="font-bold text-text-chalk mt-0.5">{userBowlingPlan}</div>
+                            <div className="text-[10px] text-text-subdued">Mode: {managementMode}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button type="button" onClick={() => setBowlingSetupStep(1)} className="px-3 py-1.5 rounded-lg border border-border-hairline bg-surface-card text-text-slate text-[11px] font-bold uppercase">← BOWLER</button>
+                          <button type="button" onClick={() => setBowlingSetupStep(2)} className="px-3 py-1.5 rounded-lg border border-border-hairline bg-surface-card text-text-slate text-[11px] font-bold uppercase">← FIELD</button>
+                          <button type="button" onClick={() => setBowlingSetupStep(3)} className="px-3 py-1.5 rounded-lg border border-border-hairline bg-surface-card text-text-slate text-[11px] font-bold uppercase">← PLAN</button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -2896,7 +3366,8 @@ export default function MatchSimulationPage() {
             <div className="w-full bg-surface-card rounded-xl p-space-md shadow-2xl border border-border-hairline flex flex-col sm:flex-row items-center justify-between gap-4 mt-2">
               <div className="flex flex-col">
                 <span className="text-xs font-mono text-text-subdued uppercase">
-                  MATCH READY STATUS: {isReadyToStart ? 'VALIDATED • READY' : 'CONFIGURATION REQUIRED'}
+                  MATCH READY STATUS: {isReadyToStart ? 'VALIDATED • READY' : 'CONFIGURATION REQUIRED'} •{' '}
+                  {isUserBattingFirst ? `BATTING STEP ${battingSetupStep}/4` : `BOWLING STEP ${bowlingSetupStep}/4`}
                 </span>
                 <span className="text-sm font-bold text-text-chalk">
                   {isUserBowlingFirst
@@ -3460,10 +3931,10 @@ export default function MatchSimulationPage() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => setShowAdvancedTactics((value) => !value)}
+                      onClick={() => setShowBowlingAdvanced((value) => !value)}
                       className="self-start text-[10px] font-bold uppercase tracking-wide text-text-subdued hover:text-text-chalk"
                     >
-                      {showAdvancedTactics ? '▾ Hide advanced tactics' : '▸ Advanced tactics'}
+                      {showBowlingAdvanced ? '▾ Hide advanced tactics' : '▸ Advanced tactics'}
                     </button>
                   </div>
 
@@ -3487,7 +3958,7 @@ export default function MatchSimulationPage() {
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
                         <button type="button" onClick={acceptBowlingRecommendation} className="rounded bg-primary px-2 py-2 text-[10px] font-bold uppercase text-on-primary">Accept recommendation</button>
-                        <button type="button" onClick={() => { setOverDecisionPending(false); setShowAdvancedTactics(true); }} className="rounded border border-border-hairline bg-surface-card px-2 py-2 text-[10px] font-bold uppercase text-text-slate hover:text-text-chalk">Customise</button>
+                        <button type="button" onClick={() => { setOverDecisionPending(false); setShowBowlingAdvanced(true); }} className="rounded border border-border-hairline bg-surface-card px-2 py-2 text-[10px] font-bold uppercase text-text-slate hover:text-text-chalk">Customise</button>
                         <button type="button" onClick={resumeCaptaincyDecision} className="rounded border border-border-hairline bg-surface-card px-2 py-2 text-[10px] font-bold uppercase text-text-slate hover:text-text-chalk">Keep current plan</button>
                       </div>
                     </div>
@@ -3524,7 +3995,7 @@ export default function MatchSimulationPage() {
                     </div>
                   )}
 
-                  {showAdvancedTactics && <>
+                  {showBowlingAdvanced && <>
                   {/* Bowling Pace & Intensity Strategy */}
                   <div className="flex flex-col gap-1">
                     <label className="text-[10px] font-label-caps text-text-subdued uppercase">
