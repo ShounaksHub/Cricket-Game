@@ -111,13 +111,12 @@ export function DecisionModal({
                   key={player.id}
                   disabled={disabled}
                   onClick={() => onSelectPlayer(player.id)}
-                  className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between gap-3 ${
-                    disabled
-                      ? 'opacity-40 bg-[#EDE3D2] border-[#D8C9B5] cursor-not-allowed'
-                      : isRecommended
+                  className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between gap-3 ${disabled
+                    ? 'opacity-40 bg-[#EDE3D2] border-[#D8C9B5] cursor-not-allowed'
+                    : isRecommended
                       ? 'bg-[#F5EBDD] border-2 border-[#C89666] hover:bg-[#FBF8F2] cursor-pointer shadow-sm'
                       : 'bg-[#F5EBDD] border-[#D8C9B5] hover:border-[#C89666] hover:bg-[#FBF8F2] cursor-pointer'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <img

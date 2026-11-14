@@ -161,19 +161,17 @@ export function PreInningsManagementModal({
               return (
                 <div
                   key={player.id}
-                  className={`p-3 rounded-xl border flex items-center justify-between gap-3 transition-all ${
-                    isOpener
-                      ? 'bg-[#F5EBDD] border-2 border-[#C89666] shadow-sm'
-                      : 'bg-[#F5EBDD] border-[#D8C9B5] hover:bg-[#FBF8F2]'
-                  }`}
+                  className={`p-3 rounded-xl border flex items-center justify-between gap-3 transition-all ${isOpener
+                    ? 'bg-[#F5EBDD] border-2 border-[#C89666] shadow-sm'
+                    : 'bg-[#F5EBDD] border-[#D8C9B5] hover:bg-[#FBF8F2]'
+                    }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <span
-                      className={`w-7 h-7 rounded-lg flex items-center justify-center font-scoreboard-md text-xs font-bold shrink-0 ${
-                        isOpener
-                          ? 'bg-[#2D545E] text-[#FBF8F2] shadow-sm'
-                          : 'bg-[#EDE3D2] text-[#12343B]'
-                      }`}
+                      className={`w-7 h-7 rounded-lg flex items-center justify-center font-scoreboard-md text-xs font-bold shrink-0 ${isOpener
+                        ? 'bg-[#2D545E] text-[#FBF8F2] shadow-sm'
+                        : 'bg-[#EDE3D2] text-[#12343B]'
+                        }`}
                     >
                       {idx + 1}
                     </span>
@@ -273,11 +271,10 @@ export function PreInningsManagementModal({
                 <button
                   key={player.id}
                   onClick={() => setSelectedBowlerId(player.id)}
-                  className={`w-full p-3.5 rounded-xl border text-left transition-all flex items-center justify-between gap-3 ${
-                    isSelected
-                      ? 'bg-[#F5EBDD] border-2 border-[#C89666] shadow-sm cursor-pointer'
-                      : 'bg-[#F5EBDD] border-[#D8C9B5] hover:border-[#C89666] hover:bg-[#FBF8F2] cursor-pointer'
-                  }`}
+                  className={`w-full p-3.5 rounded-xl border text-left transition-all flex items-center justify-between gap-3 ${isSelected
+                    ? 'bg-[#F5EBDD] border-2 border-[#C89666] shadow-sm cursor-pointer'
+                    : 'bg-[#F5EBDD] border-[#D8C9B5] hover:border-[#C89666] hover:bg-[#FBF8F2] cursor-pointer'
+                    }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <img
@@ -324,11 +321,10 @@ export function PreInningsManagementModal({
 
                   <div className="shrink-0 flex items-center gap-2">
                     <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        isSelected
-                          ? 'border-[#C89666] bg-[#E1B382] text-[#12343B]'
-                          : 'border-[#D8C9B5] bg-transparent'
-                      }`}
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected
+                        ? 'border-[#C89666] bg-[#E1B382] text-[#12343B]'
+                        : 'border-[#D8C9B5] bg-transparent'
+                        }`}
                     >
                       {isSelected && <span className="text-xs font-black">✓</span>}
                     </div>
