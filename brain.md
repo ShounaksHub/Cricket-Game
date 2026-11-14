@@ -103,6 +103,7 @@ Cricket-Game (Monorepo Root)
 | **ADR-014** | Strict Asymmetric Player Agency & Authoritative Match State | Accepted | The user manages their own Dream XI (batting intent when batting, complete bowling/fielding cockpit when bowling). The opponent is managed autonomously by CPU AI. In-match scoreboards read directly from authoritative state, preventing score summation bugs. |
 | **ADR-015** | Interactive 2D Field Placement & MCC Law 28.4 Enforcement | Accepted | Introduced `InteractiveFieldEditor` enabling click-to-reposition for all 9 fielders, dynamic Cartesian-to-polar mapping, and real-time regulation checks for leg-side fielder limits. Custom coordinates directly modulate simulation logits. |
 | **ADR-016** | Mandatory Post-Toss Team Management & Explicit Start Gate | Accepted | Enforces strict match progression `SETUP → TOSS → POST_TOSS_MANAGEMENT → LIVE`. Ensures user selects opening batting pair (when batting first) or opening bowler + Powerplay/MCC Law 28.4 compliant field (when bowling first). Requires explicit `START SIMULATION` confirmation before the first ball can execute (`firstDeliveryCount === 0` invariant). |
+| **ADR-024** | Editorial UI Simplification / Anti-Slop Pass | Accepted | Shared navigation and key entry screens use plain-language labels, fewer telemetry badges, and one clear primary action. Technical engine details remain available in match and archive views but are no longer presented as decorative status noise. |
 
 ---
 

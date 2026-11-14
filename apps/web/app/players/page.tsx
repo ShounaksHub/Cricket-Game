@@ -187,15 +187,14 @@ export default function PlayerCataloguePage() {
               <div className="flex items-center gap-2 mb-2">
                 <span className="w-2 h-2 rounded-full bg-secondary" />
                 <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest">
-                  PLAYER ARCHIVE • {allPlayers.length.toLocaleString()} PLAYERS
+                  Player archive · {allPlayers.length.toLocaleString()} players
                 </span>
               </div>
-              <h1 className="font-display-lg text-display-lg text-text-chalk tracking-tight uppercase">
-                CRICKET PLAYER ARCHIVE
+              <h1 className="font-display-lg text-display-lg text-text-chalk tracking-tight">
+                Cricket player archive
               </h1>
               <p className="font-body-base text-body-base text-text-slate max-w-2xl mt-1">
-                Browse recorded career data across nations, generations, and formats. Where a field is not verified in
-                the source record, the archive shows a dash rather than an estimate.
+                Browse recorded career data across nations, generations, and formats. Unverified fields stay blank rather than becoming guesses.
               </p>
             </div>
           </div>

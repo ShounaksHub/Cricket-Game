@@ -210,11 +210,11 @@ export default function HomeScreen() {
             <span className="w-2 h-2 rounded-full bg-[#E1B382] animate-ping" />
             <span className="w-2 h-2 rounded-full bg-[#E1B382] -ml-2.5" />
             <span className="font-label-caps text-label-caps text-[#E1B382] tracking-widest uppercase font-bold">
-              SEASON 2026 • PAVILION ACCESS UNLOCKED
+              CRICKET DREAM XI
             </span>
             <span className="text-[#D8C9B5] font-label-caps text-label-caps">/</span>
             <span className="font-label-caps text-label-caps text-[#FBF8F2]">
-              HYDERABAD COLOSSEUM
+              A local cricket simulator
             </span>
           </div>
 
@@ -244,13 +244,13 @@ export default function HomeScreen() {
               height={28}
               className="h-7 w-auto"
             />
-            <span className="px-space-sm py-1 rounded-full bg-[#12343B] font-label-caps text-label-caps text-[#E1B382] uppercase tracking-widest shadow-sm border border-[#C89666]/30 flex items-center gap-1.5 font-bold">
+              <span className="px-space-sm py-1 rounded-full bg-[#12343B] font-label-caps text-label-caps text-[#E1B382] tracking-widest shadow-sm border border-[#C89666]/30 flex items-center gap-1.5 font-bold">
               <span className="w-1.5 h-1.5 rounded-full bg-[#E1B382] animate-pulse" />
-              AUTHENTIC MATCH SIMULATOR
+              CAPTAIN EVERY OVER
             </span>
             <span className="h-1.5 w-1.5 rounded-full bg-[#C89666] hidden sm:inline-block" />
             <span className="font-label-caps text-label-caps text-[#D8C9B5] uppercase tracking-wider hidden sm:inline-block font-semibold">
-              BROADCAST SCOREBOARD
+              BALL-BY-BALL PLAY
             </span>
           </div>
 
@@ -264,7 +264,7 @@ export default function HomeScreen() {
           </h1>
 
           <p className="font-sans text-title-md text-[#D8C9B5] max-w-2xl font-normal leading-relaxed">
-            Build your ultimate cricket XI, set dynamic field placements, and chase glory across iconic stadiums in fast, realistic matches.
+            Pick your XI, make the call, and play a match where every ball follows the rules.
           </p>
 
           {/* Primary Action CTA Cluster */}
@@ -278,7 +278,7 @@ export default function HomeScreen() {
               <span className="material-symbols-outlined text-[26px] group-hover:rotate-45 transition-transform duration-300">
                 sports_cricket
               </span>
-              <span className="tracking-wider">PLAY CRICKET</span>
+              <span>Play cricket</span>
               <span className="material-symbols-outlined text-[20px] transition-transform group-hover:translate-x-1">
                 arrow_forward
               </span>
@@ -293,10 +293,7 @@ export default function HomeScreen() {
               <span className="material-symbols-outlined text-[22px] text-[#E1B382] group-hover:scale-110 transition-transform">
                 shield_person
               </span>
-              <span className="font-bold">BUILD DREAM XI</span>
-              <span className="font-label-caps text-label-caps px-2 py-0.5 rounded bg-[#2D545E] text-[#E1B382] border border-[#C89666]/30">
-                11/11 READY
-              </span>
+              <span className="font-bold">Build your XI</span>
             </Link>
 
             {/* Tertiary Quick Resume Action */}
@@ -310,8 +307,8 @@ export default function HomeScreen() {
               </span>
               <span>
                 {activeMatch
-                  ? `QUICK RESUME (${activeMatch.format} ${activeMatch.oversStr} OV)`
-                  : 'QUICK RESUME (T20 16.2 OV)'}
+                ? `Resume match (${activeMatch.format} ${activeMatch.oversStr})`
+                : 'Resume match'}
               </span>
             </Link>
           </div>
@@ -321,7 +318,7 @@ export default function HomeScreen() {
         <div className="relative z-10 w-full pt-space-md flex flex-wrap items-center justify-between gap-space-md border-t border-[#12343B]/60">
           <div className="flex items-center gap-space-xl">
             <div className="flex flex-col">
-              <span className="font-label-caps text-label-caps text-[#D8C9B5] uppercase">RECORDED CAREER RUNS</span>
+              <span className="font-label-caps text-label-caps text-[#D8C9B5]">Runs recorded</span>
               <span className="font-scoreboard-md text-scoreboard-md text-[#E1B382]">
                 {careerStats.totalRuns.toLocaleString()}{' '}
                 <span className="font-label-caps text-label-caps text-[#FBF8F2]">
@@ -330,7 +327,7 @@ export default function HomeScreen() {
               </span>
             </div>
             <div className="flex flex-col">
-              <span className="font-label-caps text-label-caps text-[#D8C9B5] uppercase">WIN RATIO</span>
+              <span className="font-label-caps text-label-caps text-[#D8C9B5]">Win rate</span>
               <span className="font-scoreboard-md text-scoreboard-md text-[#FBF8F2]">
                 {careerStats.winPercentage}%{' '}
                 <span className="font-label-caps text-label-caps text-[#D8C9B5]">
@@ -339,7 +336,7 @@ export default function HomeScreen() {
               </span>
             </div>
             <div className="hidden sm:flex flex-col">
-              <span className="font-label-caps text-label-caps text-[#D8C9B5] uppercase">ROSTER VAULT</span>
+              <span className="font-label-caps text-label-caps text-[#D8C9B5]">Player archive</span>
               <span className="font-scoreboard-md text-scoreboard-md text-[#E1B382]">
                 1,144 players
               </span>
@@ -361,15 +358,15 @@ export default function HomeScreen() {
             <div className="flex items-center gap-space-xs">
               <span className="w-2 h-2 rounded-full bg-[#C89666]" />
               <span className="font-label-caps text-label-caps text-[#C89666] uppercase tracking-widest font-bold">
-                QUICK ACCESS
+                YOUR CRICKET
               </span>
             </div>
             <h2 className="font-editorial-title text-headline-lg text-[#12343B] tracking-tight">
-              Active Squads &amp; Matches
+            Squads and matches
             </h2>
           </div>
           <span className="font-label-caps text-label-caps text-[#687477] uppercase tracking-widest hidden sm:inline-block">
-            DIRECT ACCESS
+            Start here
           </span>
         </div>
 

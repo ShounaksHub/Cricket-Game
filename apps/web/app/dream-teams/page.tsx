@@ -405,11 +405,11 @@ export default function DreamXIBuilderPage() {
       <div className="flex flex-wrap items-center justify-between gap-space-sm pb-space-xs border-b border-border-hairline">
         <div className="flex items-center gap-space-sm">
           <Link href="/" className="font-label-caps text-label-caps text-text-subdued hover:text-text-chalk transition-colors">
-            PAVILION
+            Home
           </Link>
           <span className="text-text-subdued">/</span>
           <span className="font-label-caps text-label-caps text-primary uppercase tracking-widest font-bold">
-            DREAM XI BUILDER • PLAYING XI
+            Dream XI builder · Playing XI
           </span>
         </div>
 
@@ -423,7 +423,7 @@ export default function DreamXIBuilderPage() {
               className="rounded bg-surface-elevated border-border-hairline text-primary focus:ring-0 cursor-pointer"
             />
             <span className="font-label-caps text-[10px] text-secondary font-bold uppercase tracking-wider">
-              1 PLAYER PER NATION RULE
+              One player per nation
             </span>
           </label>
 
@@ -432,7 +432,7 @@ export default function DreamXIBuilderPage() {
             className="font-label-caps text-[10px] bg-surface-elevated hover:bg-surface-bright text-text-chalk px-3 py-1 rounded-full border border-border-hairline uppercase transition-all"
             type="button"
           >
-            AUTO-FILL WORLD XI
+            Auto-fill strongest XI
           </button>
         </div>
       </div>

@@ -305,7 +305,7 @@ export default function MyCricketPage() {
                 </p>
                 <div className="flex items-center gap-space-md pt-space-xs">
                   <div className="flex items-center gap-space-xs">
-                    <span className="font-label-caps text-label-caps text-text-subdued uppercase">CAREER ACTIVITY</span>
+                    <span className="font-label-caps text-label-caps text-text-subdued">Career activity</span>
                     <div className="w-32 h-1.5 bg-surface-recessed rounded-full overflow-hidden">
                       <div
                         className="h-full bg-primary rounded-full transition-all"
@@ -323,8 +323,8 @@ export default function MyCricketPage() {
             {/* Active Preset Status Callout */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-space-md bg-surface-elevated p-space-md rounded-lg border border-border-hairline">
               <div className="flex flex-col justify-center pr-space-md sm:border-r sm:border-border-hairline">
-                <span className="font-label-caps text-label-caps text-text-subdued uppercase">DEPLOYED SQUAD</span>
-                <span className="font-headline-md text-title-md text-text-chalk tracking-tight uppercase">
+                <span className="font-label-caps text-label-caps text-text-subdued">Saved squad</span>
+                  <span className="font-headline-md text-title-md text-text-chalk tracking-tight">
                   {savedTeams[0]?.teamName || 'NO ACTIVE SQUAD'}
                 </span>
                 <span className="font-body-sm text-body-sm text-primary flex items-center gap-1">
@@ -341,11 +341,11 @@ export default function MyCricketPage() {
               </div>
               <div className="grid grid-cols-2 gap-space-md items-center">
                 <div className="flex flex-col items-center bg-surface-card px-space-md py-space-xs rounded border border-border-hairline">
-                  <span className="font-label-caps text-label-caps text-tertiary uppercase">SAVED SQUADS</span>
+                  <span className="font-label-caps text-label-caps text-tertiary">Saved squads</span>
                   <span className="font-scoreboard-md text-scoreboard-md text-text-chalk">{savedTeams.length}</span>
                 </div>
                 <div className="flex flex-col items-center bg-surface-card px-space-md py-space-xs rounded border border-border-hairline">
-                  <span className="font-label-caps text-label-caps text-secondary uppercase">PLAYERS AUDITED</span>
+                  <span className="font-label-caps text-label-caps text-secondary">Players in archive</span>
                   <span className="font-scoreboard-md text-scoreboard-md text-text-chalk">1,144</span>
                 </div>
               </div>

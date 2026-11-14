@@ -79,20 +79,13 @@ export function StitchFooter() {
 
         {/* Right: Engine Telemetry Status & Rules Trigger */}
         <div className="flex flex-wrap items-center justify-center gap-4">
-          <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#E1B382] animate-pulse" />
-            <span className="font-mono text-[11px] text-[#D8C9B5]">60 FPS</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#C89666]" />
-            <span className="font-mono text-[11px] text-[#D8C9B5]">SIM READY</span>
-          </div>
+          <span className="font-mono text-[11px] text-[#D8C9B5]">Plays offline</span>
           <button
             onClick={handleOpenRules}
             type="button"
             className="font-label-caps text-[11px] text-[#E1B382] hover:text-[#FBF8F2] transition-colors cursor-pointer uppercase tracking-wider"
           >
-            MATCH RULES &amp; GUIDE
+            Rules &amp; guide
           </button>
         </div>
       </div>

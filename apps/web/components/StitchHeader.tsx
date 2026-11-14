@@ -18,10 +18,10 @@ export function StitchHeader() {
   }, []);
 
   const navItems = [
-    { label: 'HOME', href: '/', pathMatch: (p: string) => p === '/' },
-    { label: 'DREAM XI', href: '/dream-teams', pathMatch: (p: string) => p.startsWith('/dream-teams') },
-    { label: 'PLAYERS', href: '/players', pathMatch: (p: string) => p.startsWith('/players') },
-    { label: 'MY CRICKET', href: '/my-cricket', pathMatch: (p: string) => p.startsWith('/my-cricket') },
+    { label: 'Home', href: '/', pathMatch: (p: string) => p === '/' },
+    { label: 'Dream XI', href: '/dream-teams', pathMatch: (p: string) => p.startsWith('/dream-teams') },
+    { label: 'Players', href: '/players', pathMatch: (p: string) => p.startsWith('/players') },
+    { label: 'My Cricket', href: '/my-cricket', pathMatch: (p: string) => p.startsWith('/my-cricket') },
   ];
 
   function openRules() {
@@ -67,7 +67,7 @@ export function StitchHeader() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`px-4 py-2 rounded font-headline-md text-sm uppercase tracking-wider transition-all ${
+                className={`px-4 py-2 rounded font-headline-md text-sm tracking-wide transition-all ${
                   isActive
                     ? 'bg-[#12343B] text-[#E1B382] font-bold border-b-2 border-[#E1B382]'
                     : 'text-[#FBF8F2]/80 hover:bg-[#12343B]/40 hover:text-[#FBF8F2]'
@@ -133,7 +133,7 @@ export function StitchHeader() {
           <div className="pb-3 border-b border-[#2D545E] flex items-center justify-between">
             <CricketDreamXILogo variant="horizontal" theme="dark" height={28} className="h-7 w-auto" />
             <span className="font-label-caps text-[10px] text-[#E1B382] bg-[#2D545E] px-2 py-0.5 rounded border border-[#C89666]/30">
-              OFFLINE ENGINE
+              Game guide
             </span>
           </div>
           {navItems.map((item) => {
@@ -155,7 +155,7 @@ export function StitchHeader() {
             );
           })}
           <div className="pt-2 border-t border-[#2D545E] flex items-center justify-between text-body-sm text-[#FBF8F2]/70">
-            <span className="font-label-caps text-label-caps text-[#E1B382]">OFFLINE ENGINE v2.4</span>
+            <span className="font-label-caps text-label-caps text-[#E1B382]">Works offline</span>
             <button
               onClick={() => {
                 setMobileMenuOpen(false);
@@ -163,7 +163,7 @@ export function StitchHeader() {
               }}
               className="font-label-caps text-label-caps text-[#E1B382] underline uppercase cursor-pointer"
             >
-              View Game Rules
+              Game rules
             </button>
           </div>
         </div>
