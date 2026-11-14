@@ -275,6 +275,9 @@ export function resolvePlayerImage(player: PlayerImageInput): PlayerImageMeta {
 /**
  * Standalone helper to get player avatar URL directly
  */
+/**
+ * Standalone helper to get player avatar URL directly
+ */
 export function getAuthoritativePlayerImage(
   id?: string,
   fullName?: string,
@@ -288,3 +291,8 @@ export function getAuthoritativePlayerImage(
     primaryNationality,
   }).src;
 }
+
+export {
+  hasRealisticPortrait,
+  getRealisticFallback,
+} from './realistic-portrait-manifest';

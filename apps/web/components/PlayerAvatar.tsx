@@ -3,7 +3,7 @@
 import React from 'react';
 import {
   resolvePlayerImage,
-  generateDeterministicCricketAvatar,
+  getRealisticFallback,
   type PlayerImageInput,
   type ImageClassificationStatus,
 } from '@/lib/player-image-resolver';
@@ -51,16 +51,8 @@ export function PlayerAvatar({
         loading="lazy"
         decoding="async"
         onError={(e) => {
-          // Graceful fallback to deterministic 2D cartoon avatar if external asset fails
-          e.currentTarget.src = generateDeterministicCricketAvatar({
-            id,
-            fullName,
-            displayName,
-            primaryRole,
-            primaryNationality,
-            battingHand,
-            bowlingStyle,
-          });
+          // Graceful fallback to realistic sports photography archetype under stadium lighting
+          e.currentTarget.src = getRealisticFallback(primaryRole);
         }}
       />
       {showBadge && (

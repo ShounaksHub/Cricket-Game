@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { MatchFormat, PlayerSquadContext } from '@cricket/shared-types';
 import type { FormattedSquadSlot } from '@/lib/national-teams';
-import { getAuthoritativePlayerImage } from '@/lib/player-image-resolver';
+import { getAuthoritativePlayerImage, getRealisticFallback } from '@/lib/player-image-resolver';
 
 export interface PreInningsManagementModalProps {
   isOpen: boolean;
@@ -182,6 +182,9 @@ export function PreInningsManagementModal({
                       src={portrait}
                       alt={player.displayName}
                       className="w-10 h-10 rounded-lg object-cover bg-[#F5EBDD] border border-[#D8C9B5] shrink-0"
+                      onError={(e) => {
+                        e.currentTarget.src = getRealisticFallback(player.primaryRole);
+                      }}
                     />
 
                     <div className="min-w-0">
@@ -277,6 +280,9 @@ export function PreInningsManagementModal({
                       src={portrait}
                       alt={player.displayName}
                       className="w-12 h-12 rounded-xl object-cover bg-[#F5EBDD] border border-[#D8C9B5] shrink-0"
+                      onError={(e) => {
+                        e.currentTarget.src = getRealisticFallback(player.primaryRole);
+                      }}
                     />
 
                     <div className="min-w-0">

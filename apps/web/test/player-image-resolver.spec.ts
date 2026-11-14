@@ -100,14 +100,23 @@ describe('Player Image Resolver & Deterministic Avatar System', () => {
     expect(metaByName.src).toBe('/assets/players/realistic/f1e20000-0001-4000-8000-000000000001.png');
     expect(metaByName.classification).toBe('VERIFIED_AUTHENTIC');
 
-    // Fallback to realistic role-based archetype when individual portrait is pending
+    // Dedicated realistic portrait from Batch 2
     const paroreMeta = resolvePlayerImage({
       id: 'f1e20000-0053-4000-8000-000000000053',
       fullName: 'Adam Parore',
       primaryRole: 'WICKETKEEPER_BATTER',
     });
-    expect(paroreMeta.classification).toBe('GENERIC_AVATAR');
-    expect(paroreMeta.src).toBe('/assets/players/realistic/generic-wicketkeeper.jpg');
+    expect(paroreMeta.classification).toBe('VERIFIED_AUTHENTIC');
+    expect(paroreMeta.src).toBe('/assets/players/realistic/f1e20000-0053-4000-8000-000000000053.jpg');
+
+    // Fallback to realistic role-based archetype for unregistered player
+    const unknownKeeperMeta = resolvePlayerImage({
+      id: '00000000-0000-0000-0000-000000000099',
+      fullName: 'Unregistered Club Keeper',
+      primaryRole: 'WICKETKEEPER_BATTER',
+    });
+    expect(unknownKeeperMeta.classification).toBe('GENERIC_AVATAR');
+    expect(unknownKeeperMeta.src).toBe('/assets/players/realistic/generic-wicketkeeper.jpg');
   });
 
   it('is completely deterministic given the same inputs', () => {

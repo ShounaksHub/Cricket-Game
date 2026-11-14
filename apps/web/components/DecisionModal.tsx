@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import type { PlayerSquadContext } from '@cricket/shared-types';
-import { getAuthoritativePlayerImage } from '@/lib/player-image-resolver';
+import { getAuthoritativePlayerImage, getRealisticFallback } from '@/lib/player-image-resolver';
 
 export interface DecisionModalProps {
   isOpen: boolean;
@@ -124,6 +124,9 @@ export function DecisionModal({
                       src={portrait}
                       alt={player.displayName}
                       className="w-10 h-10 rounded-lg object-cover bg-[#F5EBDD] border border-[#D8C9B5] shrink-0"
+                      onError={(e) => {
+                        e.currentTarget.src = getRealisticFallback(player.primaryRole);
+                      }}
                     />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
