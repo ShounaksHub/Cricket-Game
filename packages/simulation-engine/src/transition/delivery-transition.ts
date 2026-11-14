@@ -465,8 +465,43 @@ export function stepDelivery(
         });
 
         if (eligibleBowlers.length > 0) {
-          // Pick bowler with priority or cycle
-          nextBowlerId = eligibleBowlers[0].playerId;
+          // Sort bowlers by priority and realistic cricket bowling role
+          const sorted = [...eligibleBowlers].sort((a, b) => {
+            const priA = a.bowlingPriority != null ? a.bowlingPriority : 99;
+            const priB = b.bowlingPriority != null ? b.bowlingPriority : 99;
+            if (priA !== priB) return priA - priB;
+
+            const profA = state.config.playerProfiles.get(a.playerId);
+            const profB = state.config.playerProfiles.get(b.playerId);
+
+            // Never choose a wicketkeeper when someone else is eligible
+            const isWkA = profA?.isWicketkeeper || profA?.primaryRole === 'WICKETKEEPER_BATTER';
+            const isWkB = profB?.isWicketkeeper || profB?.primaryRole === 'WICKETKEEPER_BATTER';
+            if (isWkA !== isWkB) return isWkA ? 1 : -1;
+
+            // Bowling role priority: Bowlers (0) > Bowling AR (1) > All Rounders (2) > Batting AR (3) > Batters (4)
+            const roleRank = (p?: { primaryRole?: string; bowlingStyle?: string }) => {
+              if (!p) return 99;
+              if (p.bowlingStyle === 'NONE') return 100;
+              const r = p.primaryRole;
+              if (r === 'BOWLER' || r === 'PACE_BOWLER' || r === 'SPIN_BOWLER') return 0;
+              if (r === 'BOWLING_ALL_ROUNDER') return 1;
+              if (r === 'ALL_ROUNDER') return 2;
+              if (r === 'BATTING_ALL_ROUNDER') return 3;
+              return 4;
+            };
+            const rankA = roleRank(profA);
+            const rankB = roleRank(profB);
+            if (rankA !== rankB) return rankA - rankB;
+
+            // Higher bowling rating for the match format
+            const ratingA = profA?.ratings?.[state.config.format]?.bowlingRating ?? profA?.formatRating?.bowlingRating ?? 50;
+            const ratingB = profB?.ratings?.[state.config.format]?.bowlingRating ?? profB?.formatRating?.bowlingRating ?? 50;
+            if (ratingB !== ratingA) return ratingB - ratingA;
+
+            return a.battingOrder - b.battingOrder;
+          });
+          nextBowlerId = sorted[0].playerId;
         }
       }
     }

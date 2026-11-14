@@ -1282,6 +1282,10 @@ export default function MatchSimulationPage() {
       nextState.currentSessionNumber ?? 1,
       nextState.innings[nextState.currentInningsIndex]?.totalWickets ?? 0,
     );
+    if (overFinished) {
+      setUserNominatedBowlerId('');
+    }
+
     if (isUserBowling && overFinished && managementMode !== 'AUTOMATIC') {
       const overEvents = (nextState.innings[nextState.currentInningsIndex]?.events ?? [])
         .filter((delivery) => delivery.overNumber === completedOver - 1);
@@ -3442,7 +3446,10 @@ export default function MatchSimulationPage() {
                       {currentRuns}<span className="text-wicket-red">/{currentWickets}</span>
                     </span>
                     <span className="font-scoreboard-md text-scoreboard-md text-text-slate">
-                      {oversFormatted} <span className="font-label-caps text-label-caps text-text-subdued uppercase">/ {formatMaxOvers} OV</span>
+                      {oversFormatted}{' '}
+                      <span className="font-label-caps text-label-caps text-text-subdued uppercase">
+                        {isTestFormat ? 'OV' : `/ ${formatMaxOvers} OV`}
+                      </span>
                     </span>
                   </div>
                 </div>
@@ -3512,7 +3519,7 @@ export default function MatchSimulationPage() {
                       <div className="flex flex-col">
                         <span className="font-label-caps text-label-caps text-text-subdued uppercase">PROJECTED</span>
                         <span className="font-scoreboard-md text-scoreboard-md text-tertiary">
-                          {Math.round(parseFloat(runRate) * formatMaxOvers)}
+                          {isTestFormat ? '—' : (isFinite(formatMaxOvers) ? Math.round(parseFloat(runRate) * formatMaxOvers) : '—')}
                         </span>
                       </div>
                     </div>
@@ -3560,10 +3567,10 @@ export default function MatchSimulationPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-space-xs">
                     <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                    <span className="font-label-caps text-label-caps text-primary uppercase">STRIKER ON PITCH</span>
+                    <span className="font-label-caps text-label-caps text-primary uppercase">STRIKER</span>
                   </div>
                   <span className="font-label-caps text-label-caps bg-surface-elevated text-secondary px-2 py-0.5 rounded">
-                    FORM 96
+                    {strikerStats && strikerStats.ballsFaced > 0 ? `${((strikerStats.runs / strikerStats.ballsFaced) * 100).toFixed(0)} S/R` : 'ON STRIKE'}
                   </span>
                 </div>
                 <div className="flex items-center gap-space-sm">
@@ -3574,7 +3581,14 @@ export default function MatchSimulationPage() {
                   />
                   <div className="flex flex-col min-w-0">
                     <span className="font-headline-md text-title-md text-text-chalk truncate">{strikerName}</span>
-                    <span className="font-label-caps text-label-caps text-text-subdued uppercase">RHB • ANCHOR / ACCEL</span>
+                    <span className="font-label-caps text-label-caps text-text-subdued uppercase">
+                      {(() => {
+                        const prof = simulationResult?.finalState.config.playerProfiles.get(strikerId || '');
+                        const hand = prof?.battingHand === 'LEFT_HAND' ? 'LHB' : 'RHB';
+                        const role = prof?.primaryRole?.replace(/_/g, ' ') || 'BATTER';
+                        return `${hand} • ${role}`;
+                      })()}
+                    </span>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 bg-surface-recessed p-space-xs rounded text-center border border-border-hairline">
@@ -3598,14 +3612,23 @@ export default function MatchSimulationPage() {
                     </span>
                   </div>
                 </div>
-                {/* Batting Confidence Gauge */}
+                {/* Scoring Profile */}
                 <div className="flex flex-col gap-1">
                   <div className="flex justify-between font-label-caps text-label-caps text-text-subdued">
-                    <span>TIMING ZONE</span>
-                    <span className="text-primary uppercase font-bold">LOCKED IN (94%)</span>
+                    <span>BOUNDARY SCORING</span>
+                    <span className="text-secondary uppercase font-bold">
+                      {strikerStats && strikerStats.runs > 0
+                        ? `${Math.round(((strikerStats.fours * 4 + strikerStats.sixes * 6) / strikerStats.runs) * 100)}% IN BOUNDARIES`
+                        : `${strikerStats?.fours ?? 0} FOURS • ${strikerStats?.sixes ?? 0} SIXES`}
+                    </span>
                   </div>
                   <div className="w-full bg-surface-recessed h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-primary h-full rounded-full" style={{ width: '94%' }} />
+                    <div
+                      className="bg-primary h-full rounded-full transition-all duration-300"
+                      style={{
+                        width: `${strikerStats && strikerStats.runs > 0 ? Math.min(100, Math.round(((strikerStats.fours * 4 + strikerStats.sixes * 6) / strikerStats.runs) * 100)) : 0}%`,
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -3625,7 +3648,13 @@ export default function MatchSimulationPage() {
                     />
                     <div className="flex flex-col">
                       <span className="font-title-md text-body-bold text-text-chalk">{nonStrikerName}</span>
-                      <span className="font-label-caps text-[10px] text-text-subdued">RUNNING FIT 98%</span>
+                      <span className="font-label-caps text-[10px] text-text-subdued uppercase">
+                        {(() => {
+                          const prof = simulationResult?.finalState.config.playerProfiles.get(nonStrikerId || '');
+                          const hand = prof?.battingHand === 'LEFT_HAND' ? 'LHB' : 'RHB';
+                          return `${hand} • NON-STRIKER`;
+                        })()}
+                      </span>
                     </div>
                   </div>
                   <div className="text-right">
@@ -3658,7 +3687,18 @@ export default function MatchSimulationPage() {
                   />
                   <div className="flex flex-col min-w-0">
                     <span className="font-headline-md text-title-md text-text-chalk truncate">{bowlerName}</span>
-                    <span className="font-label-caps text-label-caps text-text-subdued uppercase">FAST SEAM • 144 KM/H</span>
+                    <span className="font-label-caps text-label-caps text-text-subdued uppercase">
+                      {(() => {
+                        const prof = simulationResult?.finalState.config.playerProfiles.get(bowlerId || '');
+                        const rawStyle = prof?.bowlingStyle || 'FAST';
+                        const styleLabel = rawStyle.replace(/_/g, ' ');
+                        const latestEv = visibleEvents[visibleEvents.length - 1];
+                        const speed = latestEv?.deliverySpeedKmh
+                          ? `${latestEv.deliverySpeedKmh.toFixed(0)} KM/H`
+                          : rawStyle.includes('FAST') ? '142 KM/H' : rawStyle.includes('MEDIUM') ? '126 KM/H' : '88 KM/H';
+                        return `${styleLabel} • ${speed}`;
+                      })()}
+                    </span>
                   </div>
                 </div>
                 <div className="grid grid-cols-4 gap-1 bg-surface-recessed p-space-xs rounded text-center border border-border-hairline">
@@ -3964,36 +4004,143 @@ export default function MatchSimulationPage() {
                     </div>
                   )}
 
-                  {/* Bowler Selection / Change */}
-                  {userBowlingSlots.length > 0 && (
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-label-caps text-text-subdued uppercase">
-                        SELECT BOWLER FOR NEXT OVER
-                      </label>
-                      <select
-                        value={userNominatedBowlerId || bowlerId || ''}
-                        onChange={(e) => setCaptainBowler(e.target.value)}
-                        className="bg-surface-recessed border border-border-hairline text-text-chalk p-1.5 rounded text-[11px] font-label-caps focus:outline-none cursor-pointer"
-                      >
-                        {userBowlingSlots.map((slot) => {
-                          const profile = simulationResult?.finalState.config.playerProfiles.get(slot.playerId);
-                          const bEntry = activeInnings?.bowlers.get(slot.playerId);
-                          const oversBowled = bEntry ? Math.floor(bEntry.ballsBowled / 6) : 0;
-                          const isCurrent = slot.playerId === bowlerId;
-                          const quotaReached = displayedQuota !== undefined && oversBowled >= displayedQuota;
-                          return (
-                            <option
-                              key={slot.playerId}
-                              value={slot.playerId}
-                              disabled={isCurrent && (activeInnings?.legalBallsInCurrentOver === 0 && (activeInnings?.completedOvers || 0) > 0)}
-                            >
-                              {profile?.displayName || slot.playerId} ({oversBowled}/{displayedQuota ?? '∞'} ov{quotaReached ? ' - MAX' : ''}{isCurrent ? ' - ACTIVE' : ''})
-                            </option>
-                          );
-                        })}
-                      </select>
-                    </div>
-                  )}
+                  {/* Bowler Selection & Dynamic Bowling Rotation */}
+                  {userBowlingSlots.length > 0 && (() => {
+                    const profiles = simulationResult?.finalState.config.playerProfiles;
+                    // Group bowlers logically
+                    const frontlinePace = userBowlingSlots.filter((s) => {
+                      const p = profiles?.get(s.playerId);
+                      const style = p?.bowlingStyle || '';
+                      return (p?.primaryRole === 'PACE_BOWLER' || (s.bowlingPriority && s.bowlingPriority <= 3)) &&
+                        (style.includes('FAST') || style.includes('MEDIUM') || style.includes('SEAM'));
+                    });
+                    const frontlineSpin = userBowlingSlots.filter((s) => {
+                      const p = profiles?.get(s.playerId);
+                      const style = p?.bowlingStyle || '';
+                      return (p?.primaryRole === 'SPIN_BOWLER' || (s.bowlingPriority && s.bowlingPriority <= 3)) &&
+                        (style.includes('BREAK') || style.includes('ORTHODOX') || style.includes('SPIN'));
+                    });
+                    const allRounders = userBowlingSlots.filter((s) => {
+                      const p = profiles?.get(s.playerId);
+                      return (p?.primaryRole === 'BOWLING_ALL_ROUNDER' || p?.primaryRole === 'BATTING_ALL_ROUNDER') &&
+                        !frontlinePace.includes(s) && !frontlineSpin.includes(s);
+                    });
+                    const partTimers = userBowlingSlots.filter((s) =>
+                      !frontlinePace.includes(s) && !frontlineSpin.includes(s) && !allRounders.includes(s)
+                    );
+
+                    const renderOption = (slot: typeof userBowlingSlots[0]) => {
+                      const profile = profiles?.get(slot.playerId);
+                      const bEntry = activeInnings?.bowlers.get(slot.playerId);
+                      const oversBowled = bEntry ? Math.floor(bEntry.ballsBowled / 6) : 0;
+                      const ballsInOver = bEntry ? (bEntry.ballsBowled % 6) : 0;
+                      const formattedOvers = bEntry ? `${oversBowled}.${ballsInOver}` : '0.0';
+                      const isCurrent = slot.playerId === bowlerId;
+                      const quotaReached = displayedQuota !== undefined && oversBowled >= displayedQuota;
+                      const disabled = (isCurrent && activeInnings && activeInnings.completedOvers > 0 && activeInnings.legalBallsInCurrentOver === 0) || quotaReached;
+                      const roleDesc = profile?.bowlingStyle ? profile.bowlingStyle.replace(/_/g, ' ') : 'Bowler';
+                      return (
+                        <option
+                          key={slot.playerId}
+                          value={slot.playerId}
+                          disabled={disabled}
+                        >
+                          {profile?.displayName || slot.playerId} ({roleDesc}) — {formattedOvers} ov · {bEntry?.runsConceded ?? 0}r/{bEntry?.wickets ?? 0}w{quotaReached ? ' [MAX]' : ''}{isCurrent ? ' [ACTIVE]' : ''}
+                        </option>
+                      );
+                    };
+
+                    return (
+                      <div className="flex flex-col gap-2 bg-surface-card p-3 rounded-lg border border-border-hairline">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[10px] font-label-caps text-text-subdued uppercase tracking-wider">
+                            BOWLER FOR NEXT OVER
+                          </label>
+                          <span className="text-[9px] font-label-caps text-secondary uppercase bg-surface-recessed px-1.5 py-0.5 rounded">
+                            {isTestFormat ? 'TEST: UNLIMITED SPELLS' : `QUOTA: MAX ${displayedQuota} OV`}
+                          </span>
+                        </div>
+
+                        {/* Dropdown with categorized optgroups */}
+                        <select
+                          value={userNominatedBowlerId || bowlerId || ''}
+                          onChange={(e) => setCaptainBowler(e.target.value)}
+                          className="bg-surface-recessed border border-border-hairline text-text-chalk p-2 rounded text-xs focus:outline-none cursor-pointer w-full"
+                        >
+                          {frontlinePace.length > 0 && (
+                            <optgroup label="Frontline Pace Bowlers">
+                              {frontlinePace.map(renderOption)}
+                            </optgroup>
+                          )}
+                          {frontlineSpin.length > 0 && (
+                            <optgroup label="Frontline Spin Bowlers">
+                              {frontlineSpin.map(renderOption)}
+                            </optgroup>
+                          )}
+                          {allRounders.length > 0 && (
+                            <optgroup label="All-Rounders">
+                              {allRounders.map(renderOption)}
+                            </optgroup>
+                          )}
+                          {partTimers.length > 0 && (
+                            <optgroup label="Part-Time Bowlers">
+                              {partTimers.map(renderOption)}
+                            </optgroup>
+                          )}
+                        </select>
+
+                        {/* Quick Selection Cards for Top Available Bowlers */}
+                        <div className="flex flex-col gap-1 pt-1">
+                          <span className="text-[9px] font-label-caps text-text-subdued uppercase">
+                            QUICK SELECT STRIKE BOWLER:
+                          </span>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                            {userBowlingSlots
+                              .filter((slot) => {
+                                const bEntry = activeInnings?.bowlers.get(slot.playerId);
+                                const overs = bEntry ? Math.floor(bEntry.ballsBowled / 6) : 0;
+                                return (displayedQuota === undefined || overs < displayedQuota);
+                              })
+                              .slice(0, 4)
+                              .map((slot) => {
+                                const profile = profiles?.get(slot.playerId);
+                                const bEntry = activeInnings?.bowlers.get(slot.playerId);
+                                const overs = bEntry ? `${Math.floor(bEntry.ballsBowled / 6)}.${bEntry.ballsBowled % 6}` : '0.0';
+                                const isCurrent = slot.playerId === bowlerId;
+                                const isNominated = (userNominatedBowlerId || bowlerId) === slot.playerId;
+                                return (
+                                  <button
+                                    key={slot.playerId}
+                                    type="button"
+                                    onClick={() => setCaptainBowler(slot.playerId)}
+                                    disabled={isCurrent && activeInnings && activeInnings.completedOvers > 0 && activeInnings.legalBallsInCurrentOver === 0}
+                                    className={`p-1.5 rounded text-left transition border flex flex-col justify-between ${
+                                      isNominated
+                                        ? 'bg-secondary/20 border-secondary text-text-chalk'
+                                        : 'bg-surface-recessed border-border-hairline text-text-slate hover:text-text-chalk hover:bg-surface-elevated'
+                                    }`}
+                                  >
+                                    <div className="flex items-center justify-between w-full">
+                                      <span className="text-[11px] font-bold truncate">
+                                        {profile?.displayName || slot.playerId}
+                                      </span>
+                                      {isCurrent && (
+                                        <span className="text-[8px] bg-primary/20 text-primary px-1 rounded font-bold">
+                                          NOW
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="text-[9px] text-text-subdued">
+                                      {overs} ov · {bEntry?.wickets ?? 0}w · Econ {bEntry?.economyRate?.toFixed(1) ?? '0.0'}
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {showBowlingAdvanced && <>
                   {/* Bowling Pace & Intensity Strategy */}

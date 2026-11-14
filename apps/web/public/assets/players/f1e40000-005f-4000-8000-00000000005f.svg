@@ -1,0 +1,160 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 600" width="480" height="600" role="img" aria-label="Daniel Marsh portrait">
+<defs>
+<radialGradient id="pcb33f61312-bg" cx="50%" cy="34%" r="78%">
+    <stop offset="0%" stop-color="#8c6a0f"/>
+    <stop offset="46%" stop-color="#101B24"/>
+    <stop offset="100%" stop-color="#05090C"/>
+  </radialGradient>
+<radialGradient id="pcb33f61312-glow" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#D4A017" stop-opacity="0.3"/>
+    <stop offset="60%" stop-color="#D4A017" stop-opacity="0.1"/>
+    <stop offset="100%" stop-color="#D4A017" stop-opacity="0"/>
+  </radialGradient>
+<radialGradient id="pcb33f61312-face" cx="66%" cy="26%" r="78%">
+    <stop offset="0%" stop-color="#F7DCC5"/>
+    <stop offset="42%" stop-color="#EAC6AB"/>
+    <stop offset="100%" stop-color="#CFA88A"/>
+  </radialGradient>
+<linearGradient id="pcb33f61312-shade" x1="100%" y1="0%" x2="0%" y2="0%">
+    <stop offset="0%" stop-color="#CFA88A" stop-opacity="0"/>
+    <stop offset="62%" stop-color="#CFA88A" stop-opacity="0.1"/>
+    <stop offset="100%" stop-color="#CFA88A" stop-opacity="0.4"/>
+  </linearGradient>
+<linearGradient id="pcb33f61312-hair" x1="20%" y1="0%" x2="80%" y2="100%">
+    <stop offset="0%" stop-color="#7E5535"/>
+    <stop offset="46%" stop-color="#5C3B23"/>
+    <stop offset="100%" stop-color="#3D2616"/>
+  </linearGradient>
+<linearGradient id="pcb33f61312-jersey" x1="10%" y1="0%" x2="90%" y2="100%">
+    <stop offset="0%" stop-color="#664d0b"/>
+    <stop offset="52%" stop-color="#372a06"/>
+    <stop offset="100%" stop-color="#070D12"/>
+  </linearGradient>
+<radialGradient id="pcb33f61312-iris" cx="40%" cy="38%" r="62%">
+    <stop offset="0%" stop-color="#82949f"/>
+    <stop offset="55%" stop-color="#3E5A6B"/>
+    <stop offset="100%" stop-color="#1c2830"/>
+  </radialGradient>
+<linearGradient id="pcb33f61312-lip" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%" stop-color="#ae8d74"/>
+    <stop offset="55%" stop-color="#957963"/>
+    <stop offset="100%" stop-color="#d3b29a"/>
+  </linearGradient>
+<radialGradient id="pcb33f61312-vig" cx="50%" cy="42%" r="72%">
+    <stop offset="55%" stop-color="#000" stop-opacity="0"/>
+    <stop offset="100%" stop-color="#000" stop-opacity="0.6"/>
+  </radialGradient>
+<filter id="pcb33f61312-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter>
+<filter id="pcb33f61312-bokeh" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter>
+<clipPath id="pcb33f61312-clip"><path d="M 158.8 125.1 C 158.8 88.8, 194.1 84.8, 237.3 84.8 C 280.5 84.8, 315.8 88.8, 315.8 125.1 C 320.5 159.5, 321 177.5, 321 177.5 C 317.7 236, 299.7 242, 299.7 242 C 293.5 264.3, 267.1 284.3, 252.2 291.3 C 243.3 294.3, 231.4 294.3, 222.4 291.3 C 207.5 284.3, 181.1 264.3, 174.9 242 C 174.9 242, 157 236, 153.6 177.5 C 153.6 177.5, 154.1 159.5, 158.8 125.1 Z"/></clipPath>
+</defs>
+<rect width="480" height="600" fill="url(#bgGradId)"/>
+<g><circle cx="32.5" cy="242.9" r="9.4" fill="#E8C98A" opacity="0" filter="url(#pcb33f61312-bokeh)"/><circle cx="290.2" cy="397.8" r="27.1" fill="#D4A017" opacity="0" filter="url(#pcb33f61312-bokeh)"/><circle cx="353.9" cy="300" r="16.3" fill="#FFFFFF" opacity="0" filter="url(#pcb33f61312-bokeh)"/><circle cx="378.4" cy="252.9" r="9.1" fill="#E8C98A" opacity="0.1" filter="url(#pcb33f61312-bokeh)"/><circle cx="398" cy="258.7" r="24.9" fill="#D4A017" opacity="0" filter="url(#pcb33f61312-bokeh)"/><circle cx="448.5" cy="66.1" r="13.4" fill="#E8C98A" opacity="0.1" filter="url(#pcb33f61312-bokeh)"/><circle cx="417.4" cy="186.5" r="29.5" fill="#D4A017" opacity="0.1" filter="url(#pcb33f61312-bokeh)"/><circle cx="195.2" cy="173.5" r="19.9" fill="#D4A017" opacity="0.1" filter="url(#pcb33f61312-bokeh)"/><circle cx="-13.1" cy="335.2" r="33.6" fill="#FFFFFF" opacity="0.1" filter="url(#pcb33f61312-bokeh)"/><circle cx="326.3" cy="354.4" r="31.5" fill="#FFFFFF" opacity="0.1" filter="url(#pcb33f61312-bokeh)"/><circle cx="243" cy="154.8" r="22.1" fill="#D4A017" opacity="0.1" filter="url(#pcb33f61312-bokeh)"/><circle cx="268.8" cy="154.2" r="10.9" fill="#D4A017" opacity="0.1" filter="url(#pcb33f61312-bokeh)"/><circle cx="242.9" cy="336.8" r="20.2" fill="#D4A017" opacity="0.1" filter="url(#pcb33f61312-bokeh)"/><circle cx="359.5" cy="22.4" r="29.6" fill="#FFFFFF" opacity="0.1" filter="url(#pcb33f61312-bokeh)"/><rect x="0" y="180" width="480" height="36" fill="#DDEAF2" opacity="0"/></g>
+<ellipse cx="237.3" cy="175.5" rx="200.9" ry="231.7" fill="url(#glowId)"/>
+<g transform="rotate(-0.1 237.3 355.2)">
+<path d="M 62 600 C 96 385.2, 141.3 343.2, 185.3 333.2
+    L 289.3 333.2 C 333.3 343.2, 378.6 385.2, 412.6 600 Z" fill="url(#jerseyGradId)"/>
+<path d="M 102 399.2 C 114 451.2, 108 560, 100 600" fill="none" stroke="#000" stroke-opacity="0.3" stroke-width="2"/>
+<path d="M 372.6 399.2 C 360.6 451.2, 366.6 560, 374.6 600" fill="none" stroke="#000" stroke-opacity="0.3" stroke-width="2"/>
+<path d="M 151.3 389.2 C 167.3 439.2, 155.3 530, 173.3 600" fill="none" stroke="#fff" stroke-opacity="0" stroke-width="10"/>
+<path d="M 311.3 377.2 C 299.3 445.2, 315.3 538, 297.3 600" fill="none" stroke="#000" stroke-opacity="0.2" stroke-width="9"/>
+<path d="M 185.3 333.2 C 203.3 357.2, 271.3 357.2, 289.3 333.2
+    C 277.3 321.2, 255.3 317.2, 237.3 317.2
+    C 219.3 317.2, 197.3 321.2, 185.3 333.2 Z" fill="#664d0b"/>
+<path d="M 185.3 333.2 C 203.3 357.2, 271.3 357.2, 289.3 333.2" fill="none" stroke="#D4A017" stroke-opacity="0.8" stroke-width="2.4"/>
+<path d="M 190.3 327.2 C 204.3 347.2, 270.3 347.2, 284.3 327.2" fill="none" stroke="#D4A017" stroke-opacity="0.3" stroke-width="1.4"/>
+<g transform="translate(175.3 429.2)" opacity="0.5">
+    <path d="M 0 0 L 16 0 L 16 5 L 10 5 L 10 18 L 6 18 L 6 5 L 0 5 Z" fill="#D4A017" opacity="0.7"/>
+    <circle cx="8" cy="26" r="4.4" fill="none" stroke="#D4A017" stroke-width="1.6"/>
+  </g>
+</g>
+<path d="M 207.3 274.3 L 267.3 274.3 C 271.3 321.2, 283.3 335.2, 293.3 343.2
+    L 181.3 343.2 C 191.3 335.2, 203.3 321.2, 207.3 274.3 Z" fill="#EAC6AB"/>
+<path d="M 207.3 274.3 L 267.3 274.3 C 265.3 298.3, 267.3 315.2, 277.3 335.2
+    L 197.3 335.2 C 207.3 315.2, 209.3 298.3, 207.3 274.3 Z" fill="url(#shadeGradId)" opacity="0.9"/>
+<path d="M 195.3 278.3 C 221.3 300.3, 253.3 300.3, 279.3 278.3
+    C 267.3 312.3, 207.3 312.3, 195.3 278.3 Z" fill="#CFA88A" opacity="0.6" filter="url(#pcb33f61312-soft)"/>
+<g transform="rotate(-0.3 237.3 185.6)">
+<path d="M 156.6 180.8 C 144.2 164.8, 143.2 193.9, 154.6 197.1"
+      fill="#EAC6AB" stroke="#CFA88A" stroke-opacity="0.6" stroke-width="1.2"/>
+<path d="M 153.6 182.8 C 148.2 174.8, 148.2 188.8, 153.6 192.8"
+      fill="none" stroke="#CFA88A" stroke-opacity="0.7" stroke-width="1.6" stroke-linecap="round"/>
+<path d="M 318 180.8 C 330.4 164.8, 331.4 193.9, 320 197.1"
+      fill="#EAC6AB" stroke="#CFA88A" stroke-opacity="0.6" stroke-width="1.2"/>
+<path d="M 321 182.8 C 326.4 174.8, 326.4 188.8, 321 192.8"
+      fill="none" stroke="#CFA88A" stroke-opacity="0.7" stroke-width="1.6" stroke-linecap="round"/>
+<path d="M 158.8 125.1 C 158.8 88.8, 194.1 84.8, 237.3 84.8 C 280.5 84.8, 315.8 88.8, 315.8 125.1 C 320.5 159.5, 321 177.5, 321 177.5 C 317.7 236, 299.7 242, 299.7 242 C 293.5 264.3, 267.1 284.3, 252.2 291.3 C 243.3 294.3, 231.4 294.3, 222.4 291.3 C 207.5 284.3, 181.1 264.3, 174.9 242 C 174.9 242, 157 236, 153.6 177.5 C 153.6 177.5, 154.1 159.5, 158.8 125.1 Z" fill="url(#faceGradId)"/>
+<g clip-path="url(#pcb33f61312-clip)">
+<rect x="143.6" y="74.8" width="187.4" height="225.5" fill="url(#shadeGradId)"/>
+<ellipse cx="272.5" cy="220.8" rx="51.9" ry="40.3" fill="#F7DCC5" opacity="0.2" filter="url(#pcb33f61312-soft)"/>
+<ellipse cx="195.5" cy="228.8" rx="35.1" ry="32.2" fill="#CFA88A" opacity="0.2" filter="url(#pcb33f61312-soft)"/>
+<ellipse cx="237.3" cy="121.1" rx="50.2" ry="24.2" fill="#F7DCC5" opacity="0.2" filter="url(#pcb33f61312-soft)"/>
+<ellipse cx="160.3" cy="160.8" rx="16.7" ry="32.2" fill="#CFA88A" opacity="0.3" filter="url(#pcb33f61312-soft)"/>
+<ellipse cx="203.6" cy="174.8" rx="22" ry="14.1" fill="#CFA88A" opacity="0.2" filter="url(#pcb33f61312-soft)"/>
+<ellipse cx="271" cy="174.8" rx="22" ry="14.1" fill="#CFA88A" opacity="0.2" filter="url(#pcb33f61312-soft)"/>
+<ellipse cx="280.8" cy="232" rx="25.1" ry="20.2" fill="#c5a083" opacity="0.1" filter="url(#pcb33f61312-soft)"/>
+<path d="M 222.6 159.2 Q 203.6 148.5 187.6 159.3"
+      fill="none" stroke="#3D2616" stroke-width="5.7" stroke-linecap="round" opacity="0.9"/>
+<path d="M 222.6 157.2 Q 203.6 147.5 187.6 156.3"
+      fill="none" stroke="#5C3B23" stroke-width="2.4" stroke-linecap="round" opacity="0.8"/>
+<path d="M 252 160.7 Q 271 152.1 287.1 158.6"
+      fill="none" stroke="#3D2616" stroke-width="5.7" stroke-linecap="round" opacity="0.9"/>
+<path d="M 252 158.7 Q 271 151.1 287.1 155.6"
+      fill="none" stroke="#5C3B23" stroke-width="2.4" stroke-linecap="round" opacity="0.8"/>
+<path d="M 218.6 176.3 C 210.4 169.8, 196.8 169.8, 188.6 177
+      C 197.6 181.6, 209.9 181.6, 218.6 176.3 Z" fill="#EFE7DE"/>
+<circle cx="203" cy="177.2" r="6.6" fill="url(#pcb33f61312-iris)"/>
+<circle cx="203" cy="177.2" r="3" fill="#120D0A"/>
+<circle cx="201.4" cy="174" r="1.4" fill="#fff" opacity="0.9"/>
+<path d="M 218.6 176.3 C 210.4 169.8, 196.8 169.8, 188.6 177"
+      fill="none" stroke="#5d4c3e" stroke-width="2.6" stroke-linecap="round"/>
+<path d="M 214.1 165.3 C 203.6 160.8, 192.8 166.3, 187.1 171.3"
+      fill="none" stroke="#CFA88A" stroke-width="1.6" opacity="0.4" stroke-linecap="round"/>
+<path d="M 216.6 180.6 C 208.1 187, 196.8 185.2, 190.1 180"
+      fill="none" stroke="#CFA88A" stroke-width="1.5" opacity="0.4" stroke-linecap="round"/>
+<path d="M 256 177.2 C 264.3 171.5, 277.8 171.5, 286.1 176.5
+      C 277 182.3, 264.7 182.3, 256 177.2 Z" fill="#EFE7DE"/>
+<circle cx="271.6" cy="177.2" r="6.6" fill="url(#pcb33f61312-iris)"/>
+<circle cx="271.6" cy="177.2" r="3" fill="#120D0A"/>
+<circle cx="268.8" cy="174" r="1.4" fill="#fff" opacity="0.9"/>
+<path d="M 256 177.2 C 264.3 171.5, 277.8 171.5, 286.1 176.5"
+      fill="none" stroke="#5d4c3e" stroke-width="2.6" stroke-linecap="round"/>
+<path d="M 260.5 167 C 271 162.5, 281.8 168, 287.6 173"
+      fill="none" stroke="#CFA88A" stroke-width="1.6" opacity="0.4" stroke-linecap="round"/>
+<path d="M 258 181.3 C 266.5 187.7, 277.8 185.9, 284.6 180.7"
+      fill="none" stroke="#CFA88A" stroke-width="1.5" opacity="0.4" stroke-linecap="round"/>
+<path d="M 233.5 188 C 230.5 206, 226.3 214, 223.6 224"
+    fill="none" stroke="#F7DCC5" stroke-width="9.9" stroke-linecap="round" opacity="0.3"/>
+<path d="M 241.4 190 C 245.8 208, 249.7 214, 250.4 223"
+    fill="none" stroke="#CFA88A" stroke-width="8.2" stroke-linecap="round" opacity="0.4"/>
+<ellipse cx="237.3" cy="225" rx="13.7" ry="7.5" fill="#F7DCC5" opacity="0.4"/>
+<ellipse cx="229.8" cy="228.3" rx="4.7" ry="3" fill="#CFA88A" opacity="0.8"/>
+<ellipse cx="244.9" cy="228.3" rx="4.7" ry="3" fill="#CFA88A" opacity="0.8"/>
+<path d="M 225 224 C 221.5 231, 227.7 232, 231.8 229"
+    fill="none" stroke="#CFA88A" stroke-width="1.5" opacity="0.6" stroke-linecap="round"/>
+<path d="M 249.7 224 C 253.1 231, 246.9 232, 242.8 229"
+    fill="none" stroke="#CFA88A" stroke-width="1.5" opacity="0.6" stroke-linecap="round"/>
+<path d="M 219.4 245.6 Q 237.3 237.5 255.2 245.6 Q 237.3 256.5 219.4 245.6 Z" fill="url(#pcb33f61312-lip)" opacity="0.9"/>
+<path d="M 232.3 243.7 Q 237.3 240.8 242.3 243.7"
+    fill="none" stroke="#F7DCC5" stroke-width="1.6" opacity="0.3" stroke-linecap="round"/>
+<path d="M 219.4 245.6 Q 237.3 250.1 255.2 245.6" fill="none" stroke="#7c6553" stroke-width="1.9" stroke-linecap="round" opacity="0.9"/>
+<path d="M 229.8 250.8 Q 237.3 253.3 244.5 250.8"
+    fill="none" stroke="#F7DCC5" stroke-width="1.7" opacity="0.3" stroke-linecap="round"/>
+<path d="M 218.4 244.6 C 212.4 250.6, 215.4 258.6, 218.4 260.6"
+        fill="none" stroke="#CFA88A" stroke-width="1.5" opacity="0.3" stroke-linecap="round"/>
+<path d="M 256.2 244.6 C 262.2 250.6, 259.2 258.6, 256.2 260.6"
+        fill="none" stroke="#CFA88A" stroke-width="1.5" opacity="0.3" stroke-linecap="round"/>
+</g>
+<g clip-path="url(#pcb33f61312-clip)" opacity="1">
+<g></g>
+</g>
+<g><path d="M 152.8 118.8
+    C 150.8 68.8, 323.8 68.8, 321.8 118.8
+    C 300.1 114, 260.9 108, 245.2 110
+    C 213.8 113, 178.4 112, 152.8 118.8 Z" fill="url(#pcb33f61312-hair)"/><path d="M 195.4 88.8 C 201.4 106.8, 198.4 102, 205.4 110" fill="none" stroke="#7E5535" stroke-width="1.6" opacity="0.2" stroke-linecap="round"/><path d="M 216.4 88.8 C 222.4 106.8, 219.4 102, 226.4 110" fill="none" stroke="#7E5535" stroke-width="1.6" opacity="0.2" stroke-linecap="round"/><path d="M 237.3 88.8 C 243.3 106.8, 240.3 102, 247.3 110" fill="none" stroke="#7E5535" stroke-width="1.6" opacity="0.2" stroke-linecap="round"/><path d="M 258.3 88.8 C 264.3 106.8, 261.3 102, 268.3 110" fill="none" stroke="#7E5535" stroke-width="1.6" opacity="0.2" stroke-linecap="round"/><path d="M 279.2 88.8 C 285.2 106.8, 282.2 102, 289.2 110" fill="none" stroke="#7E5535" stroke-width="1.6" opacity="0.2" stroke-linecap="round"/></g>
+<path d="M 315.8 117.1 C 321 169.5, 299.7 250.1, 261.2 278.3"
+    fill="none" stroke="#D4A017" stroke-width="3.2" opacity="0.5" stroke-linecap="round" filter="url(#pcb33f61312-soft)"/>
+</g>
+<rect width="480" height="600" fill="url(#pcb33f61312-vig)"/>
+<rect y="480" width="480" height="120" fill="#04080B" opacity="0.4"/>
+</svg>
