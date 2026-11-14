@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 340" width="1000" height="340" fill="none">
+  <defs>
+    <linearGradient id="box-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#194049" />
+      <stop offset="100%" stop-color="#0E282E" />
+    </linearGradient>
+    <linearGradient id="card-highlight" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#E1B382" />
+      <stop offset="100%" stop-color="#C89666" />
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="1000" height="340" rx="14" fill="#0C2025" stroke="#2D545E" stroke-width="2" />
+
+  <!-- Title Header -->
+  <g text-anchor="middle">
+    <text x="500" y="38" fill="#E1B382" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" letter-spacing="2">
+      HIGH-PERFORMANCE ARCHITECTURE • THE ENGINE TRIAD
+    </text>
+  </g>
+
+  <!-- Node 1: Engine Triad -->
+  <g transform="translate(40, 60)" filter="url(#shadow)">
+    <rect width="200" height="230" rx="10" fill="url(#box-bg)" stroke="#2D545E" stroke-width="1.5" />
+    <rect x="0" y="0" width="200" height="5" rx="2" fill="url(#card-highlight)" />
+    <text x="20" y="32" fill="#E1B382" font-family="sans-serif" font-size="20">⚙️</text>
+    <text x="52" y="32" fill="#FBF8F2" font-family="sans-serif" font-size="13" font-weight="700">Engine Triad</text>
+    
+    <g transform="translate(15, 52)">
+      <!-- Item A -->
+      <rect width="170" height="46" rx="6" fill="#12343B" stroke="#2D545E" stroke-width="1" />
+      <text x="12" y="20" fill="#E1B382" font-family="sans-serif" font-size="11" font-weight="700">SplitMix64 Engine</text>
+      <text x="12" y="35" fill="#D8C9B5" font-family="sans-serif" font-size="9">64-bit Bit-Exact Seed</text>
+      
+      <!-- Item B -->
+      <rect y="56" width="170" height="46" rx="6" fill="#12343B" stroke="#2D545E" stroke-width="1" />
+      <text x="12" y="76" fill="#E1B382" font-family="sans-serif" font-size="11" font-weight="700">MCC Law 2026</text>
+      <text x="12" y="91" fill="#D8C9B5" font-family="sans-serif" font-size="9">Quotas, Powerplays, FSM</text>
+      
+      <!-- Item C -->
+      <rect y="112" width="170" height="46" rx="6" fill="#12343B" stroke="#2D545E" stroke-width="1" />
+      <text x="12" y="132" fill="#E1B382" font-family="sans-serif" font-size="11" font-weight="700">4-Layer Rating Engine</text>
+      <text x="12" y="147" fill="#D8C9B5" font-family="sans-serif" font-size="9">1,144 Verified Profiles</text>
+    </g>
+  </g>
+
+  <!-- Connecting Arrow 1 -> 2 -->
+  <path d="M 245 175 L 275 175" stroke="#E1B382" stroke-width="2" stroke-linecap="round" />
+  <polygon points="280,175 272,170 272,180" fill="#E1B382" />
+
+  <!-- Node 2: Tactical FSM Delivery Cycle -->
+  <g transform="translate(285, 60)" filter="url(#shadow)">
+    <rect width="200" height="230" rx="10" fill="url(#box-bg)" stroke="#2D545E" stroke-width="1.5" />
+    <rect x="0" y="0" width="200" height="5" rx="2" fill="url(#card-highlight)" />
+    <text x="20" y="32" fill="#E1B382" font-family="sans-serif" font-size="20">🎯</text>
+    <text x="52" y="32" fill="#FBF8F2" font-family="sans-serif" font-size="13" font-weight="700">Delivery FSM</text>
+
+    <g transform="translate(15, 52)">
+      <rect width="170" height="46" rx="6" fill="#12343B" stroke="#2D545E" stroke-width="1" />
+      <text x="12" y="20" fill="#E1B382" font-family="sans-serif" font-size="11" font-weight="700">Captain Tactics</text>
+      <text x="12" y="35" fill="#D8C9B5" font-family="sans-serif" font-size="9">Line, Length &amp; Variations</text>
+      
+      <rect y="56" width="170" height="46" rx="6" fill="#12343B" stroke="#2D545E" stroke-width="1" />
+      <text x="12" y="76" fill="#E1B382" font-family="sans-serif" font-size="11" font-weight="700">Atmosphere &amp; Pitch</text>
+      <text x="12" y="91" fill="#D8C9B5" font-family="sans-serif" font-size="9">Dew, Twilight, Wear Matrix</text>
+      
+      <rect y="112" width="170" height="46" rx="6" fill="#12343B" stroke="#2D545E" stroke-width="1" />
+      <text x="12" y="132" fill="#E1B382" font-family="sans-serif" font-size="11" font-weight="700">Outcome Evaluator</text>
+      <text x="12" y="147" fill="#D8C9B5" font-family="sans-serif" font-size="9">Wagon Wheel + Events</text>
+    </g>
+  </g>
+
+  <!-- Connecting Arrow 2 -> 3 -->
+  <path d="M 490 175 L 520 175" stroke="#E1B382" stroke-width="2" stroke-linecap="round" />
+  <polygon points="525,175 517,170 517,180" fill="#E1B382" />
+
+  <!-- Node 3: PixiJS 8 WebGL Visualizer -->
+  <g transform="translate(530, 60)" filter="url(#shadow)">
+    <rect width="200" height="230" rx="10" fill="url(#box-bg)" stroke="#2D545E" stroke-width="1.5" />
+    <rect x="0" y="0" width="200" height="5" rx="2" fill="url(#card-highlight)" />
+    <text x="20" y="32" fill="#E1B382" font-family="sans-serif" font-size="20">🏟️</text>
+    <text x="52" y="32" fill="#FBF8F2" font-family="sans-serif" font-size="13" font-weight="700">PixiJS 8 Visualizer</text>
+
+    <g transform="translate(15, 52)">
+      <rect width="170" height="46" rx="6" fill="#12343B" stroke="#2D545E" stroke-width="1" />
+      <text x="12" y="20" fill="#E1B382" font-family="sans-serif" font-size="11" font-weight="700">2D Field Geometry</text>
+      <text x="12" y="35" fill="#D8C9B5" font-family="sans-serif" font-size="9">Turf Rings &amp; 30-Yd Circles</text>
+      
+      <rect y="56" width="170" height="46" rx="6" fill="#12343B" stroke="#2D545E" stroke-width="1" />
+      <text x="12" y="76" fill="#E1B382" font-family="sans-serif" font-size="11" font-weight="700">Ball Flight Trajectory</text>
+      <text x="12" y="91" fill="#D8C9B5" font-family="sans-serif" font-size="9">Pitch Bounce &amp; Fielder Chases</text>
+      
+      <rect y="112" width="170" height="46" rx="6" fill="#12343B" stroke="#2D545E" stroke-width="1" />
+      <text x="12" y="132" fill="#E1B382" font-family="sans-serif" font-size="11" font-weight="700">TV Broadcast HUD</text>
+      <text x="12" y="147" fill="#D8C9B5" font-family="sans-serif" font-size="9">Ball-by-Ball Live Ribbon</text>
+    </g>
+  </g>
+
+  <!-- Connecting Arrow 3 -> 4 -->
+  <path d="M 735 175 L 765 175" stroke="#E1B382" stroke-width="2" stroke-linecap="round" />
+  <polygon points="770,175 762,170 762,180" fill="#E1B382" />
+
+  <!-- Node 4: Replay Vault & Persistence -->
+  <g transform="translate(775, 60)" filter="url(#shadow)">
+    <rect width="185" height="230" rx="10" fill="url(#box-bg)" stroke="#2D545E" stroke-width="1.5" />
+    <rect x="0" y="0" width="185" height="5" rx="2" fill="url(#card-highlight)" />
+    <text x="20" y="32" fill="#E1B382" font-family="sans-serif" font-size="20">💾</text>
+    <text x="52" y="32" fill="#FBF8F2" font-family="sans-serif" font-size="13" font-weight="700">Replay Vault</text>
+
+    <g transform="translate(12, 52)">
+      <rect width="160" height="46" rx="6" fill="#12343B" stroke="#2D545E" stroke-width="1" />
+      <text x="10" y="20" fill="#E1B382" font-family="sans-serif" font-size="11" font-weight="700">SHA-256 Ledger</text>
+      <text x="10" y="35" fill="#D8C9B5" font-family="sans-serif" font-size="9">Immutable Hash Chain</text>
+      
+      <rect y="56" width="160" height="46" rx="6" fill="#12343B" stroke="#2D545E" stroke-width="1" />
+      <text x="10" y="76" fill="#E1B382" font-family="sans-serif" font-size="11" font-weight="700">Deterministic Replay</text>
+      <text x="10" y="91" fill="#D8C9B5" font-family="sans-serif" font-size="9">Reconstruct Match from Seed</text>
+      
+      <rect y="112" width="160" height="46" rx="6" fill="#12343B" stroke="#2D545E" stroke-width="1" />
+      <text x="10" y="132" fill="#E1B382" font-family="sans-serif" font-size="11" font-weight="700">100% Offline PWA</text>
+      <text x="10" y="147" fill="#D8C9B5" font-family="sans-serif" font-size="9">Zero Cloud Dependency</text>
+    </g>
+  </g>
+
+  <!-- Bottom Subtitle -->
+  <g text-anchor="middle">
+    <text x="500" y="318" fill="#8FA2A6" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11">
+      Bit-exact determinism guaranteed: Replaying the same seed with the same tactical decisions yields the identical delivery sequence.
+    </text>
+  </g>
+</svg>

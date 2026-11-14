@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 240" width="1000" height="240" fill="none">
+  <defs>
+    <linearGradient id="fcard-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#194049" />
+      <stop offset="100%" stop-color="#0E282E" />
+    </linearGradient>
+    <linearGradient id="t10-bar" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#E1B382" />
+      <stop offset="100%" stop-color="#FFD166" />
+    </linearGradient>
+    <linearGradient id="t20-bar" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06D6A0" />
+      <stop offset="100%" stop-color="#118AB2" />
+    </linearGradient>
+    <linearGradient id="odi-bar" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#118AB2" />
+      <stop offset="100%" stop-color="#4EA8DE" />
+    </linearGradient>
+    <linearGradient id="test-red-bar" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#E63946" />
+      <stop offset="100%" stop-color="#9B2226" />
+    </linearGradient>
+    <linearGradient id="test-pink-bar" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F72585" />
+      <stop offset="100%" stop-color="#B5179E" />
+    </linearGradient>
+  </defs>
+
+  <!-- Container Base -->
+  <rect width="1000" height="240" rx="14" fill="#0C2025" stroke="#2D545E" stroke-width="2" />
+
+  <text x="500" y="32" fill="#E1B382" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" letter-spacing="2" text-anchor="middle">
+    NATIVE MULTI-FORMAT SUPPORT • OFFICIAL MCC LAWS 2026
+  </text>
+
+  <!-- 5 Format Cards -->
+  <!-- Card 1: T10 -->
+  <g transform="translate(25, 52)">
+    <rect width="175" height="165" rx="10" fill="url(#fcard-bg)" stroke="#2D545E" stroke-width="1.5" />
+    <rect width="175" height="4" rx="2" fill="url(#t10-bar)" />
+    <text x="16" y="30" fill="#E1B382" font-family="sans-serif" font-size="18">⚡</text>
+    <text x="44" y="28" fill="#FBF8F2" font-family="sans-serif" font-size="13" font-weight="700">T10 SLAM</text>
+    <text x="16" y="52" fill="#E1B382" font-family="monospace" font-size="11" font-weight="700">10 OVERS / INN</text>
+    <line x1="16" y1="62" x2="159" y2="62" stroke="#2D545E" stroke-width="1" />
+    <text x="16" y="82" fill="#D8C9B5" font-family="sans-serif" font-size="10">• Bowler Max: 2 Ov</text>
+    <text x="16" y="100" fill="#D8C9B5" font-family="sans-serif" font-size="10">• Powerplay: 3 Ov</text>
+    <text x="16" y="118" fill="#D8C9B5" font-family="sans-serif" font-size="10">• Free Hit on No-Ball</text>
+    <text x="16" y="142" fill="#8FA2A6" font-family="sans-serif" font-size="9" font-style="italic">Maximum carnage blitz</text>
+  </g>
+
+  <!-- Card 2: T20 -->
+  <g transform="translate(217, 52)">
+    <rect width="175" height="165" rx="10" fill="url(#fcard-bg)" stroke="#2D545E" stroke-width="1.5" />
+    <rect width="175" height="4" rx="2" fill="url(#t20-bar)" />
+    <text x="16" y="30" fill="#06D6A0" font-family="sans-serif" font-size="18">🏏</text>
+    <text x="44" y="28" fill="#FBF8F2" font-family="sans-serif" font-size="13" font-weight="700">T20 LEAGUE</text>
+    <text x="16" y="52" fill="#06D6A0" font-family="monospace" font-size="11" font-weight="700">20 OVERS / INN</text>
+    <line x1="16" y1="62" x2="159" y2="62" stroke="#2D545E" stroke-width="1" />
+    <text x="16" y="82" fill="#D8C9B5" font-family="sans-serif" font-size="10">• Bowler Max: 4 Ov</text>
+    <text x="16" y="100" fill="#D8C9B5" font-family="sans-serif" font-size="10">• Powerplay: 6 Ov</text>
+    <text x="16" y="118" fill="#D8C9B5" font-family="sans-serif" font-size="10">• Death Over Slog Tactics</text>
+    <text x="16" y="142" fill="#8FA2A6" font-family="sans-serif" font-size="9" font-style="italic">Franchise world standard</text>
+  </g>
+
+  <!-- Card 3: ODI -->
+  <g transform="translate(410, 52)">
+    <rect width="175" height="165" rx="10" fill="url(#fcard-bg)" stroke="#2D545E" stroke-width="1.5" />
+    <rect width="175" height="4" rx="2" fill="url(#odi-bar)" />
+    <text x="16" y="30" fill="#4EA8DE" font-family="sans-serif" font-size="18">🏆</text>
+    <text x="44" y="28" fill="#FBF8F2" font-family="sans-serif" font-size="13" font-weight="700">ODI SHIELD</text>
+    <text x="16" y="52" fill="#4EA8DE" font-family="monospace" font-size="11" font-weight="700">50 OVERS / INN</text>
+    <line x1="16" y1="62" x2="159" y2="62" stroke="#2D545E" stroke-width="1" />
+    <text x="16" y="82" fill="#D8C9B5" font-family="sans-serif" font-size="10">• Bowler Max: 10 Ov</text>
+    <text x="16" y="100" fill="#D8C9B5" font-family="sans-serif" font-size="10">• 3 Powerplay Phases</text>
+    <text x="16" y="118" fill="#D8C9B5" font-family="sans-serif" font-size="10">• 2 White Kookaburras</text>
+    <text x="16" y="142" fill="#8FA2A6" font-family="sans-serif" font-size="9" font-style="italic">Classic 300+ build</text>
+  </g>
+
+  <!-- Card 4: Test Red -->
+  <g transform="translate(603, 52)">
+    <rect width="175" height="165" rx="10" fill="url(#fcard-bg)" stroke="#2D545E" stroke-width="1.5" />
+    <rect width="175" height="4" rx="2" fill="url(#test-red-bar)" />
+    <text x="16" y="30" fill="#E63946" font-family="sans-serif" font-size="18">🔴</text>
+    <text x="44" y="28" fill="#FBF8F2" font-family="sans-serif" font-size="13" font-weight="700">TEST RED</text>
+    <text x="16" y="52" fill="#E63946" font-family="monospace" font-size="11" font-weight="700">5 DAYS / 4 INN</text>
+    <line x1="16" y1="62" x2="159" y2="62" stroke="#2D545E" stroke-width="1" />
+    <text x="16" y="82" fill="#D8C9B5" font-family="sans-serif" font-size="10">• Unlimited Bowler Spells</text>
+    <text x="16" y="100" fill="#D8C9B5" font-family="sans-serif" font-size="10">• 80 Ov Re-Ball Decay</text>
+    <text x="16" y="118" fill="#D8C9B5" font-family="sans-serif" font-size="10">• Slip Cordon Catches</text>
+    <text x="16" y="142" fill="#8FA2A6" font-family="sans-serif" font-size="9" font-style="italic">Purest cricket crucible</text>
+  </g>
+
+  <!-- Card 5: Test Pink -->
+  <g transform="translate(796, 52)">
+    <rect width="175" height="165" rx="10" fill="url(#fcard-bg)" stroke="#2D545E" stroke-width="1.5" />
+    <rect width="175" height="4" rx="2" fill="url(#test-pink-bar)" />
+    <text x="16" y="30" fill="#F72585" font-family="sans-serif" font-size="18">🌸</text>
+    <text x="44" y="28" fill="#FBF8F2" font-family="sans-serif" font-size="13" font-weight="700">TEST PINK</text>
+    <text x="16" y="52" fill="#F72585" font-family="monospace" font-size="11" font-weight="700">DAY / NIGHT</text>
+    <line x1="16" y1="62" x2="159" y2="62" stroke="#2D545E" stroke-width="1" />
+    <text x="16" y="82" fill="#D8C9B5" font-family="sans-serif" font-size="10">• Twilight Swing +35%</text>
+    <text x="16" y="100" fill="#D8C9B5" font-family="sans-serif" font-size="10">• Night Dew Factor -20%</text>
+    <text x="16" y="118" fill="#D8C9B5" font-family="sans-serif" font-size="10">• Pink Lacquered Seam</text>
+    <text x="16" y="142" fill="#8FA2A6" font-family="sans-serif" font-size="9" font-style="italic">Atmospheric drama</text>
+  </g>
+</svg>
