@@ -21,6 +21,7 @@ import type {
   FieldPreset,
 } from '@cricket/simulation-engine';
 import type { BattingHand, BowlingStyle } from '@cricket/shared-types';
+import { getAuthoritativePlayerImage, getRealisticFallback } from '@/lib/player-image-resolver';
 import { PixiCricketVisualizer } from './pixi-cricket-visualizer';
 import type { AnimationPhase } from './types';
 
@@ -232,10 +233,10 @@ export function CricketVisualizerCanvas({
       />
 
       {/* 2. Top-Bar Broadcast HUD (Match Context & Environmental Metadata) */}
-      <div className="relative z-10 flex items-center justify-between px-3.5 py-2.5 bg-gradient-to-b from-[#12343B]/95 via-[#12343B]/60 to-transparent pointer-events-none">
+      <div className="relative z-10 flex items-center justify-between px-3.5 py-2.5 bg-[#12343B]/95 backdrop-blur-md border-b border-[#2D545E]/80 shadow-md pointer-events-none">
         <div className="flex items-center gap-2 pointer-events-auto flex-wrap">
           {/* Live broadcast status badge */}
-          <div className="px-2.5 py-1 bg-[#12343B]/90 backdrop-blur-md border border-[#2D545E] rounded-md text-[#FBF8F2] font-mono text-[11px] uppercase tracking-wider font-bold flex items-center gap-1.5 shadow-sm">
+          <div className="px-2.5 py-1 bg-[#12343B] border border-[#2D545E] rounded-md text-[#FBF8F2] font-mono text-[11px] uppercase tracking-wider font-bold flex items-center gap-1.5 shadow-sm">
             <span className="w-2 h-2 rounded-full bg-[#E1B382] inline-block animate-pulse" />
             <span>LIVE MATCH</span>
           </div>
@@ -250,7 +251,7 @@ export function CricketVisualizerCanvas({
           </span>
 
           {/* Stadium and pitch */}
-          <div className="hidden sm:inline-flex items-center gap-1.5 text-xs text-[#D8C9B5] font-medium bg-[#12343B]/80 backdrop-blur-sm px-2.5 py-1 rounded-md border border-[#2D545E]">
+          <div className="hidden sm:inline-flex items-center gap-1.5 text-xs text-[#D8C9B5] font-medium bg-[#12343B] px-2.5 py-1 rounded-md border border-[#2D545E] shadow-sm">
             <span className="text-[#FBF8F2] font-semibold">{getStadiumName(matchState.config.stadiumId)}</span>
             <span className="text-[#C89666]">•</span>
             <span className="uppercase text-[11px] text-[#E1B382] font-mono">{matchState.config.pitchType} PITCH</span>
@@ -327,10 +328,27 @@ export function CricketVisualizerCanvas({
             </div>
 
             {/* Active Batters (Col 5-7) */}
-            <div className="md:col-span-4 flex flex-col justify-center gap-1 border-b md:border-b-0 md:border-r border-[#2D545E] pb-2 md:pb-0 px-2 min-w-0">
-              <div className="flex items-center justify-between text-xs min-w-0">
-                <div className="flex items-center gap-1 font-semibold text-[#FBF8F2] truncate min-w-0">
+            <div className="md:col-span-4 flex flex-col justify-center gap-1.5 border-b md:border-b-0 md:border-r border-[#2D545E] pb-2 md:pb-0 px-2 min-w-0">
+              <div className="flex items-center justify-between text-xs min-w-0 gap-1.5">
+                <div className="flex items-center gap-1.5 font-semibold text-[#FBF8F2] truncate min-w-0">
                   <span className="text-[#E1B382] text-[10px] font-bold">▶</span>
+                  <img
+                    src={getAuthoritativePlayerImage(
+                      strikerProfile?.id,
+                      strikerProfile?.fullName || strikerProfile?.displayName,
+                      strikerProfile?.primaryRole,
+                      strikerProfile?.primaryNationality,
+                    )}
+                    alt={strikerProfile?.displayName ?? 'Striker'}
+                    className="w-5 h-5 rounded-full object-cover border border-[#E1B382]/60 shrink-0"
+                    onError={(e) => {
+                      e.currentTarget.src = getRealisticFallback(
+                        strikerProfile?.primaryRole,
+                        strikerProfile?.primaryNationality,
+                        strikerProfile?.id,
+                      );
+                    }}
+                  />
                   <span className="truncate">{strikerProfile?.displayName ?? 'Striker'}*</span>
                 </div>
                 <span className="font-mono text-[#D8C9B5] shrink-0 ml-1.5 text-[11px]">
@@ -338,8 +356,28 @@ export function CricketVisualizerCanvas({
                   <span className="text-[#D8C9B5]/80 text-[10px]"> ({strikerScore?.ballsFaced ?? 0}b{strikerScore?.fours ? ` ${strikerScore.fours}x4` : ''}{strikerScore?.sixes ? ` ${strikerScore.sixes}x6` : ''})</span>
                 </span>
               </div>
-              <div className="flex items-center justify-between text-xs text-[#D8C9B5] min-w-0">
-                <span className="truncate">{nonStrikerProfile?.displayName ?? 'Non-Striker'}</span>
+              <div className="flex items-center justify-between text-xs text-[#D8C9B5] min-w-0 gap-1.5">
+                <div className="flex items-center gap-1.5 truncate min-w-0">
+                  <span className="w-2.5 inline-block shrink-0" />
+                  <img
+                    src={getAuthoritativePlayerImage(
+                      nonStrikerProfile?.id,
+                      nonStrikerProfile?.fullName || nonStrikerProfile?.displayName,
+                      nonStrikerProfile?.primaryRole,
+                      nonStrikerProfile?.primaryNationality,
+                    )}
+                    alt={nonStrikerProfile?.displayName ?? 'Non-Striker'}
+                    className="w-4 h-4 rounded-full object-cover border border-[#2D545E] shrink-0 opacity-80"
+                    onError={(e) => {
+                      e.currentTarget.src = getRealisticFallback(
+                        nonStrikerProfile?.primaryRole,
+                        nonStrikerProfile?.primaryNationality,
+                        nonStrikerProfile?.id,
+                      );
+                    }}
+                  />
+                  <span className="truncate">{nonStrikerProfile?.displayName ?? 'Non-Striker'}</span>
+                </div>
                 <span className="font-mono text-[10px] shrink-0 ml-1.5 text-[#D8C9B5]">
                   {nonStrikerScore?.runs ?? 0} ({nonStrikerScore?.ballsFaced ?? 0}b)
                 </span>
@@ -347,17 +385,39 @@ export function CricketVisualizerCanvas({
             </div>
 
             {/* Active Bowler (Col 8-10) */}
-            <div className="md:col-span-3 flex flex-col justify-center border-b md:border-b-0 md:border-r border-[#2D545E] pb-2 md:pb-0 px-2 min-w-0">
-              <div className="flex items-center justify-between text-xs font-semibold text-[#FBF8F2] min-w-0">
-                <span className="truncate text-[#E1B382] font-bold">
-                  {bowlerProfile?.displayName ?? 'Bowler'}
-                </span>
-                <span className="font-mono text-[#E1B382] font-bold shrink-0 ml-1.5">
-                  {bowlerScore?.wickets ?? 0}-{bowlerScore?.runsConceded ?? 0}
-                </span>
-              </div>
-              <div className="text-[10px] text-[#D8C9B5] font-mono mt-0.5">
-                {bowlerScore?.oversBowledFormatted ?? '0.0'} ov • Econ: {bowlerScore?.economyRate.toFixed(2) ?? '0.00'}
+            <div className="md:col-span-3 flex items-center gap-2 border-b md:border-b-0 md:border-r border-[#2D545E] pb-2 md:pb-0 px-2 min-w-0">
+              <img
+                src={getAuthoritativePlayerImage(
+                  bowlerProfile?.id,
+                  bowlerProfile?.fullName || bowlerProfile?.displayName,
+                  bowlerProfile?.primaryRole,
+                  bowlerProfile?.primaryNationality,
+                )}
+                alt={bowlerProfile?.displayName ?? 'Bowler'}
+                className="w-8 h-8 rounded-full object-cover border border-[#E1B382]/60 shrink-0 shadow-sm"
+                onError={(e) => {
+                  e.currentTarget.src = getRealisticFallback(
+                    bowlerProfile?.primaryRole,
+                    bowlerProfile?.primaryNationality,
+                    bowlerProfile?.id,
+                  );
+                }}
+              />
+              <div className="flex flex-col justify-center min-w-0 flex-1">
+                <div className="text-[9px] font-bold text-[#D8C9B5] uppercase tracking-widest font-editorial-title">
+                  BOWLING
+                </div>
+                <div className="flex items-center justify-between text-xs font-semibold text-[#FBF8F2] min-w-0">
+                  <span className="truncate text-[#E1B382] font-bold">
+                    {bowlerProfile?.displayName ?? 'Bowler'}
+                  </span>
+                  <span className="font-mono text-[#E1B382] font-bold shrink-0 ml-1">
+                    {bowlerScore?.wickets ?? 0}-{bowlerScore?.runsConceded ?? 0}
+                  </span>
+                </div>
+                <div className="text-[10px] text-[#D8C9B5] font-mono">
+                  {bowlerScore?.oversBowledFormatted ?? '0.0'} ov • Econ: {bowlerScore?.economyRate.toFixed(2) ?? '0.00'}
+                </div>
               </div>
             </div>
 

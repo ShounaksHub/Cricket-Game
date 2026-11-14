@@ -572,7 +572,11 @@ export default function DreamXIBuilderPage() {
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                           src={portrait}
                           onError={(e) => {
-                            e.currentTarget.src = getRealisticFallback(player.primaryRole);
+                            e.currentTarget.src = getRealisticFallback(
+                              player.primaryRole,
+                              player.primaryNationality,
+                              player.id
+                            );
                           }}
                         />
                       </div>

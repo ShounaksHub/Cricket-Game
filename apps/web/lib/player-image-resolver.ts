@@ -20,8 +20,10 @@ import { VERIFIED_BENCHMARK_PLAYERS } from '@cricket/data-ingestion';
 import { hasGeneratedPortrait, PLAYER_PORTRAIT_IDS } from './player-portrait-manifest';
 import {
   REALISTIC_INDIVIDUAL_PORTRAITS,
+  REALISTIC_GENERIC_POOL,
   hasRealisticPortrait,
   getRealisticFallback,
+  getDiverseRealisticGeneric,
 } from './realistic-portrait-manifest';
 
 export type ImageClassificationStatus =
@@ -237,44 +239,38 @@ export function resolvePlayerImage(player: PlayerImageInput): PlayerImageMeta {
     };
   }
 
-  // 3. Realistic Role-Based Generic Image (for any player where specific photo is not yet generated)
-  const realisticFallbackSrc = getRealisticFallback(player.primaryRole);
+  // 3. Realistic Role-Based Generic Image from 60-image Diverse Pool (for any player where specific photo is not individually registered)
+  const realisticFallbackSrc = getRealisticFallback(
+    player.primaryRole,
+    player.primaryNationality,
+    resolvedId || player.id
+  );
   if (realisticFallbackSrc) {
     return {
       playerId: resolvedId || 'generic',
       src: realisticFallbackSrc,
       classification: 'GENERIC_AVATAR',
       altText: `${fullName || 'Cricket Player'} (${player.primaryRole || 'Player'} - ${player.primaryNationality || 'International'})`,
-      sourceNote: 'Realistic cinematic broadcast profile archetype',
+      sourceNote: 'Realistic broadcast sports photography archetype from 60-image pool',
     };
   }
 
-  // 4. Fallback: 2D vector cartoon portrait from /assets/players/{id}.svg
-  if (resolvedId && hasGeneratedPortrait(resolvedId)) {
-    return {
-      playerId: resolvedId,
-      src: `/assets/players/${resolvedId}.svg`,
-      classification: 'GENERATED_ILLUSTRATION',
-      altText: `${fullName} (${player.primaryRole || 'Cricket Player'} - ${player.primaryNationality || 'International'})`,
-      sourceNote: 'Authentic 2D vector cartoon portrait from player assets library',
-    };
-  }
-
-  // 5. Ultimate Fallback: High-quality generic 2D cartoon avatar
-  const avatarUri = generateDeterministicCricketAvatar(player);
+  // 4. Default Diverse Realistic Archetype Fallback (ensures ZERO silhouettes ever leak)
+  const defaultFallback = getDiverseRealisticGeneric(
+    resolvedId || player.id,
+    player.primaryRole,
+    player.primaryNationality
+  );
 
   return {
     playerId: resolvedId || 'generic',
-    src: avatarUri,
+    src: defaultFallback,
     classification: 'GENERIC_AVATAR',
     altText: `${fullName || 'Cricket Player'} (${player.primaryRole || 'Player'} - ${player.primaryNationality || 'International'})`,
-    sourceNote: 'Deterministic generic 2D cartoon cricket avatar',
+    sourceNote: 'Diverse realistic broadcast cricket archetype',
   };
 }
 
-/**
- * Standalone helper to get player avatar URL directly
- */
 /**
  * Standalone helper to get player avatar URL directly
  */
@@ -295,4 +291,6 @@ export function getAuthoritativePlayerImage(
 export {
   hasRealisticPortrait,
   getRealisticFallback,
+  getDiverseRealisticGeneric,
+  REALISTIC_GENERIC_POOL,
 } from './realistic-portrait-manifest';

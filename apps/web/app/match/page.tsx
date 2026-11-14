@@ -3551,8 +3551,8 @@ export default function MatchSimulationPage() {
             </div>
 
             {/* Real-time Broadcast Telemetry Ticker */}
-            <div className="flex items-center justify-between bg-surface-recessed px-space-md py-1.5 rounded-lg overflow-hidden border border-border-hairline shadow-sm">
-              <div className="flex items-center gap-space-sm min-w-0">
+            <div className="flex items-center justify-between bg-surface-recessed px-space-md py-1.5 rounded-lg overflow-hidden border border-border-hairline shadow-sm gap-2">
+              <div className="flex items-center gap-space-sm min-w-0 flex-1">
                 <span className="font-label-caps text-label-caps text-wicket-red uppercase tracking-wider font-extrabold flex items-center gap-1 shrink-0">
                   <span className="material-symbols-outlined text-[15px]">sports_cricket</span>
                   {currentEvent ? `${currentEvent.inningsNumber}.${currentEvent.overNumber}.${currentEvent.ballInOver} REPLAY` : 'MATCH RADAR'}

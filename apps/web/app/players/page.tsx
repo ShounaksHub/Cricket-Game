@@ -236,11 +236,10 @@ export default function PlayerCataloguePage() {
                     setRoleFilter('ALL');
                     setCurrentPage(1);
                   }}
-                  className={`px-4 py-2 rounded-full font-label-caps text-label-caps uppercase transition-all ${
-                    roleFilter === 'ALL'
-                      ? 'bg-primary text-on-primary shadow-sm shadow-night-blue-shadow/15'
-                      : 'bg-surface-elevated text-text-slate hover:bg-surface-bright hover:text-text-chalk'
-                  }`}
+                  className={`px-4 py-2 rounded-full font-label-caps text-label-caps uppercase transition-all ${roleFilter === 'ALL'
+                    ? 'bg-primary text-on-primary shadow-sm shadow-night-blue-shadow/15'
+                    : 'bg-surface-elevated text-text-slate hover:bg-surface-bright hover:text-text-chalk'
+                    }`}
                 >
                   ALL PLAYERS ({roleCounts.total})
                 </button>
@@ -249,11 +248,10 @@ export default function PlayerCataloguePage() {
                     setRoleFilter('BATTER');
                     setCurrentPage(1);
                   }}
-                  className={`px-4 py-2 rounded-full font-label-caps text-label-caps uppercase transition-all flex items-center gap-1.5 ${
-                    roleFilter === 'BATTER'
-                      ? 'bg-primary text-on-primary shadow-sm shadow-night-blue-shadow/15'
-                      : 'bg-surface-elevated text-text-slate hover:bg-surface-bright hover:text-text-chalk'
-                  }`}
+                  className={`px-4 py-2 rounded-full font-label-caps text-label-caps uppercase transition-all flex items-center gap-1.5 ${roleFilter === 'BATTER'
+                    ? 'bg-primary text-on-primary shadow-sm shadow-night-blue-shadow/15'
+                    : 'bg-surface-elevated text-text-slate hover:bg-surface-bright hover:text-text-chalk'
+                    }`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
                   BATTERS ({roleCounts.bat})
@@ -263,11 +261,10 @@ export default function PlayerCataloguePage() {
                     setRoleFilter('BOWLER');
                     setCurrentPage(1);
                   }}
-                  className={`px-4 py-2 rounded-full font-label-caps text-label-caps uppercase transition-all flex items-center gap-1.5 ${
-                    roleFilter === 'BOWLER'
-                      ? 'bg-primary text-on-primary shadow-sm shadow-night-blue-shadow/15'
-                      : 'bg-surface-elevated text-text-slate hover:bg-surface-bright hover:text-text-chalk'
-                  }`}
+                  className={`px-4 py-2 rounded-full font-label-caps text-label-caps uppercase transition-all flex items-center gap-1.5 ${roleFilter === 'BOWLER'
+                    ? 'bg-primary text-on-primary shadow-sm shadow-night-blue-shadow/15'
+                    : 'bg-surface-elevated text-text-slate hover:bg-surface-bright hover:text-text-chalk'
+                    }`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-telemetry-blue" />
                   BOWLERS ({roleCounts.bowl})
@@ -277,11 +274,10 @@ export default function PlayerCataloguePage() {
                     setRoleFilter('WK');
                     setCurrentPage(1);
                   }}
-                  className={`px-4 py-2 rounded-full font-label-caps text-label-caps uppercase transition-all flex items-center gap-1.5 ${
-                    roleFilter === 'WK'
-                      ? 'bg-primary text-on-primary shadow-sm shadow-night-blue-shadow/15'
-                      : 'bg-surface-elevated text-text-slate hover:bg-surface-bright hover:text-text-chalk'
-                  }`}
+                  className={`px-4 py-2 rounded-full font-label-caps text-label-caps uppercase transition-all flex items-center gap-1.5 ${roleFilter === 'WK'
+                    ? 'bg-primary text-on-primary shadow-sm shadow-night-blue-shadow/15'
+                    : 'bg-surface-elevated text-text-slate hover:bg-surface-bright hover:text-text-chalk'
+                    }`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-warning-amber" />
                   WICKETKEEPERS ({roleCounts.wk})
@@ -291,11 +287,10 @@ export default function PlayerCataloguePage() {
                     setRoleFilter('ALL-ROUNDER');
                     setCurrentPage(1);
                   }}
-                  className={`px-4 py-2 rounded-full font-label-caps text-label-caps uppercase transition-all flex items-center gap-1.5 ${
-                    roleFilter === 'ALL-ROUNDER'
-                      ? 'bg-primary text-on-primary shadow-sm shadow-night-blue-shadow/15'
-                      : 'bg-surface-elevated text-text-slate hover:bg-surface-bright hover:text-text-chalk'
-                  }`}
+                  className={`px-4 py-2 rounded-full font-label-caps text-label-caps uppercase transition-all flex items-center gap-1.5 ${roleFilter === 'ALL-ROUNDER'
+                    ? 'bg-primary text-on-primary shadow-sm shadow-night-blue-shadow/15'
+                    : 'bg-surface-elevated text-text-slate hover:bg-surface-bright hover:text-text-chalk'
+                    }`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-tertiary" />
                   ALL-ROUNDERS ({roleCounts.ar})
@@ -383,15 +378,14 @@ export default function PlayerCataloguePage() {
                     <button
                       key={fmt}
                       onClick={() => setSelectedFormat(fmt)}
-                      className={`px-2 py-0.5 rounded font-label-caps text-[10px] cursor-pointer transition-all ${
-                        selectedFormat === fmt
-                          ? fmt === 'T20'
-                            ? 'bg-[#0C2B1D] text-primary ring-1 ring-primary'
-                            : fmt === 'ODI'
+                      className={`px-2 py-0.5 rounded font-label-caps text-[10px] cursor-pointer transition-all ${selectedFormat === fmt
+                        ? fmt === 'T20'
+                          ? 'bg-[#0C2B1D] text-primary ring-1 ring-primary'
+                          : fmt === 'ODI'
                             ? 'bg-[#0E2342] text-telemetry-blue ring-1 ring-telemetry-blue'
                             : 'bg-[#2E0F0F] text-wicket-red ring-1 ring-wicket-red'
-                          : 'bg-surface-elevated text-text-slate hover:brightness-125'
-                      }`}
+                        : 'bg-surface-elevated text-text-slate hover:brightness-125'
+                        }`}
                     >
                       {fmt === 'TEST_RED_BALL' ? 'TEST' : fmt}
                     </button>
@@ -436,11 +430,10 @@ export default function PlayerCataloguePage() {
                     <div
                       key={player.id}
                       onClick={() => setInspectedPlayerId(player.id)}
-                      className={`bg-surface-card rounded-xl p-4 relative group shadow-md transition-all cursor-pointer border ${
-                        isInspecting
-                          ? 'border-primary ring-2 ring-primary bg-surface-elevated'
-                          : 'border-border-hairline hover:bg-surface-elevated'
-                      }`}
+                      className={`bg-surface-card rounded-xl p-4 relative group shadow-md transition-all cursor-pointer border ${isInspecting
+                        ? 'border-primary ring-2 ring-primary bg-surface-elevated'
+                        : 'border-border-hairline hover:bg-surface-elevated'
+                        }`}
                     >
                       {isInspecting && (
                         <div className="absolute top-3 right-3 flex items-center gap-1 bg-surface-elevated px-2 py-0.5 rounded-full border border-primary/40">
@@ -455,21 +448,24 @@ export default function PlayerCataloguePage() {
                           className="w-16 h-16 rounded-lg object-cover bg-surface-recessed shrink-0"
                           src={portrait}
                           onError={(e) => {
-                            e.currentTarget.src = getRealisticFallback(player.primaryRole);
+                            e.currentTarget.src = getRealisticFallback(
+                              player.primaryRole,
+                              player.primaryNationality,
+                              player.id
+                            );
                           }}
                         />
                         <div className="flex flex-col min-w-0 pr-12">
                           <div className="flex items-center gap-1.5 mb-1">
                             <span
-                              className={`px-2 py-0.5 rounded-full font-label-caps text-[10px] ${
-                                roleCat === 'BATTER'
-                                  ? 'bg-[#202920] text-secondary'
-                                  : roleCat === 'BOWLER'
+                              className={`px-2 py-0.5 rounded-full font-label-caps text-[10px] ${roleCat === 'BATTER'
+                                ? 'bg-[#202920] text-secondary'
+                                : roleCat === 'BOWLER'
                                   ? 'bg-[#0F2430] text-telemetry-blue'
                                   : roleCat === 'WK'
-                                  ? 'bg-amber-950/40 text-warning-amber'
-                                  : 'bg-[#282310] text-tertiary'
-                              }`}
+                                    ? 'bg-amber-950/40 text-warning-amber'
+                                    : 'bg-[#282310] text-tertiary'
+                                }`}
                             >
                               {roleCat}
                             </span>
@@ -599,7 +595,11 @@ export default function PlayerCataloguePage() {
                           className="w-28 h-28 sm:w-32 sm:h-32 rounded-xl object-cover bg-surface-recessed shadow-lg"
                           src={getPlayerPortrait(activePlayer, 0)}
                           onError={(e) => {
-                            e.currentTarget.src = getRealisticFallback(activePlayer.primaryRole);
+                            e.currentTarget.src = getRealisticFallback(
+                              activePlayer.primaryRole,
+                              activePlayer.primaryNationality,
+                              activePlayer.id
+                            );
                           }}
                         />
                         <div className="absolute -bottom-2 -right-2 bg-tertiary text-on-tertiary px-2 py-0.5 rounded font-label-caps text-[11px] font-extrabold shadow-md">
@@ -648,11 +648,10 @@ export default function PlayerCataloguePage() {
                         <button
                           key={fmt}
                           onClick={() => setSelectedFormat(fmt)}
-                          className={`py-1.5 text-center font-label-caps text-label-caps uppercase rounded transition-all cursor-pointer ${
-                            selectedFormat === fmt
-                              ? 'bg-surface-elevated text-text-chalk shadow-sm font-bold'
-                              : 'text-text-subdued hover:text-text-chalk'
-                          }`}
+                          className={`py-1.5 text-center font-label-caps text-label-caps uppercase rounded transition-all cursor-pointer ${selectedFormat === fmt
+                            ? 'bg-surface-elevated text-text-chalk shadow-sm font-bold'
+                            : 'text-text-subdued hover:text-text-chalk'
+                            }`}
                         >
                           {fmt === 'TEST_RED_BALL' ? 'TEST' : fmt}
                         </button>

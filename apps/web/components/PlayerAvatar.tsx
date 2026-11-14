@@ -51,8 +51,8 @@ export function PlayerAvatar({
         loading="lazy"
         decoding="async"
         onError={(e) => {
-          // Graceful fallback to realistic sports photography archetype under stadium lighting
-          e.currentTarget.src = getRealisticFallback(primaryRole);
+          // Graceful fallback to diverse realistic sports photography archetype from 60-image pool
+          e.currentTarget.src = getRealisticFallback(primaryRole, primaryNationality, id);
         }}
       />
       {showBadge && (

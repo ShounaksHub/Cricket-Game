@@ -45,14 +45,14 @@ export class PixiCricketVisualizer {
     const width = options.canvas.clientWidth || 960;
     const height = options.canvas.clientHeight || 600;
 
-    // Available ground area accounting for top HUD (54px) and bottom broadcast ribbon (88px)
-    const topMargin = 54;
-    const bottomMargin = 88;
-    const availableHeight = Math.max(280, height - topMargin - bottomMargin);
-    const availableWidth = Math.max(280, width - 40);
+    // Available ground area accounting for top HUD (60px) and bottom broadcast ribbon (148px)
+    const topMargin = 60;
+    const bottomMargin = 148;
+    const availableHeight = Math.max(260, height - topMargin - bottomMargin);
+    const availableWidth = Math.max(260, width - 40);
 
     // Dynamic scale so full boundary circle (plus 12px outer turf buffer) fits with zero overlap
-    const maxBoundaryDiameterPx = Math.min(availableWidth, availableHeight) * 0.90;
+    const maxBoundaryDiameterPx = Math.min(availableWidth, availableHeight) * 0.88;
     this.scale = (maxBoundaryDiameterPx / 2) / this.boundaryRadiusMeters;
     this.baseScale = this.scale;
 

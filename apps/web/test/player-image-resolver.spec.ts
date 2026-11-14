@@ -72,24 +72,24 @@ describe('Player Image Resolver & Deterministic Avatar System', () => {
 
     // Registered players with authentic realistic portraits
     expect(metaBumrah.classification).toBe('VERIFIED_AUTHENTIC');
-    expect(metaBumrah.src).toContain('/assets/players/realistic/');
+    expect(metaBumrah.src).toBe('/assets/players/realistic/f1e10000-0003-4000-8000-000000000003.jpg');
     expect(metaMcGrath.classification).toBe('VERIFIED_AUTHENTIC');
-    expect(metaMcGrath.src).toContain('/assets/players/realistic/');
+    expect(metaMcGrath.src).toBe('/assets/players/realistic/f1e20000-0004-4000-8000-000000000004.jpg');
 
-    // Unknown player falls back to realistic generic role-based image
+    // Unknown player falls back to realistic generic archetype from 60-image pool
     expect(metaUnknown.classification).toBe('GENERIC_AVATAR');
-    expect(metaUnknown.src).toBe('/assets/players/realistic/generic-fast-bowler.jpg');
+    expect(metaUnknown.src).toContain('/assets/players/realistic/generic-cricketer-');
   });
 
   it('resolves individual realistic portraits or role-based realistic fallbacks for talent pool benchmark players', () => {
     // Individual realistic portraits
     const bumrahMeta = resolvePlayerImage({ id: 'f1e10000-0003-4000-8000-000000000003', fullName: 'Jasprit Bumrah' });
     expect(bumrahMeta.classification).toBe('VERIFIED_AUTHENTIC');
-    expect(bumrahMeta.src).toBe('/assets/players/realistic/f1e10000-0003-4000-8000-000000000003.png');
+    expect(bumrahMeta.src).toBe('/assets/players/realistic/f1e10000-0003-4000-8000-000000000003.jpg');
 
     const mcgrathMeta = resolvePlayerImage({ id: 'f1e20000-0004-4000-8000-000000000004', fullName: 'Glenn McGrath' });
     expect(mcgrathMeta.classification).toBe('VERIFIED_AUTHENTIC');
-    expect(mcgrathMeta.src).toBe('/assets/players/realistic/f1e20000-0004-4000-8000-000000000004.png');
+    expect(mcgrathMeta.src).toBe('/assets/players/realistic/f1e20000-0004-4000-8000-000000000004.jpg');
 
     const tendulkarMeta = resolvePlayerImage({ id: 'f1e20000-0001-4000-8000-000000000001', fullName: 'Sachin Tendulkar' });
     expect(tendulkarMeta.classification).toBe('VERIFIED_AUTHENTIC');
@@ -109,14 +109,23 @@ describe('Player Image Resolver & Deterministic Avatar System', () => {
     expect(paroreMeta.classification).toBe('VERIFIED_AUTHENTIC');
     expect(paroreMeta.src).toBe('/assets/players/realistic/f1e20000-0053-4000-8000-000000000053.jpg');
 
-    // Fallback to realistic role-based archetype for unregistered player
+    // Fallback to realistic role-based archetype from 60-image pool for unregistered player
     const unknownKeeperMeta = resolvePlayerImage({
       id: '00000000-0000-0000-0000-000000000099',
       fullName: 'Unregistered Club Keeper',
       primaryRole: 'WICKETKEEPER_BATTER',
     });
     expect(unknownKeeperMeta.classification).toBe('GENERIC_AVATAR');
-    expect(unknownKeeperMeta.src).toBe('/assets/players/realistic/generic-wicketkeeper.jpg');
+    expect(unknownKeeperMeta.src).toContain('/assets/players/realistic/generic-cricketer-');
+  });
+
+  it('contains at least 50 distinct realistic broadcast photo archetypes in the generic pool', async () => {
+    const { REALISTIC_GENERIC_POOL } = await import('../lib/realistic-portrait-manifest');
+    expect(REALISTIC_GENERIC_POOL.length).toBeGreaterThanOrEqual(50);
+
+    // Verify all files have unique filenames
+    const filenames = new Set(REALISTIC_GENERIC_POOL.map(x => x.filename));
+    expect(filenames.size).toBe(REALISTIC_GENERIC_POOL.length);
   });
 
   it('is completely deterministic given the same inputs', () => {
