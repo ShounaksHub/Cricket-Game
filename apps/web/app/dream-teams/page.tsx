@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { getAuthoritativePlayerImage } from '@/lib/player-image-resolver';
+import { getAuthoritativePlayerImage, generateDeterministicCricketAvatar } from '@/lib/player-image-resolver';
 import { useRouter } from 'next/navigation';
 import {
   SUPPORTED_NATIONAL_TEAMS,
@@ -572,7 +572,7 @@ export default function DreamXIBuilderPage() {
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                           src={portrait}
                           onError={(e) => {
-                            e.currentTarget.src = '/assets/stitch/asset-004.png';
+                            e.currentTarget.src = generateDeterministicCricketAvatar(player);
                           }}
                         />
                       </div>

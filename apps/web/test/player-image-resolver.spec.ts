@@ -48,7 +48,7 @@ describe('Player Image Resolver & Deterministic Avatar System', () => {
     expect(decodeURIComponent(mcgrathUri)).toContain('GM');
   });
 
-  it('classifies unverified player photos as GENERIC_AVATAR rather than fake authentic', () => {
+  it('resolves registered benchmark players to individual 2D vector portraits and unknown players to GENERIC_AVATAR', () => {
     const metaBumrah = resolvePlayerImage({
       id: CANONICAL_BENCHMARK_UUIDS.JASPRIT_BUMRAH,
       fullName: 'Jasprit Bumrah',
@@ -63,9 +63,44 @@ describe('Player Image Resolver & Deterministic Avatar System', () => {
       primaryNationality: 'Australia',
     });
 
-    expect(metaBumrah.classification).toBe('GENERIC_AVATAR');
-    expect(metaMcGrath.classification).toBe('GENERIC_AVATAR');
-    expect(metaBumrah.src).toContain('data:image/svg+xml');
+    const metaUnknown = resolvePlayerImage({
+      id: '00000000-0000-0000-0000-000000000000',
+      fullName: 'Local Club Cricketer',
+      primaryRole: 'ALL_ROUNDER',
+      primaryNationality: 'India',
+    });
+
+    // Registered players with 2D cartoon face portraits
+    expect(metaBumrah.classification).toBe('GENERATED_ILLUSTRATION');
+    expect(metaBumrah.src).toBe(`/assets/players/${CANONICAL_BENCHMARK_UUIDS.JASPRIT_BUMRAH}.svg`);
+    expect(metaMcGrath.classification).toBe('GENERATED_ILLUSTRATION');
+    expect(metaMcGrath.src).toBe(`/assets/players/${CANONICAL_BENCHMARK_UUIDS.GLENN_MCGRATH}.svg`);
+
+    // Unknown player falls back to generic 2D cartoon avatar
+    expect(metaUnknown.classification).toBe('GENERIC_AVATAR');
+    expect(metaUnknown.src).toContain('data:image/svg+xml');
+  });
+
+  it('resolves correct 2D cartoon faces for talent pool benchmark players', () => {
+    const playersToTest = [
+      { id: 'f1e20000-0004-4000-8000-000000000004', name: 'Glenn McGrath' },
+      { id: 'f1e20000-0005-4000-8000-000000000005', name: 'Muttiah Muralitharan' },
+      { id: 'f1e10000-0003-4000-8000-000000000003', name: 'Jasprit Bumrah' },
+      { id: 'f1e20000-0001-4000-8000-000000000001', name: 'Sachin Tendulkar' },
+      { id: 'f1e20000-0053-4000-8000-000000000053', name: 'Adam Parore' },
+      { id: 'f1e20000-006c-4000-8000-00000000006c', name: 'Romesh Kaluwitharana' },
+    ];
+
+    for (const p of playersToTest) {
+      const meta = resolvePlayerImage({ id: p.id, fullName: p.name });
+      expect(meta.classification).toBe('GENERATED_ILLUSTRATION');
+      expect(meta.src).toBe(`/assets/players/${p.id}.svg`);
+    }
+
+    // Name-only resolution when ID is omitted
+    const metaByName = resolvePlayerImage({ fullName: 'Sachin Tendulkar' });
+    expect(metaByName.src).toBe('/assets/players/f1e20000-0001-4000-8000-000000000001.svg');
+    expect(metaByName.classification).toBe('GENERATED_ILLUSTRATION');
   });
 
   it('is completely deterministic given the same inputs', () => {

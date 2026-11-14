@@ -168,7 +168,7 @@ const JERSEY_ACCENTS = {
 };
 
 /* ------------------------------------------------------------------ *
- * Age / era
+ * Age / era & Iconic Player Likeness Overrides
  * ------------------------------------------------------------------ */
 
 function eraFor(debutYear) {
@@ -181,6 +181,145 @@ function eraFor(debutYear) {
   if (debutYear <= 2020) return 'T20 Revolution (2008-2020)';
   return 'Contemporary (2021-Present)';
 }
+
+function normName(name) {
+  return String(name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+/**
+ * Authentic 2D cartoon caricatures for legendary and iconic international cricketers
+ */
+const ICONIC_PLAYER_LIKENESSES = {
+  // India
+  sachintendulkar: { skin: 'fair', hairStyle: 'medium-wave', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  viratkohli: { skin: 'tan', hairStyle: 'buzz', hairColor: 'black', beardStyle: 'short-beard', expression: 'focused', ageBand: 'prime' },
+  rohitsharma: { skin: 'bronze', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'stubble', expression: 'soft-smile', ageBand: 'prime' },
+  jaspritbumrah: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  msdhoni: { skin: 'bronze', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'stubble', expression: 'neutral', ageBand: 'prime' },
+  sunilgavaskar: { skin: 'fair', hairStyle: 'side-part', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  kapildev: { skin: 'bronze', hairStyle: 'medium-wave', hairColor: 'black', beardStyle: 'moustache', expression: 'soft-smile', ageBand: 'prime' },
+  rahuldravid: { skin: 'fair', hairStyle: 'side-part', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  souravganguly: { skin: 'fair', hairStyle: 'medium-wave', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  virendersehwag: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  yuvrajsingh: { skin: 'bronze', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'stubble', expression: 'soft-smile', ageBand: 'prime' },
+  ravindrajadeja: { skin: 'bronze', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'full-beard', expression: 'focused', ageBand: 'prime' },
+  ravichandranashwin: { skin: 'bronze', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  hardikpandya: { skin: 'bronze', hairStyle: 'buzz', hairColor: 'black', beardStyle: 'goatee', expression: 'focused', ageBand: 'prime' },
+  klrahul: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'short-beard', expression: 'soft-smile', ageBand: 'prime' },
+  suryakumaryadav: { skin: 'tan', hairStyle: 'side-part', hairColor: 'black', beardStyle: 'goatee', expression: 'soft-smile', ageBand: 'prime' },
+  shubmangill: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'stubble', expression: 'soft-smile', ageBand: 'young' },
+  yashasvijaiswal: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'young' },
+  mohammedshami: { skin: 'bronze', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'short-beard', expression: 'soft-smile', ageBand: 'prime' },
+  kuldeepyadav: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'young' },
+  rishabhpant: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'stubble', expression: 'soft-smile', ageBand: 'young' },
+  anilqumble: { skin: 'fair', hairStyle: 'side-part', hairColor: 'black', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+  anilkumble: { skin: 'fair', hairStyle: 'side-part', hairColor: 'black', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+  zaheerkhan: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  harbhajansingh: { skin: 'fair', hairStyle: 'tied-back', hairColor: 'black', beardStyle: 'full-beard', expression: 'focused', ageBand: 'prime' },
+  gautamgambhir: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+
+  // Australia
+  shanewarne: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'blond', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  glennmcgrath: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'light brown', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+  rickyponting: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'brown', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+  stevesmith: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'blond', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+  patcummins: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'dark blond', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  davidwarner: { skin: 'fair', hairStyle: 'buzz', hairColor: 'blond', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+  mitchellstarc: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'brown', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+  travishead: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'brown', beardStyle: 'moustache', expression: 'soft-smile', ageBand: 'prime' },
+  glennmaxwell: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'brown', beardStyle: 'stubble', expression: 'soft-smile', ageBand: 'prime' },
+  adamgilchrist: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'dark blond', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  matthewhayden: { skin: 'fair', hairStyle: 'buzz', hairColor: 'dark blond', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+  michaellehmann: { skin: 'fair', hairStyle: 'bald', hairColor: 'shaved', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  brettle: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'blond', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  brettlee: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'blond', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  allanborder: { skin: 'fair', hairStyle: 'side-part', hairColor: 'brown', beardStyle: 'moustache', expression: 'focused', ageBand: 'prime' },
+  donbradman: { skin: 'porcelain', hairStyle: 'side-part', hairColor: 'brown', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+  stevewaugh: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'brown', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+
+  // West Indies
+  brianlara: { skin: 'deep', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  chrisgayle: { skin: 'deep', hairStyle: 'tied-back', hairColor: 'black', beardStyle: 'full-beard', expression: 'soft-smile', ageBand: 'prime' },
+  vivianrichards: { skin: 'rich', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'stubble', expression: 'focused', ageBand: 'prime' },
+  vivrichards: { skin: 'rich', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'stubble', expression: 'focused', ageBand: 'prime' },
+  curtlyambrose: { skin: 'deep', hairStyle: 'buzz', hairColor: 'black', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+  courtneywalsh: { skin: 'deep', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  malcolmmarshall: { skin: 'deep', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'moustache', expression: 'focused', ageBand: 'prime' },
+  clivelloyd: { skin: 'deep', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'moustache', expression: 'focused', ageBand: 'prime' },
+  garfieldsobers: { skin: 'brown', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  michaelholding: { skin: 'deep', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+  joelgarner: { skin: 'rich', hairStyle: 'buzz', hairColor: 'black', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+  shivanarinechanderpaul: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+  dwaynbravo: { skin: 'deep', hairStyle: 'buzz', hairColor: 'black', beardStyle: 'short-beard', expression: 'soft-smile', ageBand: 'prime' },
+  dwaynebravo: { skin: 'deep', hairStyle: 'buzz', hairColor: 'black', beardStyle: 'short-beard', expression: 'soft-smile', ageBand: 'prime' },
+  andre_russell: { skin: 'deep', hairStyle: 'buzz', hairColor: 'black', beardStyle: 'short-beard', expression: 'focused', ageBand: 'prime' },
+  andrerussell: { skin: 'deep', hairStyle: 'buzz', hairColor: 'black', beardStyle: 'short-beard', expression: 'focused', ageBand: 'prime' },
+  kieronpollard: { skin: 'deep', hairStyle: 'buzz', hairColor: 'black', beardStyle: 'short-beard', expression: 'focused', ageBand: 'prime' },
+
+  // Sri Lanka
+  muttiahmuralitharan: { skin: 'tan', hairStyle: 'medium-wave', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  romeshkaluwitharana: { skin: 'bronze', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  lasithmalinga: { skin: 'bronze', hairStyle: 'curly-short', hairColor: 'blond', beardStyle: 'goatee', expression: 'soft-smile', ageBand: 'prime' },
+  kumarsangakkara: { skin: 'tan', hairStyle: 'side-part', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  mahelajayawardene: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  sanathjayasuriya: { skin: 'tan', hairStyle: 'bald', hairColor: 'shaved', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+  chamindavaas: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  aravindadesilva: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+
+  // Pakistan
+  wasimakram: { skin: 'tan', hairStyle: 'medium-wave', hairColor: 'dark brown', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  waqaryounis: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+  imrankhan: { skin: 'tan', hairStyle: 'medium-wave', hairColor: 'dark brown', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  babarazam: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'short-beard', expression: 'soft-smile', ageBand: 'prime' },
+  shaheenshahafridi: { skin: 'tan', hairStyle: 'side-part', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'young' },
+  shaoibakhtar: { skin: 'tan', hairStyle: 'side-part', hairColor: 'dark brown', beardStyle: 'stubble', expression: 'focused', ageBand: 'prime' },
+  shoaibakhtar: { skin: 'tan', hairStyle: 'side-part', hairColor: 'dark brown', beardStyle: 'stubble', expression: 'focused', ageBand: 'prime' },
+  inzamamulhaq: { skin: 'bronze', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'full-beard', expression: 'soft-smile', ageBand: 'prime' },
+  shahidafridi: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'dark brown', beardStyle: 'short-beard', expression: 'focused', ageBand: 'prime' },
+  saeedanwar: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'full-beard', expression: 'soft-smile', ageBand: 'prime' },
+  youniskhan: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  mohammadrizwan: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'short-beard', expression: 'soft-smile', ageBand: 'prime' },
+
+  // South Africa
+  jacqueskallis: { skin: 'fair', hairStyle: 'receding', hairColor: 'light brown', beardStyle: 'clean', expression: 'neutral', ageBand: 'prime' },
+  abdevilliers: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'blond', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  dalesteyn: { skin: 'fair', hairStyle: 'buzz', hairColor: 'dark brown', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+  shaunpollock: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'red', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  allandonald: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'blond', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+  kagisorabada: { skin: 'deep', hairStyle: 'buzz', hairColor: 'black', beardStyle: 'clean', expression: 'focused', ageBand: 'young' },
+  jontyrhodes: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'brown', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  fafduplessis: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'dark brown', beardStyle: 'short-beard', expression: 'focused', ageBand: 'prime' },
+  quindondekock: { skin: 'fair', hairStyle: 'buzz', hairColor: 'brown', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'young' },
+  quintondekock: { skin: 'fair', hairStyle: 'buzz', hairColor: 'brown', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'young' },
+
+  // England
+  joeroot: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'light brown', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  benstokes: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'auburn', beardStyle: 'short-beard', expression: 'focused', ageBand: 'prime' },
+  jamesanderson: { skin: 'fair', hairStyle: 'side-part', hairColor: 'dark brown', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+  stuartbroad: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'blond', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  kevinpietersen: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'dark brown', beardStyle: 'stubble', expression: 'soft-smile', ageBand: 'prime' },
+  ianbotham: { skin: 'fair', hairStyle: 'medium-wave', hairColor: 'brown', beardStyle: 'moustache', expression: 'focused', ageBand: 'prime' },
+  alastaircook: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'dark brown', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  josbuttler: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'brown', beardStyle: 'short-beard', expression: 'soft-smile', ageBand: 'prime' },
+  jofraarcher: { skin: 'deep', hairStyle: 'buzz', hairColor: 'black', beardStyle: 'clean', expression: 'focused', ageBand: 'young' },
+
+  // New Zealand
+  kanewilliamson: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'brown', beardStyle: 'full-beard', expression: 'soft-smile', ageBand: 'prime' },
+  brendonmccullum: { skin: 'fair', hairStyle: 'buzz', hairColor: 'dark brown', beardStyle: 'stubble', expression: 'focused', ageBand: 'prime' },
+  trentboult: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'dark brown', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  richardhadlee: { skin: 'fair', hairStyle: 'side-part', hairColor: 'brown', beardStyle: 'clean', expression: 'focused', ageBand: 'prime' },
+  adamparore: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'clean', expression: 'neutral', ageBand: 'prime' },
+  timsouthee: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'brown', beardStyle: 'stubble', expression: 'soft-smile', ageBand: 'prime' },
+  rossrichardson: { skin: 'fair', hairStyle: 'short-crop', hairColor: 'dark brown', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+  rosstaylor: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'clean', expression: 'soft-smile', ageBand: 'prime' },
+
+  // Bangladesh & Afghanistan
+  shakibalhasan: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'stubble', expression: 'focused', ageBand: 'prime' },
+  tamimiqbal: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'short-beard', expression: 'soft-smile', ageBand: 'prime' },
+  mushfiqurrahim: { skin: 'tan', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'short-beard', expression: 'soft-smile', ageBand: 'prime' },
+  rashidkhan: { skin: 'bronze', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'goatee', expression: 'soft-smile', ageBand: 'prime' },
+  mohammadnabi: { skin: 'bronze', hairStyle: 'short-crop', hairColor: 'black', beardStyle: 'short-beard', expression: 'soft-smile', ageBand: 'prime' },
+};
 
 /* ------------------------------------------------------------------ *
  * Portrait construction
@@ -196,13 +335,18 @@ function traitKey(meta) {
 function buildPortrait(p, salt = 0) {
   const rng = makeRng(p.id + '|' + p.fullName + '|' + salt);
   const key = (p.primaryNationality || 'International').trim();
-  const skinKey = rng.weighted(SKIN_DISTRIBUTION[key] || SKIN_DISTRIBUTION.England);
+  const norm = normName(p.fullName);
+  const override = ICONIC_PLAYER_LIKENESSES[norm] || ICONIC_PLAYER_LIKENESSES[p.id];
+
+  let skinKey = override?.skin || rng.weighted(SKIN_DISTRIBUTION[key] || SKIN_DISTRIBUTION.England);
   const skin = SKIN[skinKey];
 
   const debut = p.careerDebutYear || 0;
   const currentYear = 2026;
   let ageBand;
-  if (debut >= 2019) ageBand = rng.chance(0.75) ? 'young' : 'prime';
+  if (override?.ageBand) {
+    ageBand = override.ageBand;
+  } else if (debut >= 2019) ageBand = rng.chance(0.75) ? 'young' : 'prime';
   else if (debut >= 2008) ageBand = rng.chance(0.45) ? 'prime' : (rng.chance(0.5) ? 'veteran' : 'young');
   else if (debut >= 1990) ageBand = rng.chance(0.6) ? 'veteran' : 'prime';
   else if (debut > 0) ageBand = 'veteran';
@@ -245,28 +389,43 @@ function buildPortrait(p, salt = 0) {
   const mouthHalf = rng.range(17, 23);
   const upperLip = rng.range(3.6, 6);
   const lowerLip = rng.range(5, 8.2);
-  const expression = rng.weighted([['neutral', 46], ['soft-smile', 38], ['focused', 16]]);
+  const expression = override?.expression || rng.weighted([['neutral', 46], ['soft-smile', 38], ['focused', 16]]);
 
   const earRY = rng.range(21, 27);
   const earRX = rng.range(9, 12.5);
 
-  const hairStyle = rng.weighted([
-    ['short-crop', 22], ['buzz', 12], ['side-part', 14], ['curly-short', 12],
-    ['afro', 7], ['bald', 8], ['receding', 9], ['medium-wave', 9],
-    ['tied-back', 4], ['long', 3],
-  ].filter(([s]) => s !== 'afro' || ['West Indies', 'Zimbabwe', 'South Africa', 'Australia', 'England', 'United States', 'USA', 'Namibia'].includes(key))
-    .filter(([s]) => s !== 'long' || isYoung || rng.chance(0.4)));
+  let hairStyle;
+  if (override?.hairStyle) {
+    hairStyle = override.hairStyle;
+  } else {
+    hairStyle = rng.weighted([
+      ['short-crop', 22], ['buzz', 12], ['side-part', 14], ['curly-short', 12],
+      ['afro', 7], ['bald', 8], ['receding', 9], ['medium-wave', 9],
+      ['tied-back', 4], ['long', 3],
+    ].filter(([s]) => s !== 'afro' || ['West Indies', 'Zimbabwe', 'South Africa', 'Australia', 'England', 'United States', 'USA', 'Namibia'].includes(key))
+      .filter(([s]) => s !== 'long' || isYoung || rng.chance(0.4)));
+  }
 
-  let hairKey = rng.weighted(HAIR_DISTRIBUTION);
-  if (isVeteran && rng.chance(0.55)) hairKey = rng.weighted([['grey', 40], ['salt and pepper', 46], ['white', 14]]);
-  else if (!isYoung && rng.chance(0.22)) hairKey = rng.weighted([['salt and pepper', 70], ['grey', 30]]);
-  if (hairStyle === 'bald') hairKey = 'shaved';
+  let hairKey;
+  if (override?.hairColor) {
+    hairKey = override.hairColor;
+  } else {
+    hairKey = rng.weighted(HAIR_DISTRIBUTION);
+    if (isVeteran && rng.chance(0.55)) hairKey = rng.weighted([['grey', 40], ['salt and pepper', 46], ['white', 14]]);
+    else if (!isYoung && rng.chance(0.22)) hairKey = rng.weighted([['salt and pepper', 70], ['grey', 30]]);
+    if (hairStyle === 'bald') hairKey = 'shaved';
+  }
   const hair = HAIR[hairKey];
 
-  const beardStyle = rng.weighted([
-    ['clean', 34], ['stubble', 20], ['moustache', 12], ['goatee', 10],
-    ['short-beard', 15], ['full-beard', 9],
-  ].filter(([s]) => s !== 'full-beard' || !isYoung || rng.chance(0.3)));
+  let beardStyle;
+  if (override?.beardStyle) {
+    beardStyle = override.beardStyle;
+  } else {
+    beardStyle = rng.weighted([
+      ['clean', 34], ['stubble', 20], ['moustache', 12], ['goatee', 10],
+      ['short-beard', 15], ['full-beard', 9],
+    ].filter(([s]) => s !== 'full-beard' || !isYoung || rng.chance(0.3)));
+  }
 
   const accent = JERSEY_ACCENTS[key] || '#2E8B7A';
   const jerseyDark = shade(accent, -0.74);
@@ -776,13 +935,16 @@ for (const p of registry) {
   if (seenIds.has(p.id)) throw new Error('Duplicate player id: ' + p.id);
   seenIds.add(p.id);
 
+  const norm = normName(p.fullName);
+  const isIconic = !!(ICONIC_PLAYER_LIKENESSES[norm] || ICONIC_PLAYER_LIKENESSES[p.id]);
+
   let built = buildPortrait(p, 0);
   let attempts = 0;
-  while (signatureCounts.has(traitKey(built.meta)) && attempts < 60) {
+  while (!isIconic && signatureCounts.has(traitKey(built.meta)) && attempts < 60) {
     attempts++;
     built = buildPortrait(p, attempts);
   }
-  if (signatureCounts.has(traitKey(built.meta))) {
+  if (!isIconic && signatureCounts.has(traitKey(built.meta))) {
     console.warn(`Unable to resolve trait collision for ${p.id} after ${attempts} attempts`);
   }
   const { svg, meta } = built;

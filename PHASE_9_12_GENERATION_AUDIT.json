@@ -2,13 +2,90 @@
   "totalPlayers": 1144,
   "assetsWritten": 1144,
   "uniqueFileHashes": 1144,
-  "totalBytes": 15996024,
-  "averageBytes": 13983,
-  "traitCombinationCollisions": 0,
-  "collisionExamples": [],
+  "totalBytes": 15937242,
+  "averageBytes": 13931,
+  "traitCombinationCollisions": 23,
+  "collisionExamples": [
+    {
+      "sig": {
+        "skinTone": "bronze",
+        "hairStyle": "short-crop",
+        "hairColor": "black",
+        "facialHair": "stubble",
+        "expression": "soft-smile",
+        "ageBand": "prime"
+      },
+      "ids": [
+        "f1e10000-0001-4000-8000-000000000001",
+        "f1e20000-001d-4000-8000-00000000001d"
+      ]
+    },
+    {
+      "sig": {
+        "skinTone": "tan",
+        "hairStyle": "short-crop",
+        "hairColor": "black",
+        "facialHair": "clean",
+        "expression": "soft-smile",
+        "ageBand": "prime"
+      },
+      "ids": [
+        "f1e10000-0003-4000-8000-000000000003",
+        "f1e20000-0046-4000-8000-000000000046",
+        "f1e20000-0065-4000-8000-000000000065",
+        "f1e20000-0068-4000-8000-000000000068",
+        "f1e20000-006a-4000-8000-00000000006a",
+        "f1e20000-0076-4000-8000-000000000076"
+      ]
+    },
+    {
+      "sig": {
+        "skinTone": "tan",
+        "hairStyle": "short-crop",
+        "hairColor": "black",
+        "facialHair": "stubble",
+        "expression": "soft-smile",
+        "ageBand": "young"
+      },
+      "ids": [
+        "f1e10000-0004-4000-8000-000000000004",
+        "f1e10000-0009-4000-8000-000000000009"
+      ]
+    },
+    {
+      "sig": {
+        "skinTone": "tan",
+        "hairStyle": "short-crop",
+        "hairColor": "black",
+        "facialHair": "clean",
+        "expression": "soft-smile",
+        "ageBand": "young"
+      },
+      "ids": [
+        "f1e10000-0005-4000-8000-000000000005",
+        "f1e10000-000e-4000-8000-00000000000e"
+      ]
+    },
+    {
+      "sig": {
+        "skinTone": "tan",
+        "hairStyle": "short-crop",
+        "hairColor": "black",
+        "facialHair": "short-beard",
+        "expression": "soft-smile",
+        "ageBand": "prime"
+      },
+      "ids": [
+        "f1e10000-000a-4000-8000-00000000000a",
+        "f1e10000-0065-4000-8000-000000000065",
+        "f1e10000-0066-4000-8000-000000000066",
+        "f1e10000-00e8-4000-8000-0000000000e8"
+      ]
+    }
+  ],
   "imagesByType": {
     "generated": 1144,
     "authentic": 0
   },
-  "generatedAt": "2026-11-11T04:43:56.782Z"
+  "generatedAt": "2026-11-14T17:44:24.029Z"
 }

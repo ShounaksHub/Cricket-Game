@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { getAuthoritativePlayerImage } from '@/lib/player-image-resolver';
+import { getAuthoritativePlayerImage, generateDeterministicCricketAvatar } from '@/lib/player-image-resolver';
 import type {
   MatchFormat,
   PlayerProfile,
@@ -455,7 +455,7 @@ export default function PlayerCataloguePage() {
                           className="w-16 h-16 rounded-lg object-cover bg-surface-recessed shrink-0"
                           src={portrait}
                           onError={(e) => {
-                            e.currentTarget.src = '/assets/stitch/asset-004.png';
+                            e.currentTarget.src = generateDeterministicCricketAvatar(player);
                           }}
                         />
                         <div className="flex flex-col min-w-0 pr-12">
@@ -599,7 +599,7 @@ export default function PlayerCataloguePage() {
                           className="w-28 h-28 sm:w-32 sm:h-32 rounded-xl object-cover bg-surface-recessed shadow-lg"
                           src={getPlayerPortrait(activePlayer, 0)}
                           onError={(e) => {
-                            e.currentTarget.src = '/assets/stitch/asset-004.png';
+                            e.currentTarget.src = generateDeterministicCricketAvatar(activePlayer);
                           }}
                         />
                         <div className="absolute -bottom-2 -right-2 bg-tertiary text-on-tertiary px-2 py-0.5 rounded font-label-caps text-[11px] font-extrabold shadow-md">

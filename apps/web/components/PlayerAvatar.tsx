@@ -50,6 +50,18 @@ export function PlayerAvatar({
         className="w-full h-full object-cover"
         loading="lazy"
         decoding="async"
+        onError={(e) => {
+          // Graceful fallback to deterministic 2D cartoon avatar if external asset fails
+          e.currentTarget.src = generateDeterministicCricketAvatar({
+            id,
+            fullName,
+            displayName,
+            primaryRole,
+            primaryNationality,
+            battingHand,
+            bowlingStyle,
+          });
+        }}
       />
       {showBadge && (
         <span
