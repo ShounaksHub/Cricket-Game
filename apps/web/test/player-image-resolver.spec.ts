@@ -48,7 +48,7 @@ describe('Player Image Resolver & Deterministic Avatar System', () => {
     expect(decodeURIComponent(mcgrathUri)).toContain('GM');
   });
 
-  it('resolves registered benchmark players to individual 2D vector portraits and unknown players to GENERIC_AVATAR', () => {
+  it('resolves registered benchmark players to individual realistic portraits and unknown players to realistic generic fallback', () => {
     const metaBumrah = resolvePlayerImage({
       id: CANONICAL_BENCHMARK_UUIDS.JASPRIT_BUMRAH,
       fullName: 'Jasprit Bumrah',
@@ -66,41 +66,48 @@ describe('Player Image Resolver & Deterministic Avatar System', () => {
     const metaUnknown = resolvePlayerImage({
       id: '00000000-0000-0000-0000-000000000000',
       fullName: 'Local Club Cricketer',
-      primaryRole: 'ALL_ROUNDER',
+      primaryRole: 'PACE_BOWLER',
       primaryNationality: 'India',
     });
 
-    // Registered players with 2D cartoon face portraits
-    expect(metaBumrah.classification).toBe('GENERATED_ILLUSTRATION');
-    expect(metaBumrah.src).toBe(`/assets/players/${CANONICAL_BENCHMARK_UUIDS.JASPRIT_BUMRAH}.svg`);
-    expect(metaMcGrath.classification).toBe('GENERATED_ILLUSTRATION');
-    expect(metaMcGrath.src).toBe(`/assets/players/${CANONICAL_BENCHMARK_UUIDS.GLENN_MCGRATH}.svg`);
+    // Registered players with authentic realistic portraits
+    expect(metaBumrah.classification).toBe('VERIFIED_AUTHENTIC');
+    expect(metaBumrah.src).toContain('/assets/players/realistic/');
+    expect(metaMcGrath.classification).toBe('VERIFIED_AUTHENTIC');
+    expect(metaMcGrath.src).toContain('/assets/players/realistic/');
 
-    // Unknown player falls back to generic 2D cartoon avatar
+    // Unknown player falls back to realistic generic role-based image
     expect(metaUnknown.classification).toBe('GENERIC_AVATAR');
-    expect(metaUnknown.src).toContain('data:image/svg+xml');
+    expect(metaUnknown.src).toBe('/assets/players/realistic/generic-fast-bowler.jpg');
   });
 
-  it('resolves correct 2D cartoon faces for talent pool benchmark players', () => {
-    const playersToTest = [
-      { id: 'f1e20000-0004-4000-8000-000000000004', name: 'Glenn McGrath' },
-      { id: 'f1e20000-0005-4000-8000-000000000005', name: 'Muttiah Muralitharan' },
-      { id: 'f1e10000-0003-4000-8000-000000000003', name: 'Jasprit Bumrah' },
-      { id: 'f1e20000-0001-4000-8000-000000000001', name: 'Sachin Tendulkar' },
-      { id: 'f1e20000-0053-4000-8000-000000000053', name: 'Adam Parore' },
-      { id: 'f1e20000-006c-4000-8000-00000000006c', name: 'Romesh Kaluwitharana' },
-    ];
+  it('resolves individual realistic portraits or role-based realistic fallbacks for talent pool benchmark players', () => {
+    // Individual realistic portraits
+    const bumrahMeta = resolvePlayerImage({ id: 'f1e10000-0003-4000-8000-000000000003', fullName: 'Jasprit Bumrah' });
+    expect(bumrahMeta.classification).toBe('VERIFIED_AUTHENTIC');
+    expect(bumrahMeta.src).toBe('/assets/players/realistic/f1e10000-0003-4000-8000-000000000003.png');
 
-    for (const p of playersToTest) {
-      const meta = resolvePlayerImage({ id: p.id, fullName: p.name });
-      expect(meta.classification).toBe('GENERATED_ILLUSTRATION');
-      expect(meta.src).toBe(`/assets/players/${p.id}.svg`);
-    }
+    const mcgrathMeta = resolvePlayerImage({ id: 'f1e20000-0004-4000-8000-000000000004', fullName: 'Glenn McGrath' });
+    expect(mcgrathMeta.classification).toBe('VERIFIED_AUTHENTIC');
+    expect(mcgrathMeta.src).toBe('/assets/players/realistic/f1e20000-0004-4000-8000-000000000004.png');
+
+    const tendulkarMeta = resolvePlayerImage({ id: 'f1e20000-0001-4000-8000-000000000001', fullName: 'Sachin Tendulkar' });
+    expect(tendulkarMeta.classification).toBe('VERIFIED_AUTHENTIC');
+    expect(tendulkarMeta.src).toBe('/assets/players/realistic/f1e20000-0001-4000-8000-000000000001.png');
 
     // Name-only resolution when ID is omitted
     const metaByName = resolvePlayerImage({ fullName: 'Sachin Tendulkar' });
-    expect(metaByName.src).toBe('/assets/players/f1e20000-0001-4000-8000-000000000001.svg');
-    expect(metaByName.classification).toBe('GENERATED_ILLUSTRATION');
+    expect(metaByName.src).toBe('/assets/players/realistic/f1e20000-0001-4000-8000-000000000001.png');
+    expect(metaByName.classification).toBe('VERIFIED_AUTHENTIC');
+
+    // Fallback to realistic role-based archetype when individual portrait is pending
+    const paroreMeta = resolvePlayerImage({
+      id: 'f1e20000-0053-4000-8000-000000000053',
+      fullName: 'Adam Parore',
+      primaryRole: 'WICKETKEEPER_BATTER',
+    });
+    expect(paroreMeta.classification).toBe('GENERIC_AVATAR');
+    expect(paroreMeta.src).toBe('/assets/players/realistic/generic-wicketkeeper.jpg');
   });
 
   it('is completely deterministic given the same inputs', () => {

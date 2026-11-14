@@ -18,6 +18,11 @@
 
 import { VERIFIED_BENCHMARK_PLAYERS } from '@cricket/data-ingestion';
 import { hasGeneratedPortrait, PLAYER_PORTRAIT_IDS } from './player-portrait-manifest';
+import {
+  REALISTIC_INDIVIDUAL_PORTRAITS,
+  hasRealisticPortrait,
+  getRealisticFallback,
+} from './realistic-portrait-manifest';
 
 export type ImageClassificationStatus =
   | 'VERIFIED_AUTHENTIC'
@@ -205,8 +210,8 @@ export function generateDeterministicCricketAvatar(player: PlayerImageInput): st
 
 /**
  * Resolve player image metadata with classification.
- * Prioritizes individual 2D vector cartoon portraits from /assets/players/{id}.svg,
- * falling back to deterministic 2D cartoon avatars where an individual portrait is unavailable.
+ * Prioritizes individual realistic broadcast portraits from /assets/players/realistic/{id}.(jpg|png),
+ * falling back to high-end realistic broadcast role archetypes, and then 2D cartoon portraits.
  */
 export function resolvePlayerImage(player: PlayerImageInput): PlayerImageMeta {
   const rawId = player.id?.trim() || '';
@@ -214,14 +219,37 @@ export function resolvePlayerImage(player: PlayerImageInput): PlayerImageMeta {
 
   // 1. Resolve to canonical UUID
   let resolvedId = rawId;
-  if (!resolvedId || !hasGeneratedPortrait(resolvedId)) {
+  if (!resolvedId || (!hasRealisticPortrait(resolvedId) && !hasGeneratedPortrait(resolvedId))) {
     const norm = normalizeKey(fullName);
     if (norm && NAME_TO_PLAYER_ID.has(norm)) {
       resolvedId = NAME_TO_PLAYER_ID.get(norm)!;
     }
   }
 
-  // 2. If individual 2D vector cartoon portrait exists in /assets/players/{id}.svg
+  // 2. Individual Realistic Broadcast Portrait (Marquee & Batch 1)
+  if (resolvedId && hasRealisticPortrait(resolvedId)) {
+    return {
+      playerId: resolvedId,
+      src: REALISTIC_INDIVIDUAL_PORTRAITS[resolvedId],
+      classification: 'VERIFIED_AUTHENTIC',
+      altText: `${fullName} (${player.primaryRole || 'Cricket Player'} - ${player.primaryNationality || 'International'})`,
+      sourceNote: 'Realistic broadcast sports portrait photography',
+    };
+  }
+
+  // 3. Realistic Role-Based Generic Image (for any player where specific photo is not yet generated)
+  const realisticFallbackSrc = getRealisticFallback(player.primaryRole);
+  if (realisticFallbackSrc) {
+    return {
+      playerId: resolvedId || 'generic',
+      src: realisticFallbackSrc,
+      classification: 'GENERIC_AVATAR',
+      altText: `${fullName || 'Cricket Player'} (${player.primaryRole || 'Player'} - ${player.primaryNationality || 'International'})`,
+      sourceNote: 'Realistic cinematic broadcast profile archetype',
+    };
+  }
+
+  // 4. Fallback: 2D vector cartoon portrait from /assets/players/{id}.svg
   if (resolvedId && hasGeneratedPortrait(resolvedId)) {
     return {
       playerId: resolvedId,
@@ -232,7 +260,7 @@ export function resolvePlayerImage(player: PlayerImageInput): PlayerImageMeta {
     };
   }
 
-  // 3. Fallback: High-quality generic 2D cartoon avatar
+  // 5. Ultimate Fallback: High-quality generic 2D cartoon avatar
   const avatarUri = generateDeterministicCricketAvatar(player);
 
   return {
