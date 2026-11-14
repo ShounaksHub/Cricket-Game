@@ -350,6 +350,6 @@ Contributions are what make the open-source community such an amazing place to l
 ---
 
 <p align="center">
-  Made with ❤️, leather, willow, and pure TypeScript for cricket fans worldwide.<br>
+  Made with ❤️ By Shounak,for cricket fans worldwide.<br>
   <strong>Don't forget to leave a ⭐ if you enjoyed playing!</strong>
 </p>
