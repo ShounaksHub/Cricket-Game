@@ -148,7 +148,7 @@ export function WelcomeModal({ forceOpen, onClose }: WelcomeModalProps) {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="p-4 rounded-xl bg-surface-container border border-border-hairline">
-                  <div className="w-8 h-8 rounded-lg bg-sky-950/60 border border-primary/30 flex items-center justify-center text-primary mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/25 flex items-center justify-center text-primary mb-2">
                     <Shield className="w-4 h-4" />
                   </div>
                   <h4 className="text-xs font-bold text-text-chalk mb-1">1. Squad Selection</h4>
@@ -158,17 +158,17 @@ export function WelcomeModal({ forceOpen, onClose }: WelcomeModalProps) {
                 </div>
 
                 <div className="p-4 rounded-xl bg-surface-container border border-border-hairline">
-                  <div className="w-8 h-8 rounded-lg bg-amber-950/60 border border-warning-amber/30 flex items-center justify-center text-warning-amber mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-secondary/15 border border-secondary/35 flex items-center justify-center text-secondary mb-2">
                     <Sliders className="w-4 h-4" />
                   </div>
-                  <h4 className="text-xs font-bold text-text-chalk mb-1">2. Venue & Toss</h4>
+                  <h4 className="text-xs font-bold text-text-chalk mb-1">2. Venue &amp; Toss</h4>
                   <p className="text-[11px] text-text-slate leading-normal">
                     Select authentic grounds (MCG, Lord&apos;s, Wankhede) and pitch conditions. Call the coin toss to decide Bat or Bowl.
                   </p>
                 </div>
 
                 <div className="p-4 rounded-xl bg-surface-container border border-border-hairline">
-                  <div className="w-8 h-8 rounded-lg bg-[#2D545E]/20 border border-primary/30 flex items-center justify-center text-primary mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/25 flex items-center justify-center text-primary mb-2">
                     <Activity className="w-4 h-4" />
                   </div>
                   <h4 className="text-xs font-bold text-text-chalk mb-1">3. Live Match Simulation</h4>

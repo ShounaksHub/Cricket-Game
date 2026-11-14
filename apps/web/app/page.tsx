@@ -204,7 +204,7 @@ export default function HomeScreen() {
         <div className="absolute inset-0 bg-gradient-to-t from-[#12343B]/95 via-[#2D545E]/80 to-[#2D545E]/40 pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#12343B]/90 via-[#2D545E]/60 to-transparent pointer-events-none" />
 
-        {/* Stadium Live Telemetry Overline Tag */}
+        {/* Stadium Live Status Overline Tag */}
         <div className="relative z-10 flex flex-wrap items-center justify-between gap-space-sm w-full">
           <div className="flex items-center gap-space-xs bg-[#12343B]/90 backdrop-blur-md px-space-md py-space-xs rounded-full border border-[#C89666]/30 shadow-sm">
             <span className="w-2 h-2 rounded-full bg-[#E1B382] animate-ping" />
@@ -212,25 +212,25 @@ export default function HomeScreen() {
             <span className="font-label-caps text-label-caps text-[#E1B382] tracking-widest uppercase font-bold">
               CRICKET DREAM XI
             </span>
-            <span className="text-[#D8C9B5] font-label-caps text-label-caps">/</span>
+            <span className="text-[#D8C9B5] font-label-caps text-label-caps">•</span>
             <span className="font-label-caps text-label-caps text-[#FBF8F2]">
-              A local cricket simulator
+              TACTICAL MATCH SIMULATOR
             </span>
           </div>
 
-          {/* Quick Match Telemetry Pill */}
+          {/* Match Conditions Bar */}
           <div className="hidden md:flex items-center gap-space-md bg-[#12343B]/80 backdrop-blur-md px-space-md py-space-xs rounded-lg border border-[#2D545E] shadow-sm">
             <div className="flex items-center gap-space-xs">
               <span className="material-symbols-outlined text-[16px] text-[#E1B382]">wb_sunny</span>
-              <span className="font-label-caps text-label-caps text-[#FBF8F2]">DAY-NIGHT DRY CRACK</span>
+              <span className="font-label-caps text-label-caps text-[#FBF8F2]">DRY CRACK PITCH</span>
             </div>
             <div className="flex items-center gap-space-xs">
               <span className="material-symbols-outlined text-[16px] text-[#D8C9B5]">air</span>
-              <span className="font-label-caps text-label-caps text-[#D8C9B5]">14 KM/H CROSSWIND</span>
+              <span className="font-label-caps text-label-caps text-[#D8C9B5]">14 KM/H BREEZE</span>
             </div>
             <div className="flex items-center gap-space-xs">
               <span className="material-symbols-outlined text-[16px] text-[#E1B382]">speed</span>
-              <span className="font-label-caps text-label-caps text-[#E1B382]">FAST OUTFIELD (1.2x)</span>
+              <span className="font-label-caps text-label-caps text-[#E1B382]">FAST OUTFIELD</span>
             </div>
           </div>
         </div>
@@ -244,27 +244,25 @@ export default function HomeScreen() {
               height={28}
               className="h-7 w-auto"
             />
-              <span className="px-space-sm py-1 rounded-full bg-[#12343B] font-label-caps text-label-caps text-[#E1B382] tracking-widest shadow-sm border border-[#C89666]/30 flex items-center gap-1.5 font-bold">
+            <span className="px-space-sm py-1 rounded-full bg-[#12343B] font-label-caps text-label-caps text-[#E1B382] tracking-widest shadow-sm border border-[#C89666]/30 flex items-center gap-1.5 font-bold">
               <span className="w-1.5 h-1.5 rounded-full bg-[#E1B382] animate-pulse" />
               CAPTAIN EVERY OVER
             </span>
             <span className="h-1.5 w-1.5 rounded-full bg-[#C89666] hidden sm:inline-block" />
             <span className="font-label-caps text-label-caps text-[#D8C9B5] uppercase tracking-wider hidden sm:inline-block font-semibold">
-              BALL-BY-BALL PLAY
+              MCC LAWS 2026
             </span>
           </div>
 
-          <h1 className="font-editorial-hero text-display-lg text-[#FBF8F2] tracking-tight leading-tight">
-            YOUR TEAM.<br />
+          <h1 className="font-editorial-hero text-display-hero text-[#FBF8F2] tracking-tight leading-[1.06]">
+            Assemble Cricket Legends.<br />
             <span className="text-[#E1B382] italic font-normal">
-              YOUR ERA.
+              Captain Every Ball.
             </span>
-            <br />
-            YOUR GAME.
           </h1>
 
           <p className="font-sans text-title-md text-[#D8C9B5] max-w-2xl font-normal leading-relaxed">
-            Pick your XI, make the call, and play a match where every ball follows the rules.
+            Draft your playing XI from 1,144 international cricketers across six eras. Set the field, choose your line and length, and play full matches governed by official MCC Laws — 100% offline.
           </p>
 
           {/* Primary Action CTA Cluster */}
@@ -480,7 +478,7 @@ export default function HomeScreen() {
                   </span>
                 </div>
                 <span className="font-label-caps text-label-caps text-[#2D545E] bg-[#F5EBDD] border border-[#D8C9B5] px-2 py-0.5 rounded shrink-0 font-bold">
-                  {activeMatch?.isChasing ? 'CHASING TARGET' : activeMatch ? '1ST INNINGS' : 'NEW DERBY'}
+                  {activeMatch?.isChasing ? 'CHASING TARGET' : activeMatch ? '1ST INNINGS' : 'NEW FIXTURE'}
                 </span>
               </div>
 
@@ -499,10 +497,10 @@ export default function HomeScreen() {
                 </div>
                 <div className="flex items-center justify-between text-body-sm text-[#687477] pt-1">
                   <span className="font-label-caps text-label-caps text-[#C89666] font-bold">
-                    {activeMatch?.targetStr || 'STANDARD MATCHPLAY'}
+                    {activeMatch?.targetStr || 'REGULAR FIXTURE'}
                   </span>
                   <span className="font-label-caps text-label-caps text-[#2D545E] font-bold">
-                    {activeMatch ? 'BALLISTICS READY' : 'CLICK TO LAUNCH'}
+                    {activeMatch ? 'MATCH IN PROGRESS' : 'READY TO PLAY'}
                   </span>
                 </div>
                 {/* Over Ball Feed */}
@@ -548,7 +546,7 @@ export default function HomeScreen() {
                   {recentCompletedMatch ? 'COMPLETED MATCH' : 'MATCH VAULT'}
                 </span>
                 <span className="font-label-caps text-label-caps text-[#687477] px-2 py-0.5 rounded bg-[#F5EBDD] border border-[#D8C9B5] font-mono">
-                  {recentCompletedMatch ? `${recentCompletedMatch.format} DERBY` : 'ARCHIVE READY'}
+                  {recentCompletedMatch ? `${recentCompletedMatch.format} FIXTURE` : 'MATCH ARCHIVE'}
                 </span>
               </div>
               <div className="flex flex-col mb-space-sm">
@@ -606,10 +604,10 @@ export default function HomeScreen() {
                   </div>
                   <div className="flex flex-col min-w-0">
                     <div className="text-[10px] font-mono text-[#2D545E] uppercase font-bold tracking-wider">
-                      HISTORICAL REPLAYS
+                      MATCH ARCHIVE
                     </div>
                     <span className="font-body-sm text-[#687477]">
-                      Matches played will be archived with full telemetry &amp; POTM awards.
+                      Completed matches are archived with full scorecards and Player of the Match honors.
                     </span>
                   </div>
                 </div>
@@ -1000,7 +998,7 @@ export default function HomeScreen() {
                   COMING SOON
                 </span>
               </button>
-              <span className="font-label-caps text-label-caps text-[#687477]">HISTORIC INJECTION IN DEVELOPMENT</span>
+              <span className="font-label-caps text-label-caps text-[#687477]">CLASSIC SCENARIOS IN DEVELOPMENT</span>
             </div>
           </div>
 

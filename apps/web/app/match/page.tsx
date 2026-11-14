@@ -1771,7 +1771,7 @@ export default function MatchSimulationPage() {
                   </p>
                 </div>
                 <div className="flex items-center justify-between pt-space-xs bg-surface-recessed px-space-xs py-1 rounded">
-                  <span className="font-label-caps text-[10px] text-secondary font-bold uppercase">ACTIVE REGIME</span>
+                  <span className="font-label-caps text-[10px] text-secondary font-bold uppercase">SELECTED FORMAT</span>
                   <span className="font-scoreboard-md text-[13px] text-primary">120 BALLS</span>
                 </div>
               </div>
