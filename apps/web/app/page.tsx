@@ -299,7 +299,7 @@ export default function HomeScreen() {
             {/* Tertiary Quick Resume Action */}
             <Link
               href="/match?resume=true"
-              className="group px-space-md py-4 bg-[#2D545E]/80 hover:bg-[#12343B] text-[#D8C9B5] hover:text-[#FBF8F2] border border-[#C89666]/30 font-label-caps text-label-caps uppercase tracking-widest rounded-lg transition-all flex items-center gap-space-xs"
+              className="group px-space-md py-3 sm:py-4 bg-[#12343B]/60 hover:bg-[#12343B] text-[#D8C9B5] hover:text-[#FBF8F2] border border-[#C89666]/30 font-label-caps text-label-caps uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-space-xs w-full sm:w-auto"
               id="btn-quick-resume"
             >
               <span className="material-symbols-outlined text-[18px] text-[#E1B382]">

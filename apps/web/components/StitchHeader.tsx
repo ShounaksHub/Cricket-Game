@@ -31,7 +31,7 @@ export function StitchHeader() {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-[#2D545E] border-b border-[#12343B] text-[#FBF8F2] shadow-sm">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#2D545E] border-b border-[#12343B]/80 text-[#FBF8F2] shadow-[0_2px_8px_rgba(18,52,59,0.18)]">
       <div className="h-20 max-w-[1440px] mx-auto px-4 md:px-margin-desktop flex items-center justify-between">
         {/* Brand */}
         <div className="flex items-center gap-space-md">

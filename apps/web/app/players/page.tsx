@@ -238,8 +238,8 @@ export default function PlayerCataloguePage() {
                   }}
                   className={`px-4 py-2 rounded-full font-label-caps text-label-caps uppercase transition-all ${
                     roleFilter === 'ALL'
-                      ? 'bg-primary text-on-primary shadow-[0_2px_10px_rgba(120,220,119,0.25)]'
-                      : 'bg-surface-elevated text-text-slate hover:bg-surface-bright'
+                      ? 'bg-primary text-on-primary shadow-sm shadow-night-blue-shadow/15'
+                      : 'bg-surface-elevated text-text-slate hover:bg-surface-bright hover:text-text-chalk'
                   }`}
                 >
                   ALL PLAYERS ({roleCounts.total})
@@ -251,8 +251,8 @@ export default function PlayerCataloguePage() {
                   }}
                   className={`px-4 py-2 rounded-full font-label-caps text-label-caps uppercase transition-all flex items-center gap-1.5 ${
                     roleFilter === 'BATTER'
-                      ? 'bg-primary text-on-primary'
-                      : 'bg-surface-elevated text-secondary hover:bg-surface-bright'
+                      ? 'bg-primary text-on-primary shadow-sm shadow-night-blue-shadow/15'
+                      : 'bg-surface-elevated text-text-slate hover:bg-surface-bright hover:text-text-chalk'
                   }`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
@@ -265,8 +265,8 @@ export default function PlayerCataloguePage() {
                   }}
                   className={`px-4 py-2 rounded-full font-label-caps text-label-caps uppercase transition-all flex items-center gap-1.5 ${
                     roleFilter === 'BOWLER'
-                      ? 'bg-primary text-on-primary'
-                      : 'bg-surface-elevated text-telemetry-blue hover:bg-surface-bright'
+                      ? 'bg-primary text-on-primary shadow-sm shadow-night-blue-shadow/15'
+                      : 'bg-surface-elevated text-text-slate hover:bg-surface-bright hover:text-text-chalk'
                   }`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-telemetry-blue" />
@@ -279,8 +279,8 @@ export default function PlayerCataloguePage() {
                   }}
                   className={`px-4 py-2 rounded-full font-label-caps text-label-caps uppercase transition-all flex items-center gap-1.5 ${
                     roleFilter === 'WK'
-                      ? 'bg-primary text-on-primary'
-                      : 'bg-surface-elevated text-warning-amber hover:bg-surface-bright'
+                      ? 'bg-primary text-on-primary shadow-sm shadow-night-blue-shadow/15'
+                      : 'bg-surface-elevated text-text-slate hover:bg-surface-bright hover:text-text-chalk'
                   }`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-warning-amber" />
@@ -293,8 +293,8 @@ export default function PlayerCataloguePage() {
                   }}
                   className={`px-4 py-2 rounded-full font-label-caps text-label-caps uppercase transition-all flex items-center gap-1.5 ${
                     roleFilter === 'ALL-ROUNDER'
-                      ? 'bg-primary text-on-primary'
-                      : 'bg-surface-elevated text-tertiary hover:bg-surface-bright'
+                      ? 'bg-primary text-on-primary shadow-sm shadow-night-blue-shadow/15'
+                      : 'bg-surface-elevated text-text-slate hover:bg-surface-bright hover:text-text-chalk'
                   }`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-tertiary" />

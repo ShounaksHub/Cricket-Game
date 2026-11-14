@@ -599,14 +599,14 @@ export default function DreamXIBuilderPage() {
                   {/* Role & Attribute Chips */}
                   <div className="flex items-center gap-space-xs mb-space-sm flex-wrap">
                     <span
-                      className={`px-2 py-0.5 rounded-full font-label-caps text-label-caps ${
+                      className={`px-2 py-0.5 rounded-full font-label-caps text-label-caps font-bold ${
                         roleCat === 'BATTER'
-                          ? 'bg-wicket-red-container text-warning-amber'
+                          ? 'bg-wicket-red-container text-wicket-red border border-wicket-red/25'
                           : roleCat === 'WK'
-                          ? 'bg-amber-950/40 text-warning-amber'
+                          ? 'bg-[#C89666]/15 text-[#8A5524] border border-[#C89666]/30'
                           : roleCat === 'ALL-ROUNDER'
-                          ? 'bg-[#282310] text-tertiary'
-                          : 'bg-[#0F2430] text-telemetry-blue'
+                          ? 'bg-[#E1B382]/25 text-[#6D421B] border border-[#C89666]/35'
+                          : 'bg-[#2D545E]/15 text-[#12343B] border border-[#2D545E]/25'
                       }`}
                     >
                       {roleCat}
@@ -618,7 +618,7 @@ export default function DreamXIBuilderPage() {
                       SR: {batSr.toFixed(1)}
                     </span>
                     {bowlAvg > 0 && (
-                      <span className="px-2 py-0.5 rounded-full font-label-caps text-label-caps bg-surface-recessed text-secondary">
+                      <span className="px-2 py-0.5 rounded-full font-label-caps text-label-caps bg-surface-recessed text-text-slate">
                         BOWL: {bowlAvg.toFixed(1)}
                       </span>
                     )}
@@ -653,7 +653,7 @@ export default function DreamXIBuilderPage() {
         </div>
 
         {/* RIGHT COLUMN: TACTICAL ROSTER & TELEMETRY DECK (5 cols on desktop) */}
-        <div className="lg:col-span-5 flex flex-col gap-space-md sticky top-24">
+        <div id="squad-roster-column" className="lg:col-span-5 flex flex-col gap-space-md sticky top-24">
           {/* Squad Header & Format Switcher */}
           <div className="bg-surface-card rounded-xl p-space-md shadow-xl border border-border-hairline flex flex-col gap-space-sm">
             <div className="flex items-center justify-between">
@@ -974,6 +974,34 @@ export default function DreamXIBuilderPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Mobile Sticky Squad Dock (lg:hidden) */}
+      <div className="lg:hidden fixed bottom-4 left-4 right-4 z-40 bg-surface-card/95 backdrop-blur-md p-3 rounded-xl shadow-xl border border-border-hairline flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <span className="w-8 h-8 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center font-mono shadow-sm">
+            {selectedSlots.length}
+          </span>
+          <div className="flex flex-col">
+            <span className="font-label-caps text-[11px] text-text-chalk uppercase font-bold">
+              {selectedSlots.length === 11 ? '11/11 Squad Full' : `${11 - selectedSlots.length} Slots Left`}
+            </span>
+            <span className="font-label-caps text-[10px] text-text-subdued">
+              {isSquadReady ? 'Ready for match' : 'Build playing XI'}
+            </span>
+          </div>
+        </div>
+        <button
+          onClick={() => {
+            const rosterEl = document.getElementById('squad-roster-column');
+            if (rosterEl) rosterEl.scrollIntoView({ behavior: 'smooth' });
+          }}
+          className="px-3 py-1.5 bg-primary text-on-primary rounded-lg font-label-caps text-label-caps uppercase font-bold flex items-center gap-1 cursor-pointer hover:bg-primary-container transition-colors shadow-sm"
+          type="button"
+        >
+          <span>View XI</span>
+          <span className="material-symbols-outlined text-[16px]">arrow_downward</span>
+        </button>
       </div>
     </div>
   );

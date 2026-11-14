@@ -341,11 +341,11 @@ export default function MyCricketPage() {
               </div>
               <div className="grid grid-cols-2 gap-space-md items-center">
                 <div className="flex flex-col items-center bg-surface-card px-space-md py-space-xs rounded border border-border-hairline">
-                  <span className="font-label-caps text-label-caps text-tertiary">Saved squads</span>
+                  <span className="font-label-caps text-label-caps text-text-subdued">Saved squads</span>
                   <span className="font-scoreboard-md text-scoreboard-md text-text-chalk">{savedTeams.length}</span>
                 </div>
                 <div className="flex flex-col items-center bg-surface-card px-space-md py-space-xs rounded border border-border-hairline">
-                  <span className="font-label-caps text-label-caps text-secondary">Players in archive</span>
+                  <span className="font-label-caps text-label-caps text-text-subdued">Players in archive</span>
                   <span className="font-scoreboard-md text-scoreboard-md text-text-chalk">1,144</span>
                 </div>
               </div>
@@ -395,7 +395,7 @@ export default function MyCricketPage() {
               </div>
               <div className="flex items-center justify-between pt-space-xs bg-surface-recessed px-space-sm py-1 rounded">
                 <span className="font-label-caps text-label-caps text-text-subdued uppercase">STATUS</span>
-                <span className="font-scoreboard-md text-title-md text-tertiary font-bold">
+                <span className="font-scoreboard-md text-title-md text-primary font-bold">
                   {totalMatches > 0 ? 'ACTIVE' : 'READY TO PLAY'}
                 </span>
               </div>
@@ -426,10 +426,10 @@ export default function MyCricketPage() {
             <div className="bg-surface-card p-space-md rounded-xl flex flex-col justify-between hover:bg-surface-elevated transition-colors shadow-sm border border-border-hairline">
               <div className="flex items-center justify-between">
                 <span className="font-label-caps text-label-caps text-text-subdued uppercase">ROSTER COMPOSITION</span>
-                <span className="material-symbols-outlined text-tertiary text-[20px]">groups</span>
+                <span className="material-symbols-outlined text-primary text-[20px]">groups</span>
               </div>
               <div className="my-space-sm flex items-center gap-space-md">
-                <span className="font-scoreboard-xl text-scoreboard-xl text-tertiary">{savedTeams.length}</span>
+                <span className="font-scoreboard-xl text-scoreboard-xl text-text-chalk">{savedTeams.length}</span>
                 <div className="flex flex-col">
                   <span className="font-body-bold text-body-bold text-text-chalk uppercase">SAVED SQUADS</span>
                   <span className="font-label-caps text-label-caps text-text-subdued uppercase">
@@ -440,7 +440,7 @@ export default function MyCricketPage() {
               <div className="pt-space-xs">
                 <Link
                   href="/dream-teams"
-                  className="block w-full text-center py-1 bg-surface-recessed hover:bg-surface-bright text-secondary font-label-caps text-label-caps uppercase rounded transition-colors"
+                  className="block w-full text-center py-1.5 bg-surface-recessed hover:bg-surface-bright text-primary font-label-caps text-label-caps uppercase rounded font-bold transition-colors border border-border-hairline"
                 >
                   CREATE NEW SQUAD →
                 </Link>

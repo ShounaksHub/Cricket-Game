@@ -107,7 +107,7 @@ const CricketVisualizerCanvas = dynamic(
           variant="app-icon"
           width={64}
           height={64}
-          className="w-16 h-16 rounded-2xl shadow-[0_0_30px_rgba(120,220,119,0.2)] animate-pulse"
+          className="w-16 h-16 rounded-2xl shadow-[0_0_30px_rgba(225,179,130,0.3)] animate-pulse"
         />
         <div className="flex items-center space-x-2 text-primary font-mono text-xs uppercase tracking-widest">
           <span className="w-2 h-2 rounded-full bg-primary animate-ping inline-block" />
@@ -1654,7 +1654,7 @@ export default function MatchSimulationPage() {
               </div>
               <span className="w-4 h-0.5 bg-surface-bright rounded" />
               <div className="flex items-center gap-space-xs px-space-sm py-1.5 bg-surface-elevated rounded-lg shadow-sm border border-border-hairline">
-                <span className="w-5 h-5 rounded-full bg-primary-container text-on-primary font-label-caps text-[11px] flex items-center justify-center font-bold shadow-[0_0_8px_rgba(76,175,80,0.5)]">2</span>
+                <span className="w-5 h-5 rounded-full bg-primary-container text-on-primary font-label-caps text-[11px] flex items-center justify-center font-bold shadow-sm shadow-primary/30">2</span>
                 <span className="font-label-caps text-label-caps text-text-chalk uppercase">Opponent</span>
               </div>
               <span className="w-4 h-0.5 bg-surface-bright rounded" />
@@ -1727,12 +1727,12 @@ export default function MatchSimulationPage() {
                 onClick={() => setFormat('T10')}
                 className={`cursor-pointer flex flex-col justify-between p-space-md rounded-xl transition-all border ${
                   format === 'T10'
-                    ? 'bg-surface-elevated ring-2 ring-primary border-primary shadow-[0_0_24px_rgba(120,220,119,0.2)]'
+                    ? 'bg-surface-elevated ring-2 ring-primary border-primary shadow-md shadow-night-blue-shadow/15'
                     : 'bg-surface-card hover:bg-surface-elevated border-border-hairline shadow-sm'
                 }`}
               >
                 <div className="flex items-start justify-between">
-                  <span className="px-space-xs py-0.5 rounded font-label-caps text-label-caps text-amber-300 bg-amber-950/60 uppercase">
+                  <span className="px-space-xs py-0.5 rounded font-label-caps text-label-caps text-[#6B4226] bg-sand-tan/25 border border-sand-tan-shadow/40 font-bold uppercase">
                     T10 SLAM
                   </span>
                   <span className="material-symbols-outlined text-[18px] text-text-subdued">bolt</span>
@@ -1754,12 +1754,12 @@ export default function MatchSimulationPage() {
                 onClick={() => setFormat('T20')}
                 className={`cursor-pointer flex flex-col justify-between p-space-md rounded-xl transition-all border ${
                   format === 'T20'
-                    ? 'bg-surface-elevated ring-2 ring-primary border-primary shadow-[0_0_24px_rgba(120,220,119,0.2)]'
+                    ? 'bg-surface-elevated ring-2 ring-primary border-primary shadow-md shadow-night-blue-shadow/15'
                     : 'bg-surface-card hover:bg-surface-elevated border-border-hairline shadow-sm'
                 }`}
               >
                 <div className="flex items-start justify-between">
-                  <span className="px-space-xs py-0.5 rounded font-label-caps text-label-caps text-on-primary bg-primary font-bold uppercase">
+                  <span className="px-space-xs py-0.5 rounded font-label-caps text-label-caps text-on-primary bg-primary font-bold uppercase shadow-sm">
                     T20 WORLD CUP
                   </span>
                   <span className="material-symbols-outlined text-primary text-[18px]">verified</span>
@@ -1781,12 +1781,12 @@ export default function MatchSimulationPage() {
                 onClick={() => setFormat('ODI')}
                 className={`cursor-pointer flex flex-col justify-between p-space-md rounded-xl transition-all border ${
                   format === 'ODI'
-                    ? 'bg-surface-elevated ring-2 ring-primary border-primary shadow-[0_0_24px_rgba(120,220,119,0.2)]'
+                    ? 'bg-surface-elevated ring-2 ring-primary border-primary shadow-md shadow-night-blue-shadow/15'
                     : 'bg-surface-card hover:bg-surface-elevated border-border-hairline shadow-sm'
                 }`}
               >
                 <div className="flex items-start justify-between">
-                  <span className="px-space-xs py-0.5 rounded font-label-caps text-label-caps text-telemetry-blue bg-sky-950/60 uppercase">
+                  <span className="px-space-xs py-0.5 rounded font-label-caps text-label-caps text-[#12343B] bg-[#2D545E]/15 border border-[#2D545E]/30 font-bold uppercase">
                     ODI TROPHY
                   </span>
                   <span className="material-symbols-outlined text-[18px] text-text-subdued">timer</span>
@@ -1808,12 +1808,12 @@ export default function MatchSimulationPage() {
                 onClick={() => setFormat('TEST_RED_BALL')}
                 className={`cursor-pointer flex flex-col justify-between p-space-md rounded-xl transition-all border ${
                   format === 'TEST_RED_BALL'
-                    ? 'bg-surface-elevated ring-2 ring-primary border-primary shadow-[0_0_24px_rgba(120,220,119,0.2)]'
+                    ? 'bg-surface-elevated ring-2 ring-primary border-primary shadow-md shadow-night-blue-shadow/15'
                     : 'bg-surface-card hover:bg-surface-elevated border-border-hairline shadow-sm'
                 }`}
               >
                 <div className="flex items-start justify-between">
-                  <span className="px-space-xs py-0.5 rounded font-label-caps text-label-caps text-wicket-red bg-wicket-red-container uppercase">
+                  <span className="px-space-xs py-0.5 rounded font-label-caps text-label-caps text-wicket-red bg-wicket-red-container border border-wicket-red/30 font-bold uppercase">
                     TEST RED
                   </span>
                   <span className="material-symbols-outlined text-[18px] text-text-subdued">shield</span>
@@ -1835,12 +1835,12 @@ export default function MatchSimulationPage() {
                 onClick={() => setFormat('TEST_PINK_BALL')}
                 className={`cursor-pointer flex flex-col justify-between p-space-md rounded-xl transition-all border ${
                   format === 'TEST_PINK_BALL'
-                    ? 'bg-surface-elevated ring-2 ring-primary border-primary shadow-[0_0_24px_rgba(120,220,119,0.2)]'
+                    ? 'bg-surface-elevated ring-2 ring-primary border-primary shadow-md shadow-night-blue-shadow/15'
                     : 'bg-surface-card hover:bg-surface-elevated border-border-hairline shadow-sm'
                 }`}
               >
                 <div className="flex items-start justify-between">
-                  <span className="px-space-xs py-0.5 rounded font-label-caps text-label-caps text-test-pink bg-pink-950/40 uppercase">
+                  <span className="px-space-xs py-0.5 rounded font-label-caps text-label-caps text-[#7A4B22] bg-[#C89666]/15 border border-[#C89666]/40 font-bold uppercase">
                     DAY / NIGHT
                   </span>
                   <span className="material-symbols-outlined text-[18px] text-text-subdued">wb_twilight</span>
@@ -3416,7 +3416,7 @@ export default function MatchSimulationPage() {
                   onClick={handleStartMatch}
                   className={`flex-1 sm:flex-none px-8 py-3.5 rounded-xl font-headline-md text-title-md font-extrabold uppercase tracking-wider transition shadow-xl flex items-center justify-center gap-2 ${
                     isReadyToStart
-                      ? 'bg-primary hover:bg-primary-container text-on-primary shadow-[0_4px_24px_rgba(120,220,119,0.35)] cursor-pointer hover:scale-[1.01]'
+                      ? 'bg-primary hover:bg-primary-container text-on-primary shadow-md shadow-night-blue-shadow/20 cursor-pointer hover:scale-[1.01]'
                       : 'bg-surface-recessed text-text-subdued border border-border-hairline cursor-not-allowed opacity-50'
                   }`}
                 >
@@ -4410,7 +4410,7 @@ export default function MatchSimulationPage() {
                   className={`w-full py-4 rounded-xl font-headline-md text-headline-md font-extrabold uppercase tracking-tight flex items-center justify-center gap-2 transition-all ${
                     phase === 'COMPLETED' || pendingBatterDecision
                       ? 'bg-surface-container text-text-subdued border border-border-hairline cursor-not-allowed opacity-60'
-                      : 'bg-primary hover:bg-primary-container text-on-primary shadow-[0_4px_24px_rgba(120,220,119,0.35)] hover:scale-[1.01] cursor-pointer'
+                      : 'bg-primary hover:bg-primary-container text-on-primary shadow-md shadow-night-blue-shadow/20 hover:scale-[1.01] cursor-pointer'
                   }`}
                   type="button"
                 >
