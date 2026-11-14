@@ -1484,7 +1484,8 @@ export default function MatchSimulationPage() {
     const p = id ? (simulationResult?.finalState.config.playerProfiles instanceof Map
       ? simulationResult.finalState.config.playerProfiles.get(id)
       : (simulationResult?.finalState.config.playerProfiles as any)?.[id]) : undefined;
-    return getAuthoritativePlayerImage(id, p?.fullName || p?.displayName, p?.primaryRole, p?.primaryNationality);
+    const name = p?.fullName || p?.displayName || (id ? getPlayerDisplayName(id) : undefined);
+    return getAuthoritativePlayerImage(id, name, p?.primaryRole, p?.primaryNationality);
   }
 
   function getCountryFlag(country: string): string {
