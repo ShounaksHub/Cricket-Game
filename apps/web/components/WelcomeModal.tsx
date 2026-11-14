@@ -168,7 +168,7 @@ export function WelcomeModal({ forceOpen, onClose }: WelcomeModalProps) {
                 </div>
 
                 <div className="p-4 rounded-xl bg-surface-container border border-border-hairline">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-950/60 border border-primary/30 flex items-center justify-center text-primary mb-2">
+                  <div className="w-8 h-8 rounded-lg bg-[#2D545E]/20 border border-primary/30 flex items-center justify-center text-primary mb-2">
                     <Activity className="w-4 h-4" />
                   </div>
                   <h4 className="text-xs font-bold text-text-chalk mb-1">3. Live Match Simulation</h4>

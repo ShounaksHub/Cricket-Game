@@ -65,38 +65,36 @@ export function DecisionModal({
       aria-labelledby="decision-modal-title"
       tabIndex={-1}
       ref={dialogRef}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#12343B]/80 backdrop-blur-sm animate-fade-in"
     >
-      <div className="bg-surface-card border border-border-hairline rounded-xl max-w-2xl w-full p-6 shadow-xl relative overflow-hidden flex flex-col max-h-[90vh]">
-        {/* Decorative glow */}
-
+      <div className="bg-[#FBF8F2] border border-[#D8C9B5] rounded-xl max-w-2xl w-full p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
         {/* Modal Header */}
-        <div className="flex items-start justify-between gap-4 mb-4 border-b border-emerald-950/60 pb-3">
+        <div className="flex items-start justify-between gap-4 mb-4 border-b border-[#D8C9B5] pb-3">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border bg-[#F5EBDD] text-[#2D545E] border-[#2D545E]/30 font-mono">
                 {isBatting ? '🏏 TACTICAL BATTING DECISION' : '⚾ BOWLING CHANGE REQUIRED'}
               </span>
-              <span className="text-xs text-neutral-400 font-mono">
+              <span className="text-xs text-[#687477] font-mono">
                 {isBatting ? 'Wicket Fallen' : 'Over Completed'}
               </span>
             </div>
-            <h3 id="decision-modal-title" className="text-xl font-bold text-white tracking-tight">{title}</h3>
-            <p className="text-xs text-neutral-400 mt-0.5">{subtitle}</p>
+            <h3 id="decision-modal-title" className="text-xl font-editorial-title font-bold text-[#12343B] tracking-tight">{title}</h3>
+            <p className="text-xs text-[#687477] mt-0.5">{subtitle}</p>
           </div>
           <button
             onClick={onDelegateToAI}
-            className="text-xs text-neutral-400 hover:text-emerald-400 flex items-center gap-1 font-mono uppercase bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/10 hover:border-emerald-500/30 transition-all shrink-0 cursor-pointer"
+            className="text-xs text-[#687477] hover:text-[#12343B] flex items-center gap-1 font-mono uppercase bg-[#F5EBDD] px-2.5 py-1.5 rounded-lg border border-[#D8C9B5] hover:border-[#C89666] transition-all shrink-0 cursor-pointer"
             title="Delegate this decision to CPU Captain"
           >
-            <span>🤖 Auto (AI)</span>
+            <span>Auto (AI)</span>
           </button>
         </div>
 
         {/* Options List */}
         <div className="flex-1 overflow-y-auto space-y-2 pr-1 my-2">
           {options.length === 0 ? (
-            <div className="p-8 text-center text-xs text-neutral-400">
+            <div className="p-8 text-center text-xs text-[#687477]">
               No eligible players remaining.
             </div>
           ) : (
@@ -115,39 +113,39 @@ export function DecisionModal({
                   onClick={() => onSelectPlayer(player.id)}
                   className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between gap-3 ${
                     disabled
-                      ? 'opacity-40 bg-black/20 border-white/5 cursor-not-allowed'
+                      ? 'opacity-40 bg-[#EDE3D2] border-[#D8C9B5] cursor-not-allowed'
                       : isRecommended
-                      ? 'bg-emerald-950/30 border-emerald-500/50 hover:bg-emerald-900/40 hover:border-emerald-400 cursor-pointer shadow-lg'
-                      : 'bg-black/40 border-white/5 hover:border-emerald-500/30 hover:bg-white/5 cursor-pointer'
+                      ? 'bg-[#F5EBDD] border-2 border-[#C89666] hover:bg-[#FBF8F2] cursor-pointer shadow-sm'
+                      : 'bg-[#F5EBDD] border-[#D8C9B5] hover:border-[#C89666] hover:bg-[#FBF8F2] cursor-pointer'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <img
                       src={portrait}
                       alt={player.displayName}
-                      className="w-10 h-10 rounded-lg object-cover bg-neutral-800 border border-white/10 shrink-0"
+                      className="w-10 h-10 rounded-lg object-cover bg-[#F5EBDD] border border-[#D8C9B5] shrink-0"
                     />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-bold text-white truncate">
+                        <span className="text-sm font-bold text-[#12343B] truncate">
                           {player.displayName}
                         </span>
                         {isRecommended && (
-                          <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                          <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-[#C89666]/20 text-[#C89666] border border-[#C89666]/40 font-bold">
                             Recommended
                           </span>
                         )}
                         {badge && (
-                          <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                          <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-[#2D545E]/10 text-[#2D545E] border border-[#2D545E]/30 font-bold">
                             {badge}
                           </span>
                         )}
                       </div>
-                      <div className="text-xs text-neutral-400 mt-0.5 truncate">
+                      <div className="text-xs text-[#687477] mt-0.5 truncate">
                         {secondaryInfo}
                       </div>
                       {disabledReason && (
-                        <div className="text-[10px] text-wicket-red font-mono mt-0.5">
+                        <div className="text-[10px] text-[#B33232] font-mono mt-0.5">
                           {disabledReason}
                         </div>
                       )}
@@ -155,7 +153,7 @@ export function DecisionModal({
                   </div>
 
                   <div className="shrink-0 flex items-center gap-2">
-                    <span className="text-xs font-mono font-semibold text-emerald-400 bg-emerald-950/40 px-2 py-1 rounded border border-emerald-500/20">
+                    <span className="text-xs font-mono font-semibold text-[#FBF8F2] bg-[#2D545E] hover:bg-[#12343B] px-2.5 py-1 rounded border border-[#2D545E] transition-colors">
                       {isBatting ? 'Send In →' : 'Bowl Over →'}
                     </span>
                   </div>
@@ -166,15 +164,15 @@ export function DecisionModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="mt-4 pt-3 border-t border-emerald-950/60 flex items-center justify-between gap-3">
-          <div className="text-[11px] text-neutral-400 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        <div className="mt-4 pt-3 border-t border-[#D8C9B5] flex items-center justify-between gap-3">
+          <div className="text-[11px] text-[#687477] flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#C89666] animate-pulse" />
             <span>Simulation paused until selection</span>
           </div>
 
           <button
             onClick={onDelegateToAI}
-            className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold uppercase tracking-wider rounded-xl transition-all border border-neutral-700 hover:text-white cursor-pointer"
+            className="px-4 py-2 bg-[#2D545E] hover:bg-[#12343B] text-[#FBF8F2] text-xs font-semibold uppercase tracking-wider rounded-xl transition-all border border-[#2D545E] cursor-pointer"
           >
             {aiButtonLabel}
           </button>

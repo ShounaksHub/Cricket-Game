@@ -31,7 +31,7 @@ export function StitchHeader() {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-surface border-b border-border-hairline">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#2D545E] border-b border-[#12343B] text-[#FBF8F2] shadow-sm">
       <div className="h-20 max-w-[1440px] mx-auto px-4 md:px-margin-desktop flex items-center justify-between">
         {/* Brand */}
         <div className="flex items-center gap-space-md">
@@ -60,17 +60,17 @@ export function StitchHeader() {
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-space-xs">
+        <nav className="hidden lg:flex items-center gap-1.5">
           {navItems.map((item) => {
             const isActive = item.pathMatch(pathname);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`px-space-md py-space-sm rounded-t-lg font-headline-md text-title-md tracking-wider transition-all ${
+                className={`px-4 py-2 rounded font-headline-md text-sm uppercase tracking-wider transition-all ${
                   isActive
-                    ? 'bg-surface-elevated text-text-chalk border-b-2 border-primary'
-                    : 'text-text-slate hover:bg-surface-elevated hover:text-on-surface'
+                    ? 'bg-[#12343B] text-[#E1B382] font-bold border-b-2 border-[#E1B382]'
+                    : 'text-[#FBF8F2]/80 hover:bg-[#12343B]/40 hover:text-[#FBF8F2]'
                 }`}
               >
                 {item.label}
@@ -86,7 +86,7 @@ export function StitchHeader() {
           <button
             aria-label="Rules & Regulations"
             title="Rules & Match Regulations"
-            className="p-space-xs rounded-lg text-text-slate hover:text-text-chalk hover:bg-surface-elevated transition-all flex items-center justify-center cursor-pointer"
+            className="p-space-xs rounded-lg text-[#FBF8F2]/80 hover:text-[#E1B382] hover:bg-[#12343B]/40 transition-all flex items-center justify-center cursor-pointer"
             type="button"
             onClick={openRules}
           >
@@ -99,13 +99,13 @@ export function StitchHeader() {
           {/* Captain Profile Pill */}
           <Link
             href="/my-cricket"
-            className="relative flex items-center pl-space-xs border-l border-border-hairline group cursor-pointer"
+            className="relative flex items-center pl-space-xs border-l border-[#12343B] group cursor-pointer"
             title={`${managerName} · Manager profile`}
           >
             <div className="relative">
-              <span aria-label={managerName} className="w-9 h-9 rounded-full bg-surface-elevated text-primary ring-1 ring-border-focus flex items-center justify-center font-bold">{managerName.slice(0, 1).toUpperCase()}</span>
+              <span aria-label={managerName} className="w-9 h-9 rounded-full bg-[#12343B] text-[#E1B382] ring-1 ring-[#C89666]/40 flex items-center justify-center font-bold text-sm">{managerName.slice(0, 1).toUpperCase()}</span>
               <span
-                className="absolute -bottom-1 -right-1 bg-tertiary text-on-tertiary font-label-caps text-[9px] px-1 rounded-sm leading-tight font-extrabold shadow-[0_0_8px_rgba(233,195,73,0.4)]"
+                className="absolute -bottom-1 -right-1 bg-[#E1B382] text-[#12343B] font-label-caps text-[9px] px-1 rounded-sm leading-tight font-extrabold shadow-sm"
                 title="Captain Rank"
               >
                 C
@@ -116,7 +116,7 @@ export function StitchHeader() {
           {/* Mobile Navigation Trigger */}
           <button
             aria-label="Toggle Navigation"
-            className="lg:hidden p-space-xs rounded-lg text-text-slate hover:text-text-chalk hover:bg-surface-elevated transition-all"
+            className="lg:hidden p-space-xs rounded-lg text-[#FBF8F2] hover:bg-[#12343B]/40 transition-all"
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
@@ -129,10 +129,10 @@ export function StitchHeader() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-surface-card border-b border-border-hairline px-4 py-4 flex flex-col gap-2">
-          <div className="pb-3 border-b border-border-hairline flex items-center justify-between">
+        <div className="lg:hidden bg-[#12343B] border-b border-[#C89666]/30 px-4 py-4 flex flex-col gap-2 text-[#FBF8F2]">
+          <div className="pb-3 border-b border-[#2D545E] flex items-center justify-between">
             <CricketDreamXILogo variant="horizontal" theme="dark" height={28} className="h-7 w-auto" />
-            <span className="font-label-caps text-[10px] text-primary bg-surface-elevated px-2 py-0.5 rounded border border-border-hairline">
+            <span className="font-label-caps text-[10px] text-[#E1B382] bg-[#2D545E] px-2 py-0.5 rounded border border-[#C89666]/30">
               OFFLINE ENGINE
             </span>
           </div>
@@ -143,10 +143,10 @@ export function StitchHeader() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`px-4 py-3 rounded-lg font-headline-md text-body-bold tracking-wider transition-all flex items-center justify-between ${
+                className={`px-4 py-3 rounded-lg font-headline-md text-sm tracking-wider transition-all flex items-center justify-between ${
                   isActive
-                    ? 'bg-surface-elevated text-primary border-l-4 border-primary'
-                    : 'text-text-slate hover:bg-surface-elevated hover:text-text-chalk'
+                    ? 'bg-[#2D545E] text-[#E1B382] font-bold border-l-4 border-[#E1B382]'
+                    : 'text-[#FBF8F2]/80 hover:bg-[#2D545E]/50 hover:text-[#FBF8F2]'
                 }`}
               >
                 <span>{item.label}</span>
@@ -154,14 +154,14 @@ export function StitchHeader() {
               </Link>
             );
           })}
-          <div className="pt-2 border-t border-border-hairline flex items-center justify-between text-body-sm text-text-slate">
-            <span className="font-label-caps text-label-caps text-primary">OFFLINE ENGINE v2.4</span>
+          <div className="pt-2 border-t border-[#2D545E] flex items-center justify-between text-body-sm text-[#FBF8F2]/70">
+            <span className="font-label-caps text-label-caps text-[#E1B382]">OFFLINE ENGINE v2.4</span>
             <button
               onClick={() => {
                 setMobileMenuOpen(false);
                 openRules();
               }}
-              className="font-label-caps text-label-caps text-tertiary underline uppercase"
+              className="font-label-caps text-label-caps text-[#E1B382] underline uppercase cursor-pointer"
             >
               View Game Rules
             </button>

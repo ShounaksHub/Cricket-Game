@@ -179,18 +179,18 @@ export function CricketVisualizerCanvas({
   const getOutcomeBadge = (outcome: string) => {
     switch (outcome) {
       case 'SIX':
-        return 'bg-purple-600/90 text-white font-black border border-purple-400/40';
+        return 'bg-[#2D545E] text-[#FBF8F2] font-black border border-[#E1B382]';
       case 'FOUR':
-        return 'bg-primary text-black font-black shadow-sm';
+        return 'bg-[#E1B382] text-[#12343B] font-black shadow-sm';
       case 'WICKET':
-        return 'bg-red-600 text-white font-black animate-pulse';
+        return 'bg-[#B33232] text-[#FBF8F2] font-black';
       case 'WIDE':
       case 'NO_BALL':
-        return 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold';
+        return 'bg-[#C89666]/30 text-[#E1B382] border border-[#C89666]/50 font-bold';
       case 'DOT':
-        return 'bg-surface-recessed text-text-subdued border border-border-hairline';
+        return 'bg-[#12343B] text-[#D8C9B5] border border-[#2D545E]';
       default:
-        return 'bg-surface-elevated text-text-chalk border border-border-hairline font-bold';
+        return 'bg-[#2D545E] text-[#FBF8F2] border border-[#2D545E] font-bold';
     }
   };
 
@@ -222,7 +222,7 @@ export function CricketVisualizerCanvas({
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-[600px] bg-[#030d07] rounded-xl overflow-hidden border border-emerald-950/70 shadow-2xl flex flex-col justify-between select-none"
+      className="relative w-full h-[600px] bg-[#0c1f24] rounded-xl overflow-hidden border border-[#2D545E] shadow-2xl flex flex-col justify-between select-none"
     >
       {/* 1. PixiJS WebGL 2D Render Canvas */}
       <canvas
@@ -232,16 +232,16 @@ export function CricketVisualizerCanvas({
       />
 
       {/* 2. Top-Bar Broadcast HUD (Match Context & Environmental Metadata) */}
-      <div className="relative z-10 flex items-center justify-between px-3.5 py-2.5 bg-gradient-to-b from-black/90 via-black/50 to-transparent pointer-events-none">
-        <div className="flex items-center gap-2 pointer-events-auto">
+      <div className="relative z-10 flex items-center justify-between px-3.5 py-2.5 bg-gradient-to-b from-[#12343B]/95 via-[#12343B]/60 to-transparent pointer-events-none">
+        <div className="flex items-center gap-2 pointer-events-auto flex-wrap">
           {/* Live broadcast status badge */}
-          <div className="px-2.5 py-1 bg-surface-elevated/90 backdrop-blur-md border border-border-hairline rounded-md text-emerald-400 font-mono text-[11px] uppercase tracking-wider font-bold flex items-center gap-1.5 shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse" />
-            <span>LIVE BROADCAST</span>
+          <div className="px-2.5 py-1 bg-[#12343B]/90 backdrop-blur-md border border-[#2D545E] rounded-md text-[#FBF8F2] font-mono text-[11px] uppercase tracking-wider font-bold flex items-center gap-1.5 shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-[#E1B382] inline-block animate-pulse" />
+            <span>LIVE MATCH</span>
           </div>
 
           {/* Match format badge */}
-          <span className="px-2 py-1 rounded-md text-[11px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+          <span className="px-2 py-1 rounded-md text-[11px] font-mono font-bold bg-[#2D545E] text-[#E1B382] border border-[#C89666]/40">
             {matchState.config.format === 'TEST_PINK_BALL'
               ? `PINK BALL D/N • DAY ${matchState.currentDayNumber ?? 1} S${matchState.currentSessionNumber ?? 1}`
               : matchState.config.format === 'TEST_RED_BALL'
@@ -250,73 +250,76 @@ export function CricketVisualizerCanvas({
           </span>
 
           {/* Stadium and pitch */}
-          <div className="hidden sm:inline-flex items-center gap-1.5 text-xs text-text-subdued font-medium bg-surface-elevated/80 backdrop-blur-sm px-2.5 py-1 rounded-md border border-border-hairline/60">
-            <span className="text-text-chalk font-semibold">{getStadiumName(matchState.config.stadiumId)}</span>
-            <span className="text-text-subdued">•</span>
-            <span className="uppercase text-[11px] text-text-slate">{matchState.config.pitchType} PITCH</span>
+          <div className="hidden sm:inline-flex items-center gap-1.5 text-xs text-[#D8C9B5] font-medium bg-[#12343B]/80 backdrop-blur-sm px-2.5 py-1 rounded-md border border-[#2D545E]">
+            <span className="text-[#FBF8F2] font-semibold">{getStadiumName(matchState.config.stadiumId)}</span>
+            <span className="text-[#C89666]">•</span>
+            <span className="uppercase text-[11px] text-[#E1B382] font-mono">{matchState.config.pitchType} PITCH</span>
           </div>
         </div>
 
-        {/* Free Hit Alert Banner */}
-        {currentInnings?.isFreeHit && (
-          <div className="px-3 py-1 bg-amber-500/20 backdrop-blur-md border border-amber-400/80 rounded-full text-amber-300 font-bold text-[11px] uppercase tracking-widest flex items-center gap-1.5 shadow-lg shadow-amber-500/20 animate-pulse pointer-events-auto">
-            <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-            <span>FREE HIT</span>
-          </div>
-        )}
+        {/* Right HUD: Free Hit + Speed Controls */}
+        <div className="flex items-center gap-2 pointer-events-auto shrink-0">
+          {/* Free Hit Alert Banner */}
+          {currentInnings?.isFreeHit && (
+            <div className="px-3 py-1 bg-[#E1B382]/20 backdrop-blur-md border border-[#E1B382] rounded-full text-[#E1B382] font-bold text-[11px] uppercase tracking-widest flex items-center gap-1.5 shadow-lg shadow-[#E1B382]/20 animate-pulse">
+              <Zap className="w-3.5 h-3.5 text-[#E1B382] fill-[#E1B382]" />
+              <span>FREE HIT</span>
+            </div>
+          )}
 
-        {/* Playback Speed Controls */}
-        <div className="flex items-center gap-0.5 bg-surface-elevated/90 backdrop-blur-md border border-border-hairline rounded-md p-0.5 pointer-events-auto shadow-sm">
-          {[
-            { label: '0.5x', speed: 600 },
-            { label: '1.0x', speed: 300 },
-            { label: '2.0x', speed: 150 },
-            { label: '4.0x', speed: 60 },
-          ].map((s) => (
-            <button
-              key={s.label}
-              onClick={() => onSpeedChange(s.speed)}
-              className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold transition ${
-                playSpeed === s.speed
-                  ? 'bg-primary text-black font-bold shadow-sm'
-                  : 'text-text-subdued hover:text-text-chalk'
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
+          {/* Playback Speed Controls */}
+          <div className="flex items-center gap-0.5 bg-[#12343B]/90 backdrop-blur-md border border-[#2D545E] rounded-md p-0.5 shadow-sm">
+            {[
+              { label: '0.5x', speed: 600 },
+              { label: '1.0x', speed: 300 },
+              { label: '2.0x', speed: 150 },
+              { label: '4.0x', speed: 60 },
+            ].map((s) => (
+              <button
+                key={s.label}
+                onClick={() => onSpeedChange(s.speed)}
+                className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold transition ${
+                  playSpeed === s.speed
+                    ? 'bg-[#E1B382] text-[#12343B] font-bold shadow-sm'
+                    : 'text-[#D8C9B5] hover:text-[#FBF8F2]'
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* 3. Bottom Television Broadcast Ribbon */}
-      <div className="relative z-10 px-3 pb-3 pt-4 bg-gradient-to-t from-black/95 via-black/75 to-transparent">
-        <div className="bg-surface-elevated/90 backdrop-blur-md border border-border-hairline rounded-xl p-2.5 shadow-2xl flex flex-col gap-2">
+      <div className="relative z-10 px-3 pb-3 pt-4 bg-gradient-to-t from-[#12343B] via-[#12343B]/80 to-transparent">
+        <div className="bg-[#12343B]/95 backdrop-blur-md border border-[#2D545E] rounded-xl p-2.5 shadow-2xl flex flex-col gap-2 text-[#FBF8F2]">
           {/* Main Broadcast Stats Row */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-2.5 items-center">
             {/* Team & Score (Col 1-4) */}
-            <div className="md:col-span-4 flex items-center gap-3 border-b md:border-b-0 md:border-r border-border-hairline pb-2 md:pb-0 pr-2">
+            <div className="md:col-span-4 flex items-center gap-3 border-b md:border-b-0 md:border-r border-[#2D545E] pb-2 md:pb-0 pr-2">
               <div className="min-w-0">
-                <div className="text-[10px] font-bold text-primary uppercase tracking-widest truncate">
+                <div className="text-[10px] font-bold text-[#E1B382] uppercase tracking-widest truncate font-editorial-title">
                   {currentInnings?.battingTeamId === matchState.config.team1.id
                     ? matchState.config.team1.name
                     : matchState.config.team2.name}
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-text-chalk font-mono tracking-tight">
+                  <span className="text-2xl font-black text-[#FBF8F2] font-mono tracking-tight">
                     {currentInnings?.totalRuns ?? 0}/{currentInnings?.totalWickets ?? 0}
                   </span>
-                  <span className="text-xs font-mono text-text-subdued">
+                  <span className="text-xs font-mono text-[#D8C9B5]">
                     ({currentInnings?.completedOvers ?? 0}.{currentInnings?.legalBallsInCurrentOver ?? 0} ov)
                   </span>
                 </div>
               </div>
-              <div className="text-[10px] text-text-subdued font-mono flex flex-col justify-center ml-auto border-l border-border-hairline/60 pl-2 shrink-0">
-                <span>CRR: <strong className="text-secondary">{currentRunRate}</strong></span>
+              <div className="text-[10px] text-[#D8C9B5] font-mono flex flex-col justify-center ml-auto border-l border-[#2D545E] pl-2 shrink-0">
+                <span>CRR: <strong className="text-[#E1B382]">{currentRunRate}</strong></span>
                 {currentInnings?.targetRuns && (
                   <span>
-                    TGT: <strong className="text-text-chalk">{currentInnings.targetRuns}</strong>
+                    TGT: <strong className="text-[#FBF8F2]">{currentInnings.targetRuns}</strong>
                     {requiredRunRate && (
-                      <span className="ml-1 text-tertiary">({requiredRunRate})</span>
+                      <span className="ml-1 text-[#C89666]">({requiredRunRate})</span>
                     )}
                   </span>
                 )}
@@ -324,36 +327,36 @@ export function CricketVisualizerCanvas({
             </div>
 
             {/* Active Batters (Col 5-7) */}
-            <div className="md:col-span-4 flex flex-col justify-center gap-1 border-b md:border-b-0 md:border-r border-border-hairline pb-2 md:pb-0 px-2 min-w-0">
+            <div className="md:col-span-4 flex flex-col justify-center gap-1 border-b md:border-b-0 md:border-r border-[#2D545E] pb-2 md:pb-0 px-2 min-w-0">
               <div className="flex items-center justify-between text-xs min-w-0">
-                <div className="flex items-center gap-1 font-semibold text-text-chalk truncate min-w-0">
-                  <span className="text-primary text-[10px] font-bold">▶</span>
+                <div className="flex items-center gap-1 font-semibold text-[#FBF8F2] truncate min-w-0">
+                  <span className="text-[#E1B382] text-[10px] font-bold">▶</span>
                   <span className="truncate">{strikerProfile?.displayName ?? 'Striker'}*</span>
                 </div>
-                <span className="font-mono text-text-slate shrink-0 ml-1.5 text-[11px]">
-                  <strong className="text-text-chalk">{strikerScore?.runs ?? 0}</strong>
-                  <span className="text-text-subdued text-[10px]"> ({strikerScore?.ballsFaced ?? 0}b{strikerScore?.fours ? ` ${strikerScore.fours}x4` : ''}{strikerScore?.sixes ? ` ${strikerScore.sixes}x6` : ''})</span>
+                <span className="font-mono text-[#D8C9B5] shrink-0 ml-1.5 text-[11px]">
+                  <strong className="text-[#FBF8F2]">{strikerScore?.runs ?? 0}</strong>
+                  <span className="text-[#D8C9B5]/80 text-[10px]"> ({strikerScore?.ballsFaced ?? 0}b{strikerScore?.fours ? ` ${strikerScore.fours}x4` : ''}{strikerScore?.sixes ? ` ${strikerScore.sixes}x6` : ''})</span>
                 </span>
               </div>
-              <div className="flex items-center justify-between text-xs text-text-subdued min-w-0">
+              <div className="flex items-center justify-between text-xs text-[#D8C9B5] min-w-0">
                 <span className="truncate">{nonStrikerProfile?.displayName ?? 'Non-Striker'}</span>
-                <span className="font-mono text-[10px] shrink-0 ml-1.5 text-text-subdued">
+                <span className="font-mono text-[10px] shrink-0 ml-1.5 text-[#D8C9B5]">
                   {nonStrikerScore?.runs ?? 0} ({nonStrikerScore?.ballsFaced ?? 0}b)
                 </span>
               </div>
             </div>
 
             {/* Active Bowler (Col 8-10) */}
-            <div className="md:col-span-3 flex flex-col justify-center border-b md:border-b-0 md:border-r border-border-hairline pb-2 md:pb-0 px-2 min-w-0">
-              <div className="flex items-center justify-between text-xs font-semibold text-text-chalk min-w-0">
-                <span className="truncate text-telemetry-blue font-bold">
+            <div className="md:col-span-3 flex flex-col justify-center border-b md:border-b-0 md:border-r border-[#2D545E] pb-2 md:pb-0 px-2 min-w-0">
+              <div className="flex items-center justify-between text-xs font-semibold text-[#FBF8F2] min-w-0">
+                <span className="truncate text-[#E1B382] font-bold">
                   {bowlerProfile?.displayName ?? 'Bowler'}
                 </span>
-                <span className="font-mono text-tertiary font-bold shrink-0 ml-1.5">
+                <span className="font-mono text-[#E1B382] font-bold shrink-0 ml-1.5">
                   {bowlerScore?.wickets ?? 0}-{bowlerScore?.runsConceded ?? 0}
                 </span>
               </div>
-              <div className="text-[10px] text-text-subdued font-mono mt-0.5">
+              <div className="text-[10px] text-[#D8C9B5] font-mono mt-0.5">
                 {bowlerScore?.oversBowledFormatted ?? '0.0'} ov • Econ: {bowlerScore?.economyRate.toFixed(2) ?? '0.00'}
               </div>
             </div>
@@ -364,24 +367,24 @@ export function CricketVisualizerCanvas({
                 onClick={onPlayPauseToggle}
                 className={`p-2 rounded-lg font-bold transition flex items-center justify-center ${
                   isPlaying
-                    ? 'bg-amber-500 hover:bg-amber-400 text-black shadow-md'
-                    : 'bg-primary hover:bg-emerald-400 text-black shadow-md shadow-primary/20'
+                    ? 'bg-[#C89666] hover:bg-[#E1B382] text-[#12343B] shadow-md'
+                    : 'bg-[#E1B382] hover:bg-[#C89666] text-[#12343B] shadow-md shadow-[#E1B382]/20'
                 }`}
                 title={isPlaying ? 'Pause Simulation' : 'Play Live Simulation'}
               >
-                {isPlaying ? <Pause className="w-3.5 h-3.5 fill-black" /> : <Play className="w-3.5 h-3.5 fill-black ml-0.5" />}
+                {isPlaying ? <Pause className="w-3.5 h-3.5 fill-[#12343B]" /> : <Play className="w-3.5 h-3.5 fill-[#12343B] ml-0.5" />}
               </button>
               <button
                 onClick={onStepNextBall}
                 disabled={isPlaying}
-                className="p-2 bg-surface-recessed hover:bg-surface-card disabled:opacity-30 text-text-chalk rounded-lg border border-border-hairline transition"
+                className="p-2 bg-[#2D545E] hover:bg-[#12343B] disabled:opacity-30 text-[#FBF8F2] rounded-lg border border-[#2D545E] transition"
                 title="Step Next Ball"
               >
                 <SkipForward className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={onSkipOver}
-                className="p-2 bg-surface-recessed hover:bg-surface-card text-text-chalk rounded-lg border border-border-hairline transition"
+                className="p-2 bg-[#2D545E] hover:bg-[#12343B] text-[#FBF8F2] rounded-lg border border-[#2D545E] transition"
                 title="Fast Forward to End of Over"
               >
                 <FastForward className="w-3.5 h-3.5" />
@@ -390,13 +393,13 @@ export function CricketVisualizerCanvas({
           </div>
 
           {/* Sub-strip: Ball-by-ball Over Sequence & Full Commentary */}
-          <div className="flex items-center justify-between gap-3 pt-1.5 border-t border-border-hairline/60 px-0.5 text-xs">
+          <div className="flex items-center justify-between gap-3 pt-1.5 border-t border-[#2D545E]/60 px-0.5 text-xs">
             <div className="flex items-center gap-1.5 shrink-0">
-              <span className="text-[10px] font-bold text-text-subdued uppercase tracking-widest mr-0.5">
+              <span className="text-[10px] font-bold text-[#D8C9B5] uppercase tracking-widest mr-0.5">
                 THIS OVER:
               </span>
               {recentEvents.length === 0 ? (
-                <span className="text-[11px] text-text-subdued italic font-mono">Over starting...</span>
+                <span className="text-[11px] text-[#D8C9B5] italic font-mono">Over starting...</span>
               ) : (
                 recentEvents.map((ev, i) => (
                   <span
@@ -424,8 +427,8 @@ export function CricketVisualizerCanvas({
             </div>
 
             {activeEvent && (
-              <div className="text-[11px] text-text-chalk font-mono truncate flex-1 min-w-0 text-right md:text-left md:pl-2" title={activeEvent.commentary}>
-                <span className="text-secondary font-bold mr-1.5">[{activeEvent.outcome}]</span>
+              <div className="text-[11px] text-[#FBF8F2] font-mono truncate flex-1 min-w-0 text-right md:text-left md:pl-2" title={activeEvent.commentary}>
+                <span className="text-[#E1B382] font-bold mr-1.5">[{activeEvent.outcome}]</span>
                 <span>{activeEvent.commentary}</span>
               </div>
             )}

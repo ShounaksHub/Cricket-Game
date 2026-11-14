@@ -12,7 +12,7 @@ export function StitchFooter() {
   }
 
   return (
-    <footer className="w-full bg-surface-recessed border-t border-border-hairline py-4 md:py-5 mt-auto text-xs">
+    <footer className="w-full bg-[#12343B] border-t border-[#2D545E] py-5 mt-auto text-xs text-[#FBF8F2]">
       <div className="max-w-[1440px] mx-auto px-4 md:px-margin-desktop flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Left: Branding, Copyright & Attribution */}
         <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-3 gap-y-2">
@@ -24,18 +24,18 @@ export function StitchFooter() {
               className="h-6 w-auto opacity-85 group-hover:opacity-100 transition-opacity"
             />
           </Link>
-          <span className="text-border-hairline hidden md:inline">|</span>
-          <span className="font-label-caps text-[11px] text-text-subdued uppercase tracking-wider">
+          <span className="text-[#2D545E] hidden md:inline">|</span>
+          <span className="font-label-caps text-[11px] text-[#E1B382] uppercase tracking-wider font-semibold">
             © 2026 CRICKET DREAM XI
           </span>
-          <span className="text-border-hairline hidden sm:inline">•</span>
-          <span className="font-label-caps text-[11px] text-text-slate tracking-wide">
+          <span className="text-[#2D545E] hidden sm:inline">•</span>
+          <span className="font-label-caps text-[11px] text-[#D8C9B5] tracking-wide">
             Made by{' '}
-            <span className="text-text-chalk font-semibold hover:text-primary transition-colors">
+            <span className="text-[#FBF8F2] font-semibold hover:text-[#E1B382] transition-colors">
               Shounak Saha
             </span>
           </span>
-          <span className="text-border-hairline hidden sm:inline">|</span>
+          <span className="text-[#2D545E] hidden sm:inline">|</span>
           {/* Social Links */}
           <div className="flex items-center gap-2">
             <a
@@ -43,7 +43,7 @@ export function StitchFooter() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Shounak Saha on GitHub"
-              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-card hover:bg-surface-elevated text-text-slate hover:text-text-chalk border border-border-hairline hover:border-primary/40 transition-all font-mono text-[11px]"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#2D545E] hover:bg-[#2D545E]/80 text-[#FBF8F2] hover:text-[#E1B382] border border-[#C89666]/30 transition-all font-mono text-[11px]"
             >
               <svg
                 className="w-3.5 h-3.5 fill-current"
@@ -63,7 +63,7 @@ export function StitchFooter() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Shounak Saha on Instagram (@shounak_tt)"
-              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-card hover:bg-surface-elevated text-text-slate hover:text-text-chalk border border-border-hairline hover:border-pink-500/40 transition-all font-mono text-[11px]"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#2D545E] hover:bg-[#2D545E]/80 text-[#FBF8F2] hover:text-[#E1B382] border border-[#C89666]/30 transition-all font-mono text-[11px]"
             >
               <svg
                 className="w-3.5 h-3.5 fill-current"
@@ -80,17 +80,17 @@ export function StitchFooter() {
         {/* Right: Engine Telemetry Status & Rules Trigger */}
         <div className="flex flex-wrap items-center justify-center gap-4">
           <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-telemetry-blue animate-pulse" />
-            <span className="font-mono text-[11px] text-text-slate">60 FPS</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#E1B382] animate-pulse" />
+            <span className="font-mono text-[11px] text-[#D8C9B5]">60 FPS</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
-            <span className="font-mono text-[11px] text-text-slate">SIM READY</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#C89666]" />
+            <span className="font-mono text-[11px] text-[#D8C9B5]">SIM READY</span>
           </div>
           <button
             onClick={handleOpenRules}
             type="button"
-            className="font-label-caps text-[11px] text-text-subdued hover:text-text-chalk transition-colors cursor-pointer uppercase tracking-wider"
+            className="font-label-caps text-[11px] text-[#E1B382] hover:text-[#FBF8F2] transition-colors cursor-pointer uppercase tracking-wider"
           >
             MATCH RULES &amp; GUIDE
           </button>

@@ -1512,10 +1512,17 @@ export default function MatchSimulationPage() {
   const isUserBatting = activeInnings?.battingTeamId === 'user-team';
   const isUserBowling = activeInnings?.bowlingTeamId === 'user-team';
 
-  // Eligible user bowlers for dynamic bowling changes
+  // Eligible user bowlers for dynamic bowling changes (strictly deduplicated)
   const userBowlingSlots = liveState && isUserBowling
-    ? (liveState.config.team1.id === 'user-team' ? liveState.config.team1.lineup : liveState.config.team2.lineup)
-      .filter((slot) => liveState.config.playerProfiles.get(slot.playerId)?.bowlingStyle !== 'NONE')
+    ? (() => {
+        const rawLineup = liveState.config.team1.id === 'user-team' ? liveState.config.team1.lineup : liveState.config.team2.lineup;
+        const seen = new Set<string>();
+        return rawLineup.filter((slot) => {
+          if (seen.has(slot.playerId)) return false;
+          seen.add(slot.playerId);
+          return liveState.config.playerProfiles.get(slot.playerId)?.bowlingStyle !== 'NONE';
+        });
+      })()
     : [];
 
   const strikerStats = strikerId ? activeInnings?.batters.get(strikerId) : undefined;
@@ -1576,7 +1583,7 @@ export default function MatchSimulationPage() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-surface flex flex-col select-none">
+    <div className={`w-full min-h-screen flex flex-col select-none transition-colors duration-300 ${phase === 'LIVE' ? 'theme-live-match bg-surface text-text-chalk' : 'bg-surface text-text-chalk'}`}>
       {/* Top Breadcrumb & Status Overline */}
       <div className="w-full max-w-[1440px] mx-auto px-4 md:px-margin-desktop pt-4 pb-2 flex flex-wrap items-center justify-between gap-space-sm border-b border-border-hairline">
         <div className="flex items-center gap-space-sm">
@@ -4076,7 +4083,7 @@ export default function MatchSimulationPage() {
                       const ballsInOver = bEntry ? (bEntry.ballsBowled % 6) : 0;
                       const formattedOvers = bEntry ? `${oversBowled}.${ballsInOver}` : '0.0';
                       const isCurrent = slot.playerId === bowlerId;
-                      const quotaReached = displayedQuota !== undefined && oversBowled >= displayedQuota;
+                      const quotaReached = !isTestFormat && displayedQuota !== undefined && oversBowled >= displayedQuota;
                       const disabled = (isCurrent && activeInnings && activeInnings.completedOvers > 0 && activeInnings.legalBallsInCurrentOver === 0) || quotaReached;
                       const roleDesc = profile?.bowlingStyle ? profile.bowlingStyle.replace(/_/g, ' ') : 'Bowler';
                       return (
@@ -4085,7 +4092,7 @@ export default function MatchSimulationPage() {
                           value={slot.playerId}
                           disabled={disabled}
                         >
-                          {profile?.displayName || slot.playerId} ({roleDesc}) — {formattedOvers} ov · {bEntry?.runsConceded ?? 0}r/{bEntry?.wickets ?? 0}w{quotaReached ? ' [MAX]' : ''}{isCurrent ? ' [ACTIVE]' : ''}
+                          {profile?.displayName || slot.playerId} ({roleDesc}) — {formattedOvers} ov · {bEntry?.runsConceded ?? 0}r/{bEntry?.wickets ?? 0}w{quotaReached ? ' [MAX]' : ''}{isCurrent ? ' [CURRENT OVER]' : ''}
                         </option>
                       );
                     };

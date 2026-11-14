@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Manrope, JetBrains_Mono } from 'next/font/google';
+import { Inter, Manrope, JetBrains_Mono, Playfair_Display } from 'next/font/google';
 import './globals.css';
 import { StitchHeader } from '../components/StitchHeader';
 import { StitchFooter } from '../components/StitchFooter';
@@ -10,6 +10,12 @@ import { AudioProvider } from '../context/AudioContext';
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
+  display: 'swap',
+});
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-serif',
   display: 'swap',
 });
 
@@ -77,7 +83,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${inter.variable} ${manrope.variable} ${jetbrainsMono.variable}`}
+      className={`${inter.variable} ${playfair.variable} ${manrope.variable} ${jetbrainsMono.variable}`}
     >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -87,11 +93,11 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-surface font-body-base text-body-base text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container flex flex-col">
+      <body className="min-h-screen bg-warm-paper font-body-base text-body-base text-night-blue-shadow antialiased selection:bg-sand-tan selection:text-night-blue-shadow flex flex-col">
         <AudioProvider>
           <EnterArenaSplash />
           <StitchHeader />
-          <main className="w-full pt-20 bg-surface min-h-[calc(100vh-80px)] flex flex-col flex-1">
+          <main className="w-full pt-20 bg-warm-paper min-h-[calc(100vh-80px)] flex flex-col flex-1">
             {children}
           </main>
           <StitchFooter />

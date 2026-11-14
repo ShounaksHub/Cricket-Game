@@ -119,11 +119,11 @@ export class PixiCricketVisualizer {
     if (!this.app || !this.rootContainer) return;
     this.app.renderer.resize(width, height);
 
-    const topMargin = 54;
-    const bottomMargin = 88;
-    const availableHeight = Math.max(280, height - topMargin - bottomMargin);
-    const availableWidth = Math.max(280, width - 40);
-    const maxBoundaryDiameterPx = Math.min(availableWidth, availableHeight) * 0.90;
+    const topMargin = 52;
+    const bottomMargin = 135;
+    const availableHeight = Math.max(260, height - topMargin - bottomMargin);
+    const availableWidth = Math.max(260, width - 40);
+    const maxBoundaryDiameterPx = Math.min(availableWidth, availableHeight) * 0.94;
     const targetScale = (maxBoundaryDiameterPx / 2) / this.boundaryRadiusMeters;
 
     const scaleFactor = targetScale / this.baseScale;
