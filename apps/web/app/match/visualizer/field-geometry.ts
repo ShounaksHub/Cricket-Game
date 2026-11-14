@@ -42,6 +42,10 @@ export function createFieldGeometry(options: FieldGeometryOptions): Container {
   const { boundaryRadiusMeters, pitchType, scale } = options;
   const boundaryRadiusPx = boundaryRadiusMeters * scale;
 
+  // 0. Outer apron / perimeter track grass beyond the boundary rope
+  g.circle(0, 0, boundaryRadiusPx + 10);
+  g.fill({ color: 0x072214 });
+
   // 1. Outfield Base and Alternating Concentric Mowing Bands
   const ringCount = 14;
   const ringWidth = boundaryRadiusPx / ringCount;
@@ -55,8 +59,8 @@ export function createFieldGeometry(options: FieldGeometryOptions): Container {
   }
 
   // 2. Boundary Rope (White braided line + outer warning track)
-  g.circle(0, 0, boundaryRadiusPx + 4);
-  g.stroke({ color: 0x081f13, width: 8 });
+  g.circle(0, 0, boundaryRadiusPx + 3);
+  g.stroke({ color: 0x081f13, width: 6 });
 
   g.circle(0, 0, boundaryRadiusPx);
   g.stroke({ color: 0xffffff, width: 3.5 });

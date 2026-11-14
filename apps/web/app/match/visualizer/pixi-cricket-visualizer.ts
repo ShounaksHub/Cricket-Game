@@ -26,6 +26,8 @@ export class PixiCricketVisualizer {
   private effectsManager: EffectsManager | null = null;
 
   private scale = 5.2; // Pixels per meter
+  private baseScale = 5.2;
+  private boundaryRadiusMeters = 75;
   private animationPhase: AnimationPhase = 'IDLE';
   private playbackSpeed = 1.0;
   private onPhaseChangeCallback?: (phase: AnimationPhase) => void;
@@ -38,14 +40,21 @@ export class PixiCricketVisualizer {
 
   async init(options: VisualizerInitOptions): Promise<void> {
     this.onPhaseChangeCallback = options.onPhaseChange;
+    this.boundaryRadiusMeters = options.boundaryRadiusMeters || 75;
 
     const width = options.canvas.clientWidth || 960;
-    const height = options.canvas.clientHeight || 640;
+    const height = options.canvas.clientHeight || 600;
 
-    // Dynamically calculate scale so boundary rope fits with margin
-    const stadiumRadius = options.boundaryRadiusMeters || 75;
-    const minDim = Math.min(width, height);
-    this.scale = (minDim * 0.44) / stadiumRadius;
+    // Available ground area accounting for top HUD (54px) and bottom broadcast ribbon (88px)
+    const topMargin = 54;
+    const bottomMargin = 88;
+    const availableHeight = Math.max(280, height - topMargin - bottomMargin);
+    const availableWidth = Math.max(280, width - 40);
+
+    // Dynamic scale so full boundary circle (plus 12px outer turf buffer) fits with zero overlap
+    const maxBoundaryDiameterPx = Math.min(availableWidth, availableHeight) * 0.90;
+    this.scale = (maxBoundaryDiameterPx / 2) / this.boundaryRadiusMeters;
+    this.baseScale = this.scale;
 
     this.app = new Application();
     await this.app.init({
@@ -60,7 +69,7 @@ export class PixiCricketVisualizer {
 
     this.rootContainer = new Container();
     this.rootContainer.x = width / 2;
-    this.rootContainer.y = height / 2;
+    this.rootContainer.y = topMargin + (availableHeight / 2);
     this.app.stage.addChild(this.rootContainer);
 
     // 1. Ground Geometry
@@ -109,8 +118,18 @@ export class PixiCricketVisualizer {
   resize(width: number, height: number): void {
     if (!this.app || !this.rootContainer) return;
     this.app.renderer.resize(width, height);
+
+    const topMargin = 54;
+    const bottomMargin = 88;
+    const availableHeight = Math.max(280, height - topMargin - bottomMargin);
+    const availableWidth = Math.max(280, width - 40);
+    const maxBoundaryDiameterPx = Math.min(availableWidth, availableHeight) * 0.90;
+    const targetScale = (maxBoundaryDiameterPx / 2) / this.boundaryRadiusMeters;
+
+    const scaleFactor = targetScale / this.baseScale;
+    this.rootContainer.scale.set(scaleFactor);
     this.rootContainer.x = width / 2;
-    this.rootContainer.y = height / 2;
+    this.rootContainer.y = topMargin + (availableHeight / 2);
   }
 
   /**

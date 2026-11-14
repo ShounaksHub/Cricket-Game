@@ -102,7 +102,7 @@ const CricketVisualizerCanvas = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[580px] bg-surface-recessed rounded-2xl flex flex-col items-center justify-center border border-border-hairline shadow-2xl gap-4">
+      <div className="w-full h-[600px] bg-surface-recessed rounded-2xl flex flex-col items-center justify-center border border-border-hairline shadow-2xl gap-4">
         <CricketDreamXILogo
           variant="app-icon"
           width={64}
@@ -111,7 +111,7 @@ const CricketVisualizerCanvas = dynamic(
         />
         <div className="flex items-center space-x-2 text-primary font-mono text-xs uppercase tracking-widest">
           <span className="w-2 h-2 rounded-full bg-primary animate-ping inline-block" />
-          <span>INITIALIZING PIXIJS V8 2D BROADCAST VISUALIZER...</span>
+          <span>INITIALIZING 2D MATCH BROADCAST...</span>
         </div>
       </div>
     ),
@@ -1464,6 +1464,20 @@ export default function MatchSimulationPage() {
     if (b.dismissal.mode === 'STUMPED') return `st †${fielderName || 'Keeper'} b ${bowlerName}`;
     if (b.dismissal.mode === 'RUN_OUT') return `run out (${fielderName || bowlerName})`;
     return b.dismissal.mode.replace(/_/g, ' ').toLowerCase();
+  }
+
+  function formatDismissalMode(mode?: string): string {
+    switch (mode) {
+      case 'CAUGHT_BEHIND': return 'Caught Behind';
+      case 'BOWLED': return 'Bowled';
+      case 'LBW': return 'LBW';
+      case 'RUN_OUT': return 'Run Out';
+      case 'STUMPED': return 'Stumped';
+      case 'CAUGHT': return 'Caught';
+      case 'HIT_WICKET': return 'Hit Wicket';
+      case 'CAUGHT_AND_BOWLED': return 'Caught & Bowled';
+      default: return mode ? mode.replace(/_/g, ' ') : 'Wicket';
+    }
   }
 
   function getPlayerPortrait(id?: string, index: number = 0): string {
@@ -3529,20 +3543,46 @@ export default function MatchSimulationPage() {
             </div>
 
             {/* Real-time Broadcast Telemetry Ticker */}
-            <div className="flex items-center justify-between bg-surface-recessed px-space-md py-1 rounded overflow-hidden border border-border-hairline">
+            <div className="flex items-center justify-between bg-surface-recessed px-space-md py-1.5 rounded-lg overflow-hidden border border-border-hairline shadow-sm">
               <div className="flex items-center gap-space-sm min-w-0">
                 <span className="font-label-caps text-label-caps text-wicket-red uppercase tracking-wider font-extrabold flex items-center gap-1 shrink-0">
-                  <span className="material-symbols-outlined text-[14px]">sports_cricket</span>
+                  <span className="material-symbols-outlined text-[15px]">sports_cricket</span>
                   {currentEvent ? `${currentEvent.inningsNumber}.${currentEvent.overNumber}.${currentEvent.ballInOver} REPLAY` : 'MATCH RADAR'}
                 </span>
                 <p className="font-body-sm text-body-sm text-text-chalk truncate">
-                  {currentEvent ? (
-                    <>
-                      <span className="text-text-slate">{bowlerName} to {strikerName}: </span>
-                      <strong className="text-tertiary">{currentEvent.outcome}! </strong>
-                      {currentEvent.runsBat + currentEvent.extras.wides + currentEvent.extras.noBalls + currentEvent.extras.byes + currentEvent.extras.legByes} run(s) scored on this delivery. {currentEvent.dismissal ? `Dismissal: ${currentEvent.dismissal.mode}` : ''}
-                    </>
-                  ) : (
+                  {currentEvent ? (() => {
+                    const runsThisBall =
+                      currentEvent.runsBat +
+                      currentEvent.extras.wides +
+                      currentEvent.extras.noBalls +
+                      currentEvent.extras.byes +
+                      currentEvent.extras.legByes;
+                    return (
+                      <>
+                        <span className="text-text-slate font-mono text-xs">{bowlerName} to {strikerName}: </span>
+                        {currentEvent.dismissal ? (
+                          <strong className="text-wicket-red font-black">
+                            WICKET! ({formatDismissalMode(currentEvent.dismissal.mode)}) •{' '}
+                          </strong>
+                        ) : currentEvent.outcome === 'SIX' ? (
+                          <strong className="text-tertiary font-black">SIX! • </strong>
+                        ) : currentEvent.outcome === 'FOUR' ? (
+                          <strong className="text-secondary font-black">FOUR! • </strong>
+                        ) : currentEvent.outcome === 'WIDE' ? (
+                          <strong className="text-amber-400 font-bold">WIDE • </strong>
+                        ) : currentEvent.outcome === 'NO_BALL' ? (
+                          <strong className="text-amber-400 font-bold">NO BALL • </strong>
+                        ) : currentEvent.outcome === 'DOT' ? (
+                          <strong className="text-text-subdued font-bold">DOT BALL • </strong>
+                        ) : (
+                          <strong className="text-primary font-bold">
+                            {runsThisBall} RUN{runsThisBall === 1 ? '' : 'S'} •{' '}
+                          </strong>
+                        )}
+                        <span className="text-text-chalk">{currentEvent.commentary || `${runsThisBall} run(s) scored`}</span>
+                      </>
+                    );
+                  })() : (
                     'Match in progress. Select tactical batter intent and step delivery.'
                   )}
                 </p>
