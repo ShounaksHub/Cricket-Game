@@ -1,0 +1,805 @@
+[
+  {
+    "id": "f1e10000-0008-4000-8000-000000000008",
+    "fullName": "Ravindra Jadeja",
+    "displayName": "R. Jadeja",
+    "primaryNationality": "India",
+    "primaryRole": "BOWLING_ALL_ROUNDER",
+    "cricsheetId": "ravindra_jadeja"
+  },
+  {
+    "id": "f1e10000-0009-4000-8000-000000000009",
+    "fullName": "Rishabh Pant",
+    "displayName": "R. Pant",
+    "primaryNationality": "India",
+    "primaryRole": "WICKETKEEPER_BATTER",
+    "cricsheetId": "rishabh_pant"
+  },
+  {
+    "id": "f1e10000-000a-4000-8000-00000000000a",
+    "fullName": "KL Rahul",
+    "displayName": "K.L. Rahul",
+    "primaryNationality": "India",
+    "primaryRole": "WICKETKEEPER_BATTER",
+    "cricsheetId": "kl_rahul"
+  },
+  {
+    "id": "f1e10000-000b-4000-8000-00000000000b",
+    "fullName": "Shreyas Iyer",
+    "displayName": "S. Iyer",
+    "primaryNationality": "India",
+    "primaryRole": "MIDDLE_ORDER_BATTER",
+    "cricsheetId": "shreyas_iyer"
+  },
+  {
+    "id": "f1e10000-000c-4000-8000-00000000000c",
+    "fullName": "Mohammed Shami",
+    "displayName": "M. Shami",
+    "primaryNationality": "India",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "mohammed_shami"
+  },
+  {
+    "id": "f1e10000-000d-4000-8000-00000000000d",
+    "fullName": "Mohammed Siraj",
+    "displayName": "M. Siraj",
+    "primaryNationality": "India",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "mohammed_siraj"
+  },
+  {
+    "id": "f1e10000-000e-4000-8000-00000000000e",
+    "fullName": "Kuldeep Yadav",
+    "displayName": "K. Yadav",
+    "primaryNationality": "India",
+    "primaryRole": "SPIN_BOWLER",
+    "cricsheetId": "kuldeep_yadav"
+  },
+  {
+    "id": "f1e10000-000f-4000-8000-00000000000f",
+    "fullName": "Axar Patel",
+    "displayName": "A. Patel",
+    "primaryNationality": "India",
+    "primaryRole": "BOWLING_ALL_ROUNDER",
+    "cricsheetId": "axar_patel"
+  },
+  {
+    "id": "f1e10000-0010-4000-8000-000000000010",
+    "fullName": "Sanju Samson",
+    "displayName": "S. Samson",
+    "primaryNationality": "India",
+    "primaryRole": "WICKETKEEPER_BATTER",
+    "cricsheetId": "sanju_samson"
+  },
+  {
+    "id": "f1e10000-0011-4000-8000-000000000011",
+    "fullName": "Arshdeep Singh",
+    "displayName": "A. Singh",
+    "primaryNationality": "India",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "arshdeep_singh"
+  },
+  {
+    "id": "f1e10000-0012-4000-8000-000000000012",
+    "fullName": "Washington Sundar",
+    "displayName": "W. Sundar",
+    "primaryNationality": "India",
+    "primaryRole": "BOWLING_ALL_ROUNDER",
+    "cricsheetId": "washington_sundar"
+  },
+  {
+    "id": "f1e10000-0013-4000-8000-000000000013",
+    "fullName": "Rinku Singh",
+    "displayName": "R. Singh",
+    "primaryNationality": "India",
+    "primaryRole": "MIDDLE_ORDER_BATTER",
+    "cricsheetId": "rinku_singh"
+  },
+  {
+    "id": "f1e10000-0014-4000-8000-000000000014",
+    "fullName": "Tilak Varma",
+    "displayName": "T. Varma",
+    "primaryNationality": "India",
+    "primaryRole": "MIDDLE_ORDER_BATTER",
+    "cricsheetId": "tilak_varma"
+  },
+  {
+    "id": "f1e10000-0015-4000-8000-000000000015",
+    "fullName": "Ruturaj Gaikwad",
+    "displayName": "R. Gaikwad",
+    "primaryNationality": "India",
+    "primaryRole": "TOP_ORDER_BATTER",
+    "cricsheetId": "ruturaj_gaikwad"
+  },
+  {
+    "id": "f1e10000-0016-4000-8000-000000000016",
+    "fullName": "Ravi Bishnoi",
+    "displayName": "R. Bishnoi",
+    "primaryNationality": "India",
+    "primaryRole": "SPIN_BOWLER",
+    "cricsheetId": "ravi_bishnoi"
+  },
+  {
+    "id": "f1e10000-0017-4000-8000-000000000017",
+    "fullName": "Yuzvendra Chahal",
+    "displayName": "Y. Chahal",
+    "primaryNationality": "India",
+    "primaryRole": "SPIN_BOWLER",
+    "cricsheetId": "yuzvendra_chahal"
+  },
+  {
+    "id": "f1e10000-0018-4000-8000-000000000018",
+    "fullName": "Ishan Kishan",
+    "displayName": "I. Kishan",
+    "primaryNationality": "India",
+    "primaryRole": "WICKETKEEPER_BATTER",
+    "cricsheetId": "ishan_kishan"
+  },
+  {
+    "id": "f1e10000-0019-4000-8000-000000000019",
+    "fullName": "Shardul Thakur",
+    "displayName": "S. Thakur",
+    "primaryNationality": "India",
+    "primaryRole": "BOWLING_ALL_ROUNDER",
+    "cricsheetId": "shardul_thakur"
+  },
+  {
+    "id": "f1e10000-001a-4000-8000-00000000001a",
+    "fullName": "Prasidh Krishna",
+    "displayName": "P. Krishna",
+    "primaryNationality": "India",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "prasidh_krishna"
+  },
+  {
+    "id": "f1e10000-001b-4000-8000-00000000001b",
+    "fullName": "Mukesh Kumar",
+    "displayName": "M. Kumar",
+    "primaryNationality": "India",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "mukesh_kumar"
+  },
+  {
+    "id": "f1e10000-001c-4000-8000-00000000001c",
+    "fullName": "Avesh Khan",
+    "displayName": "A. Khan",
+    "primaryNationality": "India",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "avesh_khan"
+  },
+  {
+    "id": "f1e10000-001d-4000-8000-00000000001d",
+    "fullName": "Shivam Dube",
+    "displayName": "S. Dube",
+    "primaryNationality": "India",
+    "primaryRole": "BATTING_ALL_ROUNDER",
+    "cricsheetId": "shivam_dube"
+  },
+  {
+    "id": "f1e10000-001e-4000-8000-00000000001e",
+    "fullName": "Dhruv Jurel",
+    "displayName": "D. Jurel",
+    "primaryNationality": "India",
+    "primaryRole": "WICKETKEEPER_BATTER",
+    "cricsheetId": "dhruv_jurel"
+  },
+  {
+    "id": "f1e10000-001f-4000-8000-00000000001f",
+    "fullName": "Sarfaraz Khan",
+    "displayName": "S. Khan",
+    "primaryNationality": "India",
+    "primaryRole": "MIDDLE_ORDER_BATTER",
+    "cricsheetId": "sarfaraz_khan"
+  },
+  {
+    "id": "f1e10000-0020-4000-8000-000000000020",
+    "fullName": "Akash Deep",
+    "displayName": "A. Deep",
+    "primaryNationality": "India",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "akash_deep"
+  },
+  {
+    "id": "f1e10000-0021-4000-8000-000000000021",
+    "fullName": "Nitish Kumar Reddy",
+    "displayName": "N.K. Reddy",
+    "primaryNationality": "India",
+    "primaryRole": "BATTING_ALL_ROUNDER",
+    "cricsheetId": "nitish_kumar_reddy"
+  },
+  {
+    "id": "f1e10000-0022-4000-8000-000000000022",
+    "fullName": "Harshit Rana",
+    "displayName": "H. Rana",
+    "primaryNationality": "India",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "harshit_rana"
+  },
+  {
+    "id": "f1e10000-0023-4000-8000-000000000023",
+    "fullName": "Mayank Yadav",
+    "displayName": "M. Yadav",
+    "primaryNationality": "India",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "mayank_yadav"
+  },
+  {
+    "id": "f1e10000-0024-4000-8000-000000000024",
+    "fullName": "Abhishek Sharma",
+    "displayName": "A. Sharma",
+    "primaryNationality": "India",
+    "primaryRole": "TOP_ORDER_BATTER",
+    "cricsheetId": "abhishek_sharma"
+  },
+  {
+    "id": "f1e10000-0025-4000-8000-000000000025",
+    "fullName": "Varun Chakaravarthy",
+    "displayName": "V. Chakaravarthy",
+    "primaryNationality": "India",
+    "primaryRole": "SPIN_BOWLER",
+    "cricsheetId": "varun_chakaravarthy"
+  },
+  {
+    "id": "f1e10000-0026-4000-8000-000000000026",
+    "fullName": "Sai Sudharsan",
+    "displayName": "S. Sudharsan",
+    "primaryNationality": "India",
+    "primaryRole": "TOP_ORDER_BATTER",
+    "cricsheetId": "sai_sudharsan"
+  },
+  {
+    "id": "f1e10000-0027-4000-8000-000000000027",
+    "fullName": "Jitesh Sharma",
+    "displayName": "J. Sharma",
+    "primaryNationality": "India",
+    "primaryRole": "WICKETKEEPER_BATTER",
+    "cricsheetId": "jitesh_sharma"
+  },
+  {
+    "id": "f1e10000-0028-4000-8000-000000000028",
+    "fullName": "Devdutt Padikkal",
+    "displayName": "D. Padikkal",
+    "primaryNationality": "India",
+    "primaryRole": "TOP_ORDER_BATTER",
+    "cricsheetId": "devdutt_padikkal"
+  },
+  {
+    "id": "f1e10000-002a-4000-8000-00000000002a",
+    "fullName": "Steve Smith",
+    "displayName": "S. Smith",
+    "primaryNationality": "Australia",
+    "primaryRole": "TOP_ORDER_BATTER",
+    "wikidataId": "Q7613972",
+    "cricsheetId": "ssmith_aus"
+  },
+  {
+    "id": "f1e10000-002f-4000-8000-00000000002f",
+    "fullName": "Marnus Labuschagne",
+    "displayName": "M. Labuschagne",
+    "primaryNationality": "Australia",
+    "primaryRole": "TOP_ORDER_BATTER",
+    "cricsheetId": "marnus_labuschagne"
+  },
+  {
+    "id": "f1e10000-0030-4000-8000-000000000030",
+    "fullName": "Usman Khawaja",
+    "displayName": "U. Khawaja",
+    "primaryNationality": "Australia",
+    "primaryRole": "TOP_ORDER_BATTER",
+    "cricsheetId": "usman_khawaja"
+  },
+  {
+    "id": "f1e10000-0031-4000-8000-000000000031",
+    "fullName": "Mitchell Marsh",
+    "displayName": "M. Marsh",
+    "primaryNationality": "Australia",
+    "primaryRole": "BATTING_ALL_ROUNDER",
+    "cricsheetId": "mitchell_marsh"
+  },
+  {
+    "id": "f1e10000-0032-4000-8000-000000000032",
+    "fullName": "Glenn Maxwell",
+    "displayName": "G. Maxwell",
+    "primaryNationality": "Australia",
+    "primaryRole": "BATTING_ALL_ROUNDER",
+    "cricsheetId": "glenn_maxwell"
+  },
+  {
+    "id": "f1e10000-0033-4000-8000-000000000033",
+    "fullName": "Marcus Stoinis",
+    "displayName": "M. Stoinis",
+    "primaryNationality": "Australia",
+    "primaryRole": "BATTING_ALL_ROUNDER",
+    "cricsheetId": "marcus_stoinis"
+  },
+  {
+    "id": "f1e10000-0034-4000-8000-000000000034",
+    "fullName": "Alex Carey",
+    "displayName": "A. Carey",
+    "primaryNationality": "Australia",
+    "primaryRole": "WICKETKEEPER_BATTER",
+    "cricsheetId": "alex_carey"
+  },
+  {
+    "id": "f1e10000-0035-4000-8000-000000000035",
+    "fullName": "Cameron Green",
+    "displayName": "C. Green",
+    "primaryNationality": "Australia",
+    "primaryRole": "BATTING_ALL_ROUNDER",
+    "cricsheetId": "cameron_green"
+  },
+  {
+    "id": "f1e10000-0036-4000-8000-000000000036",
+    "fullName": "Josh Inglis",
+    "displayName": "J. Inglis",
+    "primaryNationality": "Australia",
+    "primaryRole": "WICKETKEEPER_BATTER",
+    "cricsheetId": "josh_inglis"
+  },
+  {
+    "id": "f1e10000-0037-4000-8000-000000000037",
+    "fullName": "Adam Zampa",
+    "displayName": "A. Zampa",
+    "primaryNationality": "Australia",
+    "primaryRole": "SPIN_BOWLER",
+    "cricsheetId": "adam_zampa"
+  },
+  {
+    "id": "f1e10000-0038-4000-8000-000000000038",
+    "fullName": "Nathan Lyon",
+    "displayName": "N. Lyon",
+    "primaryNationality": "Australia",
+    "primaryRole": "SPIN_BOWLER",
+    "cricsheetId": "nathan_lyon"
+  },
+  {
+    "id": "f1e10000-0039-4000-8000-000000000039",
+    "fullName": "Sean Abbott",
+    "displayName": "S. Abbott",
+    "primaryNationality": "Australia",
+    "primaryRole": "BOWLING_ALL_ROUNDER",
+    "cricsheetId": "sean_abbott"
+  },
+  {
+    "id": "f1e10000-003a-4000-8000-00000000003a",
+    "fullName": "Nathan Ellis",
+    "displayName": "N. Ellis",
+    "primaryNationality": "Australia",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "nathan_ellis"
+  },
+  {
+    "id": "f1e10000-003b-4000-8000-00000000003b",
+    "fullName": "Spencer Johnson",
+    "displayName": "S. Johnson",
+    "primaryNationality": "Australia",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "spencer_johnson"
+  },
+  {
+    "id": "f1e10000-003c-4000-8000-00000000003c",
+    "fullName": "Xavier Bartlett",
+    "displayName": "X. Bartlett",
+    "primaryNationality": "Australia",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "xavier_bartlett"
+  },
+  {
+    "id": "f1e10000-003d-4000-8000-00000000003d",
+    "fullName": "Matthew Short",
+    "displayName": "M. Short",
+    "primaryNationality": "Australia",
+    "primaryRole": "TOP_ORDER_BATTER",
+    "cricsheetId": "matthew_short"
+  },
+  {
+    "id": "f1e10000-003e-4000-8000-00000000003e",
+    "fullName": "Tim David",
+    "displayName": "T. David",
+    "primaryNationality": "Australia",
+    "primaryRole": "MIDDLE_ORDER_BATTER",
+    "cricsheetId": "tim_david"
+  },
+  {
+    "id": "f1e10000-003f-4000-8000-00000000003f",
+    "fullName": "Jhye Richardson",
+    "displayName": "J. Richardson",
+    "primaryNationality": "Australia",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "jhye_richardson"
+  },
+  {
+    "id": "f1e10000-0040-4000-8000-000000000040",
+    "fullName": "Scott Boland",
+    "displayName": "S. Boland",
+    "primaryNationality": "Australia",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "scott_boland"
+  },
+  {
+    "id": "f1e10000-0041-4000-8000-000000000041",
+    "fullName": "Michael Neser",
+    "displayName": "M. Neser",
+    "primaryNationality": "Australia",
+    "primaryRole": "BOWLING_ALL_ROUNDER",
+    "cricsheetId": "michael_neser"
+  },
+  {
+    "id": "f1e10000-0042-4000-8000-000000000042",
+    "fullName": "Ashton Agar",
+    "displayName": "A. Agar",
+    "primaryNationality": "Australia",
+    "primaryRole": "BOWLING_ALL_ROUNDER",
+    "cricsheetId": "ashton_agar"
+  },
+  {
+    "id": "f1e10000-0043-4000-8000-000000000043",
+    "fullName": "Todd Murphy",
+    "displayName": "T. Murphy",
+    "primaryNationality": "Australia",
+    "primaryRole": "SPIN_BOWLER",
+    "cricsheetId": "todd_murphy"
+  },
+  {
+    "id": "f1e10000-0044-4000-8000-000000000044",
+    "fullName": "Lance Morris",
+    "displayName": "L. Morris",
+    "primaryNationality": "Australia",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "lance_morris"
+  },
+  {
+    "id": "f1e10000-0045-4000-8000-000000000045",
+    "fullName": "Tanveer Sangha",
+    "displayName": "T. Sangha",
+    "primaryNationality": "Australia",
+    "primaryRole": "SPIN_BOWLER",
+    "cricsheetId": "tanveer_sangha"
+  },
+  {
+    "id": "f1e10000-0046-4000-8000-000000000046",
+    "fullName": "Ben McDermott",
+    "displayName": "B. McDermott",
+    "primaryNationality": "Australia",
+    "primaryRole": "WICKETKEEPER_BATTER",
+    "wikidataId": "Q16236341",
+    "cricsheetId": "ben_mcdermott"
+  },
+  {
+    "id": "f1e10000-0047-4000-8000-000000000047",
+    "fullName": "Joe Root",
+    "displayName": "J. Root",
+    "primaryNationality": "England",
+    "primaryRole": "TOP_ORDER_BATTER",
+    "wikidataId": "Q3524888",
+    "cricsheetId": "jroot_eng"
+  },
+  {
+    "id": "f1e10000-004b-4000-8000-00000000004b",
+    "fullName": "Jonny Bairstow",
+    "displayName": "J. Bairstow",
+    "primaryNationality": "England",
+    "primaryRole": "WICKETKEEPER_BATTER",
+    "cricsheetId": "jonny_bairstow"
+  },
+  {
+    "id": "f1e10000-004c-4000-8000-00000000004c",
+    "fullName": "Zak Crawley",
+    "displayName": "Z. Crawley",
+    "primaryNationality": "England",
+    "primaryRole": "TOP_ORDER_BATTER",
+    "cricsheetId": "zak_crawley"
+  },
+  {
+    "id": "f1e10000-004d-4000-8000-00000000004d",
+    "fullName": "Ben Duckett",
+    "displayName": "B. Duckett",
+    "primaryNationality": "England",
+    "primaryRole": "TOP_ORDER_BATTER",
+    "cricsheetId": "ben_duckett"
+  },
+  {
+    "id": "f1e10000-004e-4000-8000-00000000004e",
+    "fullName": "Ollie Pope",
+    "displayName": "O. Pope",
+    "primaryNationality": "England",
+    "primaryRole": "MIDDLE_ORDER_BATTER",
+    "cricsheetId": "ollie_pope"
+  },
+  {
+    "id": "f1e10000-004f-4000-8000-00000000004f",
+    "fullName": "Chris Woakes",
+    "displayName": "C. Woakes",
+    "primaryNationality": "England",
+    "primaryRole": "BOWLING_ALL_ROUNDER",
+    "cricsheetId": "chris_woakes"
+  },
+  {
+    "id": "f1e10000-0050-4000-8000-000000000050",
+    "fullName": "Mark Wood",
+    "displayName": "M. Wood",
+    "primaryNationality": "England",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "mark_wood"
+  },
+  {
+    "id": "f1e10000-0051-4000-8000-000000000051",
+    "fullName": "Jofra Archer",
+    "displayName": "J. Archer",
+    "primaryNationality": "England",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "jofra_archer"
+  },
+  {
+    "id": "f1e10000-0052-4000-8000-000000000052",
+    "fullName": "Gus Atkinson",
+    "displayName": "G. Atkinson",
+    "primaryNationality": "England",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "gus_atkinson"
+  },
+  {
+    "id": "f1e10000-0053-4000-8000-000000000053",
+    "fullName": "Shoaib Bashir",
+    "displayName": "S. Bashir",
+    "primaryNationality": "England",
+    "primaryRole": "SPIN_BOWLER",
+    "cricsheetId": "shoaib_bashir"
+  },
+  {
+    "id": "f1e10000-0054-4000-8000-000000000054",
+    "fullName": "Tom Hartley",
+    "displayName": "T. Hartley",
+    "primaryNationality": "England",
+    "primaryRole": "SPIN_BOWLER",
+    "cricsheetId": "tom_hartley"
+  },
+  {
+    "id": "f1e10000-0055-4000-8000-000000000055",
+    "fullName": "Rehan Ahmed",
+    "displayName": "R. Ahmed",
+    "primaryNationality": "England",
+    "primaryRole": "SPIN_BOWLER",
+    "cricsheetId": "rehan_ahmed"
+  },
+  {
+    "id": "f1e10000-0056-4000-8000-000000000056",
+    "fullName": "Liam Livingstone",
+    "displayName": "L. Livingstone",
+    "primaryNationality": "England",
+    "primaryRole": "BATTING_ALL_ROUNDER",
+    "cricsheetId": "liam_livingstone"
+  },
+  {
+    "id": "f1e10000-0057-4000-8000-000000000057",
+    "fullName": "Phil Salt",
+    "displayName": "P. Salt",
+    "primaryNationality": "England",
+    "primaryRole": "WICKETKEEPER_BATTER",
+    "cricsheetId": "phil_salt"
+  },
+  {
+    "id": "f1e10000-0058-4000-8000-000000000058",
+    "fullName": "Sam Curran",
+    "displayName": "S. Curran",
+    "primaryNationality": "England",
+    "primaryRole": "BOWLING_ALL_ROUNDER",
+    "cricsheetId": "sam_curran"
+  },
+  {
+    "id": "f1e10000-0059-4000-8000-000000000059",
+    "fullName": "Adil Rashid",
+    "displayName": "A. Rashid",
+    "primaryNationality": "England",
+    "primaryRole": "SPIN_BOWLER",
+    "cricsheetId": "adil_rashid"
+  },
+  {
+    "id": "f1e10000-005a-4000-8000-00000000005a",
+    "fullName": "Reece Topley",
+    "displayName": "R. Topley",
+    "primaryNationality": "England",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "reece_topley"
+  },
+  {
+    "id": "f1e10000-005b-4000-8000-00000000005b",
+    "fullName": "Brydon Carse",
+    "displayName": "B. Carse",
+    "primaryNationality": "England",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "brydon_carse"
+  },
+  {
+    "id": "f1e10000-005c-4000-8000-00000000005c",
+    "fullName": "Matthew Potts",
+    "displayName": "M. Potts",
+    "primaryNationality": "England",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "matthew_potts"
+  },
+  {
+    "id": "f1e10000-005d-4000-8000-00000000005d",
+    "fullName": "Jamie Smith",
+    "displayName": "J. Smith",
+    "primaryNationality": "England",
+    "primaryRole": "WICKETKEEPER_BATTER",
+    "cricsheetId": "jamie_smith"
+  },
+  {
+    "id": "f1e10000-005e-4000-8000-00000000005e",
+    "fullName": "Dan Lawrence",
+    "displayName": "D. Lawrence",
+    "primaryNationality": "England",
+    "primaryRole": "MIDDLE_ORDER_BATTER",
+    "cricsheetId": "dan_lawrence"
+  },
+  {
+    "id": "f1e10000-005f-4000-8000-00000000005f",
+    "fullName": "Will Jacks",
+    "displayName": "W. Jacks",
+    "primaryNationality": "England",
+    "primaryRole": "TOP_ORDER_BATTER",
+    "cricsheetId": "will_jacks"
+  },
+  {
+    "id": "f1e10000-0060-4000-8000-000000000060",
+    "fullName": "Ollie Robinson",
+    "displayName": "O. Robinson",
+    "primaryNationality": "England",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "ollie_robinson"
+  },
+  {
+    "id": "f1e10000-0061-4000-8000-000000000061",
+    "fullName": "Saqib Mahmood",
+    "displayName": "S. Mahmood",
+    "primaryNationality": "England",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "saqib_mahmood"
+  },
+  {
+    "id": "f1e10000-0062-4000-8000-000000000062",
+    "fullName": "Luke Wood",
+    "displayName": "L. Wood",
+    "primaryNationality": "England",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "luke_wood"
+  },
+  {
+    "id": "f1e10000-0063-4000-8000-000000000063",
+    "fullName": "Jacob Bethell",
+    "displayName": "J. Bethell",
+    "primaryNationality": "England",
+    "primaryRole": "BATTING_ALL_ROUNDER",
+    "cricsheetId": "jacob_bethell"
+  },
+  {
+    "id": "f1e10000-0064-4000-8000-000000000064",
+    "fullName": "John Turner",
+    "displayName": "J. Turner",
+    "primaryNationality": "England",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "john_turner"
+  },
+  {
+    "id": "f1e10000-0065-4000-8000-000000000065",
+    "fullName": "Babar Azam",
+    "displayName": "B. Azam",
+    "primaryNationality": "Pakistan",
+    "primaryRole": "TOP_ORDER_BATTER",
+    "cricsheetId": "babar_azam"
+  },
+  {
+    "id": "f1e10000-0067-4000-8000-000000000067",
+    "fullName": "Shaheen Shah Afridi",
+    "displayName": "S. Afridi",
+    "primaryNationality": "Pakistan",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "shaheen_shah_afridi"
+  },
+  {
+    "id": "f1e10000-0068-4000-8000-000000000068",
+    "fullName": "Naseem Shah",
+    "displayName": "N. Shah",
+    "primaryNationality": "Pakistan",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "naseem_shah"
+  },
+  {
+    "id": "f1e10000-0069-4000-8000-000000000069",
+    "fullName": "Haris Rauf",
+    "displayName": "H. Rauf",
+    "primaryNationality": "Pakistan",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "haris_rauf"
+  },
+  {
+    "id": "f1e10000-006a-4000-8000-00000000006a",
+    "fullName": "Fakhar Zaman",
+    "displayName": "F. Zaman",
+    "primaryNationality": "Pakistan",
+    "primaryRole": "TOP_ORDER_BATTER",
+    "cricsheetId": "fakhar_zaman"
+  },
+  {
+    "id": "f1e10000-006b-4000-8000-00000000006b",
+    "fullName": "Imam-ul-Haq",
+    "displayName": "Imam-ul-Haq",
+    "primaryNationality": "Pakistan",
+    "primaryRole": "TOP_ORDER_BATTER",
+    "cricsheetId": "imam_ul_haq"
+  },
+  {
+    "id": "f1e10000-006c-4000-8000-00000000006c",
+    "fullName": "Abdullah Shafique",
+    "displayName": "A. Shafique",
+    "primaryNationality": "Pakistan",
+    "primaryRole": "TOP_ORDER_BATTER",
+    "cricsheetId": "abdullah_shafique"
+  },
+  {
+    "id": "f1e10000-006d-4000-8000-00000000006d",
+    "fullName": "Saud Shakeel",
+    "displayName": "S. Shakeel",
+    "primaryNationality": "Pakistan",
+    "primaryRole": "MIDDLE_ORDER_BATTER",
+    "cricsheetId": "saud_shakeel"
+  },
+  {
+    "id": "f1e10000-006e-4000-8000-00000000006e",
+    "fullName": "Shan Masood",
+    "displayName": "S. Masood",
+    "primaryNationality": "Pakistan",
+    "primaryRole": "TOP_ORDER_BATTER",
+    "cricsheetId": "shan_masood"
+  },
+  {
+    "id": "f1e10000-006f-4000-8000-00000000006f",
+    "fullName": "Salman Ali Agha",
+    "displayName": "S. Agha",
+    "primaryNationality": "Pakistan",
+    "primaryRole": "BATTING_ALL_ROUNDER",
+    "cricsheetId": "salman_ali_agha"
+  },
+  {
+    "id": "f1e10000-0070-4000-8000-000000000070",
+    "fullName": "Shadab Khan",
+    "displayName": "S. Khan",
+    "primaryNationality": "Pakistan",
+    "primaryRole": "BOWLING_ALL_ROUNDER",
+    "cricsheetId": "shadab_khan"
+  },
+  {
+    "id": "f1e10000-0071-4000-8000-000000000071",
+    "fullName": "Iftikhar Ahmed",
+    "displayName": "I. Ahmed",
+    "primaryNationality": "Pakistan",
+    "primaryRole": "BATTING_ALL_ROUNDER",
+    "cricsheetId": "iftikhar_ahmed"
+  },
+  {
+    "id": "f1e10000-0072-4000-8000-000000000072",
+    "fullName": "Imad Wasim",
+    "displayName": "I. Wasim",
+    "primaryNationality": "Pakistan",
+    "primaryRole": "BOWLING_ALL_ROUNDER",
+    "cricsheetId": "imad_wasim"
+  },
+  {
+    "id": "f1e10000-0073-4000-8000-000000000073",
+    "fullName": "Mohammad Amir",
+    "displayName": "M. Amir",
+    "primaryNationality": "Pakistan",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "mohammad_amir"
+  },
+  {
+    "id": "f1e10000-0074-4000-8000-000000000074",
+    "fullName": "Hasan Ali",
+    "displayName": "H. Ali",
+    "primaryNationality": "Pakistan",
+    "primaryRole": "PACE_BOWLER",
+    "cricsheetId": "hasan_ali"
+  }
+]

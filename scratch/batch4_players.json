@@ -1,0 +1,602 @@
+[
+  {
+    "id": "f1e10000-0075-4000-8000-000000000075",
+    "fullName": "Aamer Jamal",
+    "nationality": "Pakistan",
+    "role": "BOWLING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-0076-4000-8000-000000000076",
+    "fullName": "Saim Ayub",
+    "nationality": "Pakistan",
+    "role": "TOP_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-0077-4000-8000-000000000077",
+    "fullName": "Mohammad Haris",
+    "nationality": "Pakistan",
+    "role": "WICKETKEEPER_BATTER"
+  },
+  {
+    "id": "f1e10000-0078-4000-8000-000000000078",
+    "fullName": "Mir Hamza",
+    "nationality": "Pakistan",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-0079-4000-8000-000000000079",
+    "fullName": "Khurram Shahzad",
+    "nationality": "Pakistan",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-007a-4000-8000-00000000007a",
+    "fullName": "Abrar Ahmed",
+    "nationality": "Pakistan",
+    "role": "SPIN_BOWLER"
+  },
+  {
+    "id": "f1e10000-007b-4000-8000-00000000007b",
+    "fullName": "Usman Khan",
+    "nationality": "Pakistan",
+    "role": "TOP_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-007c-4000-8000-00000000007c",
+    "fullName": "Abbas Afridi",
+    "nationality": "Pakistan",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-007d-4000-8000-00000000007d",
+    "fullName": "Sufiyan Muqeem",
+    "nationality": "Pakistan",
+    "role": "SPIN_BOWLER"
+  },
+  {
+    "id": "f1e10000-007e-4000-8000-00000000007e",
+    "fullName": "Kagiso Rabada",
+    "nationality": "South Africa",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-007f-4000-8000-00000000007f",
+    "fullName": "Anrich Nortje",
+    "nationality": "South Africa",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-0080-4000-8000-000000000080",
+    "fullName": "Marco Jansen",
+    "nationality": "South Africa",
+    "role": "BOWLING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-0081-4000-8000-000000000081",
+    "fullName": "Keshav Maharaj",
+    "nationality": "South Africa",
+    "role": "SPIN_BOWLER"
+  },
+  {
+    "id": "f1e10000-0082-4000-8000-000000000082",
+    "fullName": "Aiden Markram",
+    "nationality": "South Africa",
+    "role": "TOP_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-0083-4000-8000-000000000083",
+    "fullName": "Heinrich Klaasen",
+    "nationality": "South Africa",
+    "role": "WICKETKEEPER_BATTER"
+  },
+  {
+    "id": "f1e10000-0084-4000-8000-000000000084",
+    "fullName": "David Miller",
+    "nationality": "South Africa",
+    "role": "MIDDLE_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-0085-4000-8000-000000000085",
+    "fullName": "Quinton de Kock",
+    "nationality": "South Africa",
+    "role": "WICKETKEEPER_BATTER"
+  },
+  {
+    "id": "f1e10000-0086-4000-8000-000000000086",
+    "fullName": "Temba Bavuma",
+    "nationality": "South Africa",
+    "role": "TOP_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-0087-4000-8000-000000000087",
+    "fullName": "Lungi Ngidi",
+    "nationality": "South Africa",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-0088-4000-8000-000000000088",
+    "fullName": "Gerald Coetzee",
+    "nationality": "South Africa",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-0089-4000-8000-000000000089",
+    "fullName": "Tristan Stubbs",
+    "nationality": "South Africa",
+    "role": "MIDDLE_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-008a-4000-8000-00000000008a",
+    "fullName": "Ryan Rickelton",
+    "nationality": "South Africa",
+    "role": "WICKETKEEPER_BATTER"
+  },
+  {
+    "id": "f1e10000-008b-4000-8000-00000000008b",
+    "fullName": "Nandre Burger",
+    "nationality": "South Africa",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-008c-4000-8000-00000000008c",
+    "fullName": "Wiaan Mulder",
+    "nationality": "South Africa",
+    "role": "BATTING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-008d-4000-8000-00000000008d",
+    "fullName": "Tony de Zorzi",
+    "nationality": "South Africa",
+    "role": "TOP_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-008e-4000-8000-00000000008e",
+    "fullName": "Tabraiz Shamsi",
+    "nationality": "South Africa",
+    "role": "SPIN_BOWLER"
+  },
+  {
+    "id": "f1e10000-008f-4000-8000-00000000008f",
+    "fullName": "Bjorn Fortuin",
+    "nationality": "South Africa",
+    "role": "SPIN_BOWLER"
+  },
+  {
+    "id": "f1e10000-0090-4000-8000-000000000090",
+    "fullName": "Ottneil Baartman",
+    "nationality": "South Africa",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-0091-4000-8000-000000000091",
+    "fullName": "Matthew Breetzke",
+    "nationality": "South Africa",
+    "role": "TOP_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-0092-4000-8000-000000000092",
+    "fullName": "Patrick Kruger",
+    "nationality": "South Africa",
+    "role": "BATTING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-0093-4000-8000-000000000093",
+    "fullName": "Kwena Maphaka",
+    "nationality": "South Africa",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-0094-4000-8000-000000000094",
+    "fullName": "Andile Phehlukwayo",
+    "nationality": "South Africa",
+    "role": "BOWLING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-0095-4000-8000-000000000095",
+    "fullName": "Rassie van der Dussen",
+    "nationality": "South Africa",
+    "role": "TOP_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-0096-4000-8000-000000000096",
+    "fullName": "Reeza Hendricks",
+    "nationality": "South Africa",
+    "role": "TOP_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-0097-4000-8000-000000000097",
+    "fullName": "Kane Williamson",
+    "nationality": "New Zealand",
+    "role": "TOP_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-0099-4000-8000-000000000099",
+    "fullName": "Tim Southee",
+    "nationality": "New Zealand",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-009a-4000-8000-00000000009a",
+    "fullName": "Tom Latham",
+    "nationality": "New Zealand",
+    "role": "WICKETKEEPER_BATTER"
+  },
+  {
+    "id": "f1e10000-009b-4000-8000-00000000009b",
+    "fullName": "Devon Conway",
+    "nationality": "New Zealand",
+    "role": "WICKETKEEPER_BATTER"
+  },
+  {
+    "id": "f1e10000-009c-4000-8000-00000000009c",
+    "fullName": "Daryl Mitchell",
+    "nationality": "New Zealand",
+    "role": "BATTING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-009d-4000-8000-00000000009d",
+    "fullName": "Glenn Phillips",
+    "nationality": "New Zealand",
+    "role": "MIDDLE_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-009e-4000-8000-00000000009e",
+    "fullName": "Rachin Ravindra",
+    "nationality": "New Zealand",
+    "role": "BATTING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-009f-4000-8000-00000000009f",
+    "fullName": "Mitchell Santner",
+    "nationality": "New Zealand",
+    "role": "BOWLING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-00a0-4000-8000-0000000000a0",
+    "fullName": "Matt Henry",
+    "nationality": "New Zealand",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-00a1-4000-8000-0000000000a1",
+    "fullName": "Lockie Ferguson",
+    "nationality": "New Zealand",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-00a2-4000-8000-0000000000a2",
+    "fullName": "Finn Allen",
+    "nationality": "New Zealand",
+    "role": "TOP_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-00a3-4000-8000-0000000000a3",
+    "fullName": "Ish Sodhi",
+    "nationality": "New Zealand",
+    "role": "SPIN_BOWLER"
+  },
+  {
+    "id": "f1e10000-00a4-4000-8000-0000000000a4",
+    "fullName": "Will Young",
+    "nationality": "New Zealand",
+    "role": "TOP_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-00a5-4000-8000-0000000000a5",
+    "fullName": "Kyle Jamieson",
+    "nationality": "New Zealand",
+    "role": "BOWLING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-00a6-4000-8000-0000000000a6",
+    "fullName": "Ajaz Patel",
+    "nationality": "New Zealand",
+    "role": "SPIN_BOWLER"
+  },
+  {
+    "id": "f1e10000-00a7-4000-8000-0000000000a7",
+    "fullName": "Michael Bracewell",
+    "nationality": "New Zealand",
+    "role": "BATTING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-00a8-4000-8000-0000000000a8",
+    "fullName": "Mark Chapman",
+    "nationality": "New Zealand",
+    "role": "MIDDLE_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-00a9-4000-8000-0000000000a9",
+    "fullName": "Adam Milne",
+    "nationality": "New Zealand",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-00aa-4000-8000-0000000000aa",
+    "fullName": "Ben Sears",
+    "nationality": "New Zealand",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-00ab-4000-8000-0000000000ab",
+    "fullName": "William O",
+    "nationality": "New Zealand",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-00ac-4000-8000-0000000000ac",
+    "fullName": "Jacob Duffy",
+    "nationality": "New Zealand",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-00ad-4000-8000-0000000000ad",
+    "fullName": "Tim Seifert",
+    "nationality": "New Zealand",
+    "role": "WICKETKEEPER_BATTER"
+  },
+  {
+    "id": "f1e10000-00ae-4000-8000-0000000000ae",
+    "fullName": "James Neesham",
+    "nationality": "New Zealand",
+    "role": "BATTING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-00af-4000-8000-0000000000af",
+    "fullName": "Henry Nicholls",
+    "nationality": "New Zealand",
+    "role": "MIDDLE_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-00b0-4000-8000-0000000000b0",
+    "fullName": "Nicholas Pooran",
+    "nationality": "West Indies",
+    "role": "WICKETKEEPER_BATTER"
+  },
+  {
+    "id": "f1e10000-00b1-4000-8000-0000000000b1",
+    "fullName": "Shai Hope",
+    "nationality": "West Indies",
+    "role": "WICKETKEEPER_BATTER"
+  },
+  {
+    "id": "f1e10000-00b2-4000-8000-0000000000b2",
+    "fullName": "Shimron Hetmyer",
+    "nationality": "West Indies",
+    "role": "MIDDLE_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-00b3-4000-8000-0000000000b3",
+    "fullName": "Andre Russell",
+    "nationality": "West Indies",
+    "role": "BATTING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-00b4-4000-8000-0000000000b4",
+    "fullName": "Jason Holder",
+    "nationality": "West Indies",
+    "role": "BOWLING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-00b5-4000-8000-0000000000b5",
+    "fullName": "Alzarri Joseph",
+    "nationality": "West Indies",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-00b6-4000-8000-0000000000b6",
+    "fullName": "Rovman Powell",
+    "nationality": "West Indies",
+    "role": "MIDDLE_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-00b7-4000-8000-0000000000b7",
+    "fullName": "Akeal Hosein",
+    "nationality": "West Indies",
+    "role": "SPIN_BOWLER"
+  },
+  {
+    "id": "f1e10000-00b8-4000-8000-0000000000b8",
+    "fullName": "Roston Chase",
+    "nationality": "West Indies",
+    "role": "BATTING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-00b9-4000-8000-0000000000b9",
+    "fullName": "Gudakesh Motie",
+    "nationality": "West Indies",
+    "role": "SPIN_BOWLER"
+  },
+  {
+    "id": "f1e10000-00ba-4000-8000-0000000000ba",
+    "fullName": "Shamar Joseph",
+    "nationality": "West Indies",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-00bb-4000-8000-0000000000bb",
+    "fullName": "Brandon King",
+    "nationality": "West Indies",
+    "role": "TOP_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-00bc-4000-8000-0000000000bc",
+    "fullName": "Romario Shepherd",
+    "nationality": "West Indies",
+    "role": "BOWLING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-00bd-4000-8000-0000000000bd",
+    "fullName": "Jayden Seales",
+    "nationality": "West Indies",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-00be-4000-8000-0000000000be",
+    "fullName": "Kraigg Brathwaite",
+    "nationality": "West Indies",
+    "role": "TOP_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-00bf-4000-8000-0000000000bf",
+    "fullName": "Kyle Mayers",
+    "nationality": "West Indies",
+    "role": "BATTING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-00c0-4000-8000-0000000000c0",
+    "fullName": "Sherfane Rutherford",
+    "nationality": "West Indies",
+    "role": "MIDDLE_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-00c1-4000-8000-0000000000c1",
+    "fullName": "Obed McCoy",
+    "nationality": "West Indies",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-00c2-4000-8000-0000000000c2",
+    "fullName": "Johnson Charles",
+    "nationality": "West Indies",
+    "role": "TOP_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-00c3-4000-8000-0000000000c3",
+    "fullName": "Alick Athanaze",
+    "nationality": "West Indies",
+    "role": "TOP_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-00c4-4000-8000-0000000000c4",
+    "fullName": "Matthew Forde",
+    "nationality": "West Indies",
+    "role": "BOWLING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-00c5-4000-8000-0000000000c5",
+    "fullName": "Mikyle Louis",
+    "nationality": "West Indies",
+    "role": "TOP_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-00c6-4000-8000-0000000000c6",
+    "fullName": "Kavem Hodge",
+    "nationality": "West Indies",
+    "role": "BATTING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-00c7-4000-8000-0000000000c7",
+    "fullName": "Jermaine Blackwood",
+    "nationality": "West Indies",
+    "role": "MIDDLE_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-00c8-4000-8000-0000000000c8",
+    "fullName": "Kemar Roach",
+    "nationality": "West Indies",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-00c9-4000-8000-0000000000c9",
+    "fullName": "Wanindu Hasaranga",
+    "nationality": "Sri Lanka",
+    "role": "BOWLING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-00ca-4000-8000-0000000000ca",
+    "fullName": "Kusal Mendis",
+    "nationality": "Sri Lanka",
+    "role": "WICKETKEEPER_BATTER"
+  },
+  {
+    "id": "f1e10000-00cb-4000-8000-0000000000cb",
+    "fullName": "Pathum Nissanka",
+    "nationality": "Sri Lanka",
+    "role": "TOP_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-00cc-4000-8000-0000000000cc",
+    "fullName": "Charith Asalanka",
+    "nationality": "Sri Lanka",
+    "role": "MIDDLE_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-00cd-4000-8000-0000000000cd",
+    "fullName": "Maheesh Theekshana",
+    "nationality": "Sri Lanka",
+    "role": "SPIN_BOWLER"
+  },
+  {
+    "id": "f1e10000-00ce-4000-8000-0000000000ce",
+    "fullName": "Matheesha Pathirana",
+    "nationality": "Sri Lanka",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-00cf-4000-8000-0000000000cf",
+    "fullName": "Dilshan Madushanka",
+    "nationality": "Sri Lanka",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-00d0-4000-8000-0000000000d0",
+    "fullName": "Kamindu Mendis",
+    "nationality": "Sri Lanka",
+    "role": "BATTING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-00d1-4000-8000-0000000000d1",
+    "fullName": "Dunith Wellalage",
+    "nationality": "Sri Lanka",
+    "role": "BOWLING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-00d2-4000-8000-0000000000d2",
+    "fullName": "Sadeera Samarawickrama",
+    "nationality": "Sri Lanka",
+    "role": "WICKETKEEPER_BATTER"
+  },
+  {
+    "id": "f1e10000-00d3-4000-8000-0000000000d3",
+    "fullName": "Dasun Shanaka",
+    "nationality": "Sri Lanka",
+    "role": "BATTING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-00d4-4000-8000-0000000000d4",
+    "fullName": "Dushmantha Chameera",
+    "nationality": "Sri Lanka",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-00d5-4000-8000-0000000000d5",
+    "fullName": "Angelo Mathews",
+    "nationality": "Sri Lanka",
+    "role": "BATTING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-00d6-4000-8000-0000000000d6",
+    "fullName": "Dinesh Chandimal",
+    "nationality": "Sri Lanka",
+    "role": "MIDDLE_ORDER_BATTER"
+  },
+  {
+    "id": "f1e10000-00d7-4000-8000-0000000000d7",
+    "fullName": "Dhananjaya de Silva",
+    "nationality": "Sri Lanka",
+    "role": "BATTING_ALL_ROUNDER"
+  },
+  {
+    "id": "f1e10000-00d8-4000-8000-0000000000d8",
+    "fullName": "Asitha Fernando",
+    "nationality": "Sri Lanka",
+    "role": "PACE_BOWLER"
+  },
+  {
+    "id": "f1e10000-00d9-4000-8000-0000000000d9",
+    "fullName": "Prabath Jayasuriya",
+    "nationality": "Sri Lanka",
+    "role": "SPIN_BOWLER"
+  }
+]
