@@ -309,6 +309,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.0.4
         version: 19.3.0(@types/react@19.3.0)
+      daisyui:
+        specifier: ^5.8.1
+        version: 5.8.1
       postcss:
         specifier: ^8.5.3
         version: 8.5.32
@@ -1958,6 +1961,9 @@ packages:
 
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
+
+  daisyui@5.8.1:
+    resolution: {integrity: sha512-ptP4WHOJ6WltNnA5zwkg3GypOLhsyUM2FHuXCckWVEpWviioInFKsjnShCWYGYHsQ5P9bUCOH1tn45cKLeTUpg==}
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -4514,6 +4520,8 @@ snapshots:
       typescript: 5.9.3
 
   csstype@3.2.3: {}
+
+  daisyui@5.8.1: {}
 
   debug@4.4.3(supports-color@8.1.1):
     dependencies:

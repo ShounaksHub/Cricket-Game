@@ -266,18 +266,18 @@ export default function HomeScreen() {
           </p>
 
           {/* Primary Action CTA Cluster */}
-          <div className="flex flex-wrap items-center gap-space-md pt-space-sm">
+          <div className="flex flex-wrap items-center gap-3 pt-2">
             {/* Main 'PLAY CRICKET' CTA */}
             <Link
               href="/match"
-              className="group relative px-space-xl py-4 bg-[#E1B382] hover:bg-[#ebd0b0] text-[#12343B] font-headline-md text-title-md rounded-lg transition-colors flex items-center gap-space-sm shadow-md font-extrabold"
+              className="btn btn-primary btn-lg font-headline-md shadow-md gap-2 font-extrabold"
               id="btn-play-cricket"
             >
-              <span className="material-symbols-outlined text-[26px] group-hover:rotate-45 transition-transform duration-300">
+              <span className="material-symbols-outlined text-[24px]">
                 sports_cricket
               </span>
               <span>Play cricket</span>
-              <span className="material-symbols-outlined text-[20px] transition-transform group-hover:translate-x-1">
+              <span className="material-symbols-outlined text-[18px]">
                 arrow_forward
               </span>
             </Link>
@@ -285,10 +285,10 @@ export default function HomeScreen() {
             {/* Secondary 'BUILD YOUR DREAM XI' CTA */}
             <Link
               href="/dream-teams"
-              className="group px-space-lg py-4 bg-[#12343B] hover:bg-[#153C44] text-[#FBF8F2] border border-[#C89666]/40 font-headline-md text-title-md uppercase tracking-wider rounded-lg shadow-sm transition-all flex items-center gap-space-sm"
+              className="btn btn-neutral btn-lg border border-primary/40 font-headline-md tracking-wider shadow-xs gap-2"
               id="btn-build-xi"
             >
-              <span className="material-symbols-outlined text-[22px] text-[#E1B382] group-hover:scale-110 transition-transform">
+              <span className="material-symbols-outlined text-[22px] text-primary">
                 shield_person
               </span>
               <span className="font-bold">Build your XI</span>
@@ -297,10 +297,10 @@ export default function HomeScreen() {
             {/* Tertiary Quick Resume Action */}
             <Link
               href="/match?resume=true"
-              className="group px-space-md py-3 sm:py-4 bg-[#12343B]/60 hover:bg-[#12343B] text-[#D8C9B5] hover:text-[#FBF8F2] border border-[#C89666]/30 font-label-caps text-label-caps uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-space-xs w-full sm:w-auto"
+              className="btn btn-outline btn-lg text-primary-content hover:bg-neutral/40 border-primary/30 text-xs uppercase tracking-widest gap-2 w-full sm:w-auto"
               id="btn-quick-resume"
             >
-              <span className="material-symbols-outlined text-[18px] text-[#E1B382]">
+              <span className="material-symbols-outlined text-[18px] text-primary">
                 play_circle
               </span>
               <span>
@@ -653,11 +653,11 @@ export default function HomeScreen() {
           </div>
 
           {/* Quick Category Toggle Pills */}
-          <div className="flex items-center p-1 bg-[#FBF8F2] rounded-lg gap-1 border border-[#D8C9B5]">
+          <div className="join border border-base-300 p-1 bg-base-200/50 rounded-lg">
             <button
               onClick={() => setFormatFilter('all')}
-              className={`px-space-md py-1.5 rounded font-label-caps text-label-caps uppercase font-bold transition-all cursor-pointer ${
-                formatFilter === 'all' ? 'text-[#E1B382] bg-[#2D545E] shadow-sm' : 'text-[#687477] hover:text-[#12343B]'
+              className={`btn btn-xs join-item font-mono uppercase font-bold transition-all ${
+                formatFilter === 'all' ? 'btn-primary' : 'btn-ghost'
               }`}
               type="button"
             >
@@ -665,8 +665,8 @@ export default function HomeScreen() {
             </button>
             <button
               onClick={() => setFormatFilter('white')}
-              className={`px-space-md py-1.5 rounded font-label-caps text-label-caps uppercase font-bold transition-all cursor-pointer ${
-                formatFilter === 'white' ? 'text-[#E1B382] bg-[#2D545E] shadow-sm' : 'text-[#687477] hover:text-[#12343B]'
+              className={`btn btn-xs join-item font-mono uppercase font-bold transition-all ${
+                formatFilter === 'white' ? 'btn-primary' : 'btn-ghost'
               }`}
               type="button"
             >
@@ -674,8 +674,8 @@ export default function HomeScreen() {
             </button>
             <button
               onClick={() => setFormatFilter('red')}
-              className={`px-space-md py-1.5 rounded font-label-caps text-label-caps uppercase font-bold transition-all cursor-pointer ${
-                formatFilter === 'red' ? 'text-[#E1B382] bg-[#2D545E] shadow-sm' : 'text-[#687477] hover:text-[#12343B]'
+              className={`btn btn-xs join-item font-mono uppercase font-bold transition-all ${
+                formatFilter === 'red' ? 'btn-primary' : 'btn-ghost'
               }`}
               type="button"
             >

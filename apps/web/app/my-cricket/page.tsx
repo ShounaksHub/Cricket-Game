@@ -355,84 +355,84 @@ export default function MyCricketPage() {
           {/* Quick Career Metrics Dashboard Grid (4 Pillars) */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md">
             {/* Card 1: Record & Win Ratio */}
-            <div className="bg-surface-card p-space-md rounded-xl flex flex-col justify-between hover:bg-surface-elevated transition-colors shadow-sm border border-border-hairline">
+            <div className="card bg-base-200/50 border border-base-300 p-space-md rounded-xl flex flex-col justify-between hover:bg-base-200 transition-colors shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="font-label-caps text-label-caps text-text-subdued uppercase">CAREER MATCH RECORD</span>
+                <span className="font-mono text-[10px] opacity-70 uppercase">CAREER MATCH RECORD</span>
                 <span className="material-symbols-outlined text-secondary text-[20px]">sports_cricket</span>
               </div>
               <div className="my-space-sm">
                 <div className="flex items-baseline gap-space-xs">
-                  <span className="font-scoreboard-xl text-scoreboard-xl text-text-chalk">{totalMatches}</span>
-                  <span className="font-body-bold text-body-bold text-text-slate uppercase">FIXTURES</span>
+                  <span className="text-3xl font-scoreboard-xl font-bold text-base-content">{totalMatches}</span>
+                  <span className="font-mono text-xs opacity-75 uppercase">FIXTURES</span>
                 </div>
-                <div className="flex items-center gap-space-xs font-label-caps text-label-caps text-text-slate mt-1">
+                <div className="flex items-center gap-space-xs font-mono text-xs opacity-80 mt-1">
                   <span className="text-primary font-bold">{totalWins} W</span> •{' '}
                   <span className="text-error font-bold">{totalLosses} L</span> •{' '}
-                  <span className="text-text-subdued">{totalTies} T/D</span>
+                  <span className="opacity-60">{totalTies} T/D</span>
                 </div>
               </div>
-              <div className="flex items-center justify-between pt-space-xs bg-surface-recessed px-space-sm py-1 rounded">
-                <span className="font-label-caps text-label-caps text-text-subdued uppercase">WIN RATIO</span>
-                <span className="font-scoreboard-md text-title-md text-primary font-bold">{winRatio}%</span>
+              <div className="flex items-center justify-between pt-space-xs bg-base-300/40 px-space-sm py-1 rounded">
+                <span className="font-mono text-[10px] opacity-70 uppercase">WIN RATIO</span>
+                <span className="font-mono text-sm text-primary font-bold">{winRatio}%</span>
               </div>
             </div>
 
             {/* Card 2: Career Runs */}
-            <div className="bg-surface-card p-space-md rounded-xl flex flex-col justify-between hover:bg-surface-elevated transition-colors shadow-sm border border-border-hairline">
+            <div className="card bg-base-200/50 border border-base-300 p-space-md rounded-xl flex flex-col justify-between hover:bg-base-200 transition-colors shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="font-label-caps text-label-caps text-text-subdued uppercase">TOTAL RUNS SCORED</span>
-                <span className="material-symbols-outlined text-tertiary text-[20px]">trending_up</span>
+                <span className="font-mono text-[10px] opacity-70 uppercase">TOTAL RUNS SCORED</span>
+                <span className="material-symbols-outlined text-primary text-[20px]">trending_up</span>
               </div>
               <div className="my-space-sm">
                 <div className="flex items-baseline gap-space-xs">
-                  <span className="font-scoreboard-xl text-scoreboard-xl text-text-chalk">
+                  <span className="text-3xl font-scoreboard-xl font-bold text-base-content">
                     {totalRuns.toLocaleString()}
                   </span>
                 </div>
-                <span className="font-label-caps text-label-caps text-text-slate mt-1 uppercase">
+                <span className="font-mono text-[10px] opacity-75 mt-1 uppercase">
                   {totalMatches > 0 ? `AVG ${(totalRuns / totalMatches).toFixed(1)} / FIXTURE` : 'NO COMPLETED RUNS'}
                 </span>
               </div>
-              <div className="flex items-center justify-between pt-space-xs bg-surface-recessed px-space-sm py-1 rounded">
-                <span className="font-label-caps text-label-caps text-text-subdued uppercase">STATUS</span>
-                <span className="font-scoreboard-md text-title-md text-primary font-bold">
+              <div className="flex items-center justify-between pt-space-xs bg-base-300/40 px-space-sm py-1 rounded">
+                <span className="font-mono text-[10px] opacity-70 uppercase">STATUS</span>
+                <span className="font-mono text-sm text-primary font-bold">
                   {totalMatches > 0 ? 'ACTIVE' : 'READY TO PLAY'}
                 </span>
               </div>
             </div>
 
             {/* Card 3: Wickets Taken */}
-            <div className="bg-surface-card p-space-md rounded-xl flex flex-col justify-between hover:bg-surface-elevated transition-colors shadow-sm border border-border-hairline">
+            <div className="card bg-base-200/50 border border-base-300 p-space-md rounded-xl flex flex-col justify-between hover:bg-base-200 transition-colors shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="font-label-caps text-label-caps text-text-subdued uppercase">WICKETS RECORDED</span>
-                <span className="material-symbols-outlined text-telemetry-blue text-[20px]">sports_baseball</span>
+                <span className="font-mono text-[10px] opacity-70 uppercase">WICKETS RECORDED</span>
+                <span className="material-symbols-outlined text-info text-[20px]">sports_baseball</span>
               </div>
               <div className="my-space-sm">
                 <div className="flex items-baseline gap-space-xs">
-                  <span className="font-scoreboard-xl text-scoreboard-xl text-text-chalk">{totalWickets}</span>
-                  <span className="font-body-bold text-body-bold text-text-slate uppercase">DISMISSALS</span>
+                  <span className="text-3xl font-scoreboard-xl font-bold text-base-content">{totalWickets}</span>
+                  <span className="font-mono text-xs opacity-75 uppercase">DISMISSALS</span>
                 </div>
-                <span className="font-label-caps text-label-caps text-text-slate mt-1 uppercase">
+                <span className="font-mono text-[10px] opacity-75 mt-1 uppercase">
                   {totalMatches > 0 ? `${(totalWickets / totalMatches).toFixed(1)} PER FIXTURE` : 'NO DISMISSALS'}
                 </span>
               </div>
-              <div className="flex items-center justify-between pt-space-xs bg-surface-recessed px-space-sm py-1 rounded">
-                <span className="font-label-caps text-label-caps text-text-subdued uppercase">SIMULATION</span>
-                <span className="font-scoreboard-md text-title-md text-telemetry-blue font-bold">OFFLINE-FIRST</span>
+              <div className="flex items-center justify-between pt-space-xs bg-base-300/40 px-space-sm py-1 rounded">
+                <span className="font-mono text-[10px] opacity-70 uppercase">SIMULATION</span>
+                <span className="font-mono text-sm text-info font-bold">OFFLINE-FIRST</span>
               </div>
             </div>
 
             {/* Card 4: Squads & Formations */}
-            <div className="bg-surface-card p-space-md rounded-xl flex flex-col justify-between hover:bg-surface-elevated transition-colors shadow-sm border border-border-hairline">
+            <div className="card bg-base-200/50 border border-base-300 p-space-md rounded-xl flex flex-col justify-between hover:bg-base-200 transition-colors shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="font-label-caps text-label-caps text-text-subdued uppercase">ROSTER COMPOSITION</span>
-                <span className="material-symbols-outlined text-primary text-[20px]">groups</span>
+                <span className="font-mono text-[10px] opacity-70 uppercase">ROSTER COMPOSITION</span>
+                <span className="material-symbols-outlined text-accent text-[20px]">groups</span>
               </div>
               <div className="my-space-sm flex items-center gap-space-md">
-                <span className="font-scoreboard-xl text-scoreboard-xl text-text-chalk">{savedTeams.length}</span>
+                <span className="text-3xl font-scoreboard-xl font-bold text-base-content">{savedTeams.length}</span>
                 <div className="flex flex-col">
-                  <span className="font-body-bold text-body-bold text-text-chalk uppercase">SAVED SQUADS</span>
-                  <span className="font-label-caps text-label-caps text-text-subdued uppercase">
+                  <span className="font-mono text-xs font-bold uppercase">SAVED SQUADS</span>
+                  <span className="font-mono text-[10px] opacity-70 uppercase">
                     {savedTeams.length > 0 ? 'READY FOR COMPETITION' : 'AWAITING CREATION'}
                   </span>
                 </div>
@@ -440,7 +440,7 @@ export default function MyCricketPage() {
               <div className="pt-space-xs">
                 <Link
                   href="/dream-teams"
-                  className="block w-full text-center py-1.5 bg-surface-recessed hover:bg-surface-bright text-primary font-label-caps text-label-caps uppercase rounded font-bold transition-colors border border-border-hairline"
+                  className="btn btn-neutral btn-sm btn-block text-xs uppercase"
                 >
                   CREATE NEW SQUAD →
                 </Link>

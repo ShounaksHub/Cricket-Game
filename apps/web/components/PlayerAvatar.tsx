@@ -41,28 +41,30 @@ export function PlayerAvatar({
 
   return (
     <div
-      className={`relative inline-flex items-center justify-center shrink-0 rounded-lg overflow-hidden bg-surface-recessed select-none ${className}`}
+      className={`avatar ${className}`}
       style={{ width: widthStyle, height: heightStyle }}
     >
-      <img
-        src={meta.src}
-        alt={meta.altText}
-        className="w-full h-full object-cover"
-        loading="lazy"
-        decoding="async"
-        onError={(e) => {
-          // Graceful fallback to diverse realistic sports photography archetype from 60-image pool
-          e.currentTarget.src = getRealisticFallback(primaryRole, primaryNationality, id);
-        }}
-      />
-      {showBadge && (
-        <span
-          className="absolute bottom-0 right-0 px-1 py-0.2 bg-surface-elevated/90 text-[8px] font-mono text-primary font-bold rounded-tl"
-          title={`Status: ${meta.classification}`}
-        >
-          {meta.classification === 'VERIFIED_AUTHENTIC' ? '✓' : 'XI'}
-        </span>
-      )}
+      <div className="w-full h-full rounded-box overflow-hidden bg-base-300 relative">
+        <img
+          src={meta.src}
+          alt={meta.altText}
+          className="w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
+          onError={(e) => {
+            // Graceful fallback to diverse realistic sports photography archetype from 60-image pool
+            e.currentTarget.src = getRealisticFallback(primaryRole, primaryNationality, id);
+          }}
+        />
+        {showBadge && (
+          <span
+            className="badge badge-xs badge-neutral absolute bottom-0.5 right-0.5 font-mono text-[8px] font-bold shadow-sm"
+            title={`Status: ${meta.classification}`}
+          >
+            {meta.classification === 'VERIFIED_AUTHENTIC' ? '✓' : 'XI'}
+          </span>
+        )}
+      </div>
     </div>
   );
 }

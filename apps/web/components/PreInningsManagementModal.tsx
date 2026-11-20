@@ -104,24 +104,24 @@ export function PreInningsManagementModal({
       aria-label={isBatting ? 'Pre-Innings Batting Strategy' : 'Pre-Innings Bowling Attack'}
       tabIndex={-1}
       ref={dialogRef}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#12343B]/80 backdrop-blur-sm animate-fade-in"
+      className="modal modal-open z-50 bg-black/80 backdrop-blur-xs"
     >
-      <div className="bg-[#FBF8F2] border border-[#D8C9B5] rounded-xl max-w-3xl w-full p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="modal-box max-w-3xl w-full p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[92vh] bg-base-100 border border-base-300 rounded-2xl">
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 mb-4 border-b border-[#D8C9B5] pb-3">
+        <div className="flex items-start justify-between gap-4 mb-4 border-b border-base-300 pb-3">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border bg-[#F5EBDD] text-[#2D545E] border-[#2D545E]/30 font-mono">
+              <span className="badge badge-primary badge-outline text-[10px] uppercase font-bold tracking-wider font-mono">
                 {isBatting ? '🏏 PRE-INNINGS BATTING STRATEGY' : '⚾ PRE-INNINGS BOWLING ATTACK'}
               </span>
-              <span className="text-xs text-[#687477] font-mono">
+              <span className="text-xs opacity-70 font-mono">
                 {format.replace(/_/g, ' ')} • {teamName}
               </span>
             </div>
-            <h3 className="text-2xl font-editorial-title font-bold text-[#12343B] tracking-tight">
+            <h3 className="text-2xl font-editorial-title font-bold text-base-content tracking-tight">
               {isBatting ? 'Choose your opening pair' : 'Choose your opening bowler'}
             </h3>
-            <p className="text-xs text-[#687477] mt-0.5">
+            <p className="text-xs opacity-75 mt-0.5">
               {isBatting
                 ? 'Choose who starts at the striker’s end and who starts at the non-striker’s end. You can still adjust the rest of the order.'
                 : 'Choose who bowls the first over.'}
@@ -130,7 +130,7 @@ export function PreInningsManagementModal({
 
           <button
             onClick={onDelegateToAI}
-            className="text-xs text-[#687477] hover:text-[#12343B] flex items-center gap-1.5 font-mono uppercase bg-[#F5EBDD] px-3 py-1.5 rounded-lg border border-[#D8C9B5] hover:border-[#C89666] transition-all shrink-0 cursor-pointer"
+            className="btn btn-neutral btn-xs gap-1.5 font-mono uppercase"
             title="Accept computer recommended strategy"
           >
             <span>Delegate to AI</span>
@@ -141,7 +141,7 @@ export function PreInningsManagementModal({
         {isBatting ? (
           /* BATTING ORDER MANAGEMENT */
           <div className="flex-1 overflow-y-auto space-y-2 pr-1 my-2">
-            <div className="text-[11px] font-mono text-[#687477] uppercase tracking-wider mb-2 flex items-center justify-between">
+            <div className="text-[11px] font-mono opacity-70 uppercase tracking-wider mb-2 flex items-center justify-between">
               <span>POSITION &amp; PLAYER DETAILS</span>
               <span>BAT ORDER</span>
             </div>
@@ -161,62 +161,68 @@ export function PreInningsManagementModal({
               return (
                 <div
                   key={player.id}
-                  className={`p-3 rounded-xl border flex items-center justify-between gap-3 transition-all ${isOpener
-                    ? 'bg-[#F5EBDD] border-2 border-[#C89666] shadow-sm'
-                    : 'bg-[#F5EBDD] border-[#D8C9B5] hover:bg-[#FBF8F2]'
-                    }`}
+                  className={`p-3 rounded-xl border flex items-center justify-between gap-3 transition-all ${
+                    isOpener
+                      ? 'bg-base-200 border-2 border-primary shadow-xs'
+                      : 'bg-base-200/50 border-base-300 hover:bg-base-200'
+                  }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <span
-                      className={`w-7 h-7 rounded-lg flex items-center justify-center font-scoreboard-md text-xs font-bold shrink-0 ${isOpener
-                        ? 'bg-[#2D545E] text-[#FBF8F2] shadow-sm'
-                        : 'bg-[#EDE3D2] text-[#12343B]'
-                        }`}
+                      className={`w-7 h-7 rounded-lg flex items-center justify-center font-scoreboard-md text-xs font-bold shrink-0 ${
+                        isOpener
+                          ? 'bg-primary text-primary-content shadow-xs'
+                          : 'bg-base-300 text-base-content'
+                      }`}
                     >
                       {idx + 1}
                     </span>
 
-                    <img
-                      src={portrait}
-                      alt={player.displayName}
-                      className="w-10 h-10 rounded-lg object-cover bg-[#F5EBDD] border border-[#D8C9B5] shrink-0"
-                      onError={(e) => {
-                        e.currentTarget.src = getRealisticFallback(
-                          player.primaryRole,
-                          player.primaryNationality,
-                          player.id
-                        );
-                      }}
-                    />
+                    <div className="avatar">
+                      <div className="w-10 h-10 rounded-lg border border-base-300">
+                        <img
+                          src={portrait}
+                          alt={player.displayName}
+                          className="object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = getRealisticFallback(
+                              player.primaryRole,
+                              player.primaryNationality,
+                              player.id
+                            );
+                          }}
+                        />
+                      </div>
+                    </div>
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-bold text-[#12343B] truncate">
+                        <span className="text-sm font-bold text-base-content truncate">
                           {player.displayName}
                         </span>
                         {isOpener && (
-                          <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-[#C89666]/20 text-[#C89666] border border-[#C89666]/40 font-bold">
+                          <span className="badge badge-primary badge-xs font-mono uppercase font-bold">
                             Opener #{idx + 1}
                           </span>
                         )}
                         {slot.isCaptain && (
-                          <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-[#2D545E]/10 text-[#2D545E] border border-[#2D545E]/30 font-bold">
+                          <span className="badge badge-secondary badge-outline badge-xs font-mono uppercase font-bold">
                             (C) Captain
                           </span>
                         )}
                         {slot.isDesignatedWicketkeeper && (
-                          <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-[#2D545E]/10 text-[#2D545E] border border-[#2D545E]/30 font-bold">
+                          <span className="badge badge-neutral badge-xs font-mono uppercase font-bold">
                             (WK) Keeper
                           </span>
                         )}
                       </div>
 
-                      <div className="text-xs text-[#687477] mt-0.5 flex items-center gap-2">
+                      <div className="text-xs opacity-75 mt-0.5 flex items-center gap-2">
                         <span>{player.primaryRole.replace(/_/g, ' ')}</span>
                         <span>•</span>
                         <span>{player.battingHand.replace(/_/g, ' ')}</span>
                         <span>•</span>
-                        <span className="font-mono text-[#2D545E] font-semibold">
+                        <span className="font-mono text-primary font-semibold">
                           OVR {getRatingNumber(player.formatRating)}
                         </span>
                       </div>
@@ -224,12 +230,12 @@ export function PreInningsManagementModal({
                   </div>
 
                   {/* Move Up / Down Buttons */}
-                  <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="join shrink-0">
                     <button
                       type="button"
                       disabled={idx === 0}
                       onClick={() => moveSlot(idx, idx - 1)}
-                      className="p-1.5 rounded-lg bg-[#FBF8F2] hover:bg-[#EDE3D2] disabled:opacity-20 text-[#12343B] transition-colors cursor-pointer disabled:cursor-not-allowed border border-[#D8C9B5]"
+                      className="btn btn-sm btn-outline join-item px-2 disabled:opacity-20"
                       title="Promote Batting Position"
                     >
                       ▲
@@ -238,7 +244,7 @@ export function PreInningsManagementModal({
                       type="button"
                       disabled={idx === currentLineup.length - 1}
                       onClick={() => moveSlot(idx, idx + 1)}
-                      className="p-1.5 rounded-lg bg-[#FBF8F2] hover:bg-[#EDE3D2] disabled:opacity-20 text-[#12343B] transition-colors cursor-pointer disabled:cursor-not-allowed border border-[#D8C9B5]"
+                      className="btn btn-sm btn-outline join-item px-2 disabled:opacity-20"
                       title="Demote Batting Position"
                     >
                       ▼
@@ -251,7 +257,7 @@ export function PreInningsManagementModal({
         ) : (
           /* OPENING BOWLER SELECTION */
           <div className="flex-1 overflow-y-auto space-y-2 pr-1 my-2">
-            <div className="text-[11px] font-mono text-[#687477] uppercase tracking-wider mb-2">
+            <div className="text-[11px] font-mono opacity-70 uppercase tracking-wider mb-2">
               SELECT STARTING BOWLER FOR OVER 1
             </div>
 
@@ -271,48 +277,53 @@ export function PreInningsManagementModal({
                 <button
                   key={player.id}
                   onClick={() => setSelectedBowlerId(player.id)}
-                  className={`w-full p-3.5 rounded-xl border text-left transition-all flex items-center justify-between gap-3 ${isSelected
-                    ? 'bg-[#F5EBDD] border-2 border-[#C89666] shadow-sm cursor-pointer'
-                    : 'bg-[#F5EBDD] border-[#D8C9B5] hover:border-[#C89666] hover:bg-[#FBF8F2] cursor-pointer'
-                    }`}
+                  className={`w-full p-3.5 rounded-xl border text-left transition-all flex items-center justify-between gap-3 ${
+                    isSelected
+                      ? 'bg-base-200 border-2 border-primary shadow-xs cursor-pointer'
+                      : 'bg-base-200/50 border-base-300 hover:border-primary/50 hover:bg-base-200 cursor-pointer'
+                  }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <img
-                      src={portrait}
-                      alt={player.displayName}
-                      className="w-12 h-12 rounded-xl object-cover bg-[#F5EBDD] border border-[#D8C9B5] shrink-0"
-                      onError={(e) => {
-                        e.currentTarget.src = getRealisticFallback(
-                          player.primaryRole,
-                          player.primaryNationality,
-                          player.id
-                        );
-                      }}
-                    />
+                    <div className="avatar">
+                      <div className="w-12 h-12 rounded-xl border border-base-300">
+                        <img
+                          src={portrait}
+                          alt={player.displayName}
+                          className="object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = getRealisticFallback(
+                              player.primaryRole,
+                              player.primaryNationality,
+                              player.id
+                            );
+                          }}
+                        />
+                      </div>
+                    </div>
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-bold text-[#12343B] truncate">
+                        <span className="text-sm font-bold text-base-content truncate">
                           {player.displayName}
                         </span>
                         {slot.bowlingPriority === 1 && (
-                          <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-[#C89666]/20 text-[#C89666] border border-[#C89666]/40 font-bold">
+                          <span className="badge badge-primary badge-xs font-mono uppercase font-bold">
                             Primary Strike Bowler
                           </span>
                         )}
                         {slot.isDesignatedWicketkeeper && (
-                          <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-[#EDE3D2] text-[#687477] border border-[#D8C9B5]">
+                          <span className="badge badge-ghost badge-xs font-mono uppercase">
                             Keeper (Part-time)
                           </span>
                         )}
                       </div>
 
-                      <div className="text-xs text-[#687477] mt-1 flex items-center gap-2">
+                      <div className="text-xs opacity-75 mt-1 flex items-center gap-2">
                         <span>{player.bowlingStyle.replace(/_/g, ' ')}</span>
                         <span>•</span>
                         <span>{player.primaryRole.replace(/_/g, ' ')}</span>
                         <span>•</span>
-                        <span className="font-mono text-[#2D545E] font-semibold">
+                        <span className="font-mono text-primary font-semibold">
                           OVR {getRatingNumber(player.formatRating)}
                         </span>
                       </div>
@@ -320,14 +331,13 @@ export function PreInningsManagementModal({
                   </div>
 
                   <div className="shrink-0 flex items-center gap-2">
-                    <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected
-                        ? 'border-[#C89666] bg-[#E1B382] text-[#12343B]'
-                        : 'border-[#D8C9B5] bg-transparent'
-                        }`}
-                    >
-                      {isSelected && <span className="text-xs font-black">✓</span>}
-                    </div>
+                    <input
+                      type="radio"
+                      name="opening-bowler"
+                      checked={isSelected}
+                      onChange={() => setSelectedBowlerId(player.id)}
+                      className="radio radio-primary radio-sm"
+                    />
                   </div>
                 </button>
               );
@@ -336,16 +346,16 @@ export function PreInningsManagementModal({
         )}
 
         {/* Footer */}
-        <div className="mt-4 pt-3 border-t border-[#D8C9B5] flex items-center justify-between gap-3">
-          <div className="text-[11px] text-[#687477] flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#C89666]" />
+        <div className="modal-action m-0 mt-4 pt-3 border-t border-base-300 flex items-center justify-between gap-3">
+          <div className="text-[11px] opacity-70 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
             <span>Tactical readiness verified</span>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={onDelegateToAI}
-              className="px-4 py-2 bg-[#F5EBDD] hover:bg-[#EDE3D2] text-[#12343B] text-xs font-semibold uppercase tracking-wider rounded-xl transition-all border border-[#D8C9B5] cursor-pointer"
+              className="btn btn-neutral btn-sm text-xs uppercase"
             >
               Use AI Suggestion
             </button>
@@ -357,7 +367,7 @@ export function PreInningsManagementModal({
                   onConfirmOpeningBowler(selectedBowlerId);
                 }
               }}
-              className="px-5 py-2.5 bg-[#2D545E] hover:bg-[#12343B] text-[#FBF8F2] font-editorial-title text-xs font-extrabold uppercase tracking-wider rounded-xl transition-all shadow-sm cursor-pointer"
+              className="btn btn-primary btn-sm font-editorial-title text-xs font-extrabold uppercase tracking-wider"
             >
               Confirm &amp; Start Match →
             </button>

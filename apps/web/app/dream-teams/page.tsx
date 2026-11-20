@@ -449,9 +449,9 @@ export default function DreamXIBuilderPage() {
         {/* LEFT COLUMN: PLAYER DISCOVERY POOL (7 cols on desktop) */}
         <div className="lg:col-span-7 flex flex-col gap-space-md">
           {/* Search, Role Filters & Sort Bar */}
-          <div className="bg-surface-card rounded-xl p-space-md shadow-lg border border-border-hairline flex flex-col gap-space-sm">
+          <div className="card bg-base-200/50 rounded-xl p-4 shadow-sm border border-base-300 flex flex-col gap-3">
             <div className="relative w-full">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-subdued text-[20px]">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 opacity-50 text-[20px]">
                 search
               </span>
               <input
@@ -459,21 +459,21 @@ export default function DreamXIBuilderPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by player name or nation (e.g. Kohli, Bumrah, AUS)..."
-                className="w-full bg-surface-recessed text-text-chalk placeholder-text-subdued pl-10 pr-4 py-2.5 rounded-lg border border-border-hairline focus:outline-none focus:border-tertiary transition-colors text-body-sm"
+                className="input input-bordered w-full pl-10 pr-10 text-sm"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-subdued hover:text-text-chalk"
+                  className="btn btn-ghost btn-circle btn-xs absolute right-2 top-1/2 -translate-y-1/2"
                 >
-                  <span className="material-symbols-outlined text-[18px]">close</span>
+                  <span className="material-symbols-outlined text-[16px]">close</span>
                 </button>
               )}
             </div>
 
             {/* Filter Pills Row */}
-            <div className="flex flex-wrap items-center justify-between gap-space-sm pt-space-xs">
-              <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+              <div className="join flex-wrap">
                 {[
                   { id: 'ALL', label: 'ALL' },
                   { id: 'BATTER', label: 'BATTER' },
@@ -484,10 +484,10 @@ export default function DreamXIBuilderPage() {
                   <button
                     key={rf.id}
                     onClick={() => setRoleFilter(rf.id as any)}
-                    className={`px-3 py-1 rounded-full font-label-caps text-label-caps uppercase font-bold transition-all ${
+                    className={`btn btn-xs join-item font-mono uppercase font-bold transition-all ${
                       roleFilter === rf.id
-                        ? 'bg-primary text-on-primary shadow-sm'
-                        : 'bg-surface-elevated text-text-slate hover:text-text-chalk hover:bg-surface-container'
+                        ? 'btn-primary'
+                        : 'btn-ghost'
                     }`}
                     type="button"
                   >
@@ -501,7 +501,7 @@ export default function DreamXIBuilderPage() {
                 <select
                   value={nationFilter}
                   onChange={(e) => setNationFilter(e.target.value)}
-                  className="bg-surface-recessed text-text-slate text-body-sm px-2.5 py-1 rounded border border-border-hairline focus:outline-none focus:border-tertiary cursor-pointer"
+                  className="select select-bordered select-xs"
                 >
                   <option value="ALL">All Nations</option>
                   <option value="India">🇮🇳 India</option>
@@ -518,7 +518,7 @@ export default function DreamXIBuilderPage() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="bg-surface-recessed text-text-slate text-body-sm px-2.5 py-1 rounded border border-border-hairline focus:outline-none focus:border-tertiary cursor-pointer"
+                  className="select select-bordered select-xs"
                 >
                   <option value="OVR_DESC">OVR (Highest)</option>
                   <option value="BAT_AVG">Batting Avg</option>
@@ -690,30 +690,22 @@ export default function DreamXIBuilderPage() {
             </div>
 
             {/* Squad Counters Bento */}
-            <div className="grid grid-cols-4 gap-space-xs text-center pt-space-xs border-t border-border-hairline">
-              <div className="bg-surface-elevated p-2 rounded-lg">
-                <span className="font-scoreboard-md text-headline-sm text-text-chalk block">
-                  {selectedSlots.length}/11
-                </span>
-                <span className="font-label-caps text-[10px] text-text-subdued uppercase">TOTAL</span>
+            <div className="stats stats-horizontal bg-base-200/50 border border-base-300 shadow-xs w-full">
+              <div className="stat py-2 px-3 text-center">
+                <div className="stat-title text-[10px] uppercase font-mono">TOTAL</div>
+                <div className="stat-value text-lg text-base-content">{selectedSlots.length}/11</div>
               </div>
-              <div className="bg-surface-elevated p-2 rounded-lg">
-                <span className="font-scoreboard-md text-headline-sm text-warning-amber block">
-                  {roleBreakdown.bat}
-                </span>
-                <span className="font-label-caps text-[10px] text-text-subdued uppercase">BAT</span>
+              <div className="stat py-2 px-3 text-center">
+                <div className="stat-title text-[10px] uppercase font-mono">BAT</div>
+                <div className="stat-value text-lg text-warning">{roleBreakdown.bat}</div>
               </div>
-              <div className="bg-surface-elevated p-2 rounded-lg">
-                <span className="font-scoreboard-md text-headline-sm text-tertiary block">
-                  {roleBreakdown.ar}
-                </span>
-                <span className="font-label-caps text-[10px] text-text-subdued uppercase">ALL-RD</span>
+              <div className="stat py-2 px-3 text-center">
+                <div className="stat-title text-[10px] uppercase font-mono">ALL-RD</div>
+                <div className="stat-value text-lg text-accent">{roleBreakdown.ar}</div>
               </div>
-              <div className="bg-surface-elevated p-2 rounded-lg">
-                <span className="font-scoreboard-md text-headline-sm text-telemetry-blue block">
-                  {roleBreakdown.bowl}
-                </span>
-                <span className="font-label-caps text-[10px] text-text-subdued uppercase">BOWL</span>
+              <div className="stat py-2 px-3 text-center">
+                <div className="stat-title text-[10px] uppercase font-mono">BOWL</div>
+                <div className="stat-value text-lg text-info">{roleBreakdown.bowl}</div>
               </div>
             </div>
           </div>
@@ -953,24 +945,24 @@ export default function DreamXIBuilderPage() {
             <button
               onClick={handleProceedToMatch}
               disabled={!isSquadReady}
-              className="w-full mt-2 py-3 bg-primary text-on-primary font-headline-md text-title-md rounded-lg font-bold transition-colors flex items-center justify-center gap-space-xs disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="btn btn-primary btn-block text-xs uppercase font-bold tracking-wider gap-2"
               type="button"
             >
               <span className="material-symbols-outlined text-[20px]">sports_cricket</span>
-              <span>LOCK IN SQUAD & PROCEED TO TOSS</span>
+              <span>LOCK IN SQUAD &amp; PROCEED TO TOSS</span>
             </button>
 
             <div className="flex items-center justify-between pt-1">
               <button
                 onClick={handleSaveSquad}
-                className="text-text-slate hover:text-text-chalk text-body-sm font-label-caps transition-colors"
+                className="btn btn-ghost btn-xs text-xs font-mono"
                 type="button"
               >
                 SAVE AS DRAFT
               </button>
               <button
                 onClick={handleClearSquad}
-                className="text-error/80 hover:text-error text-body-sm font-label-caps transition-colors"
+                className="btn btn-outline btn-error btn-xs text-xs font-mono"
                 type="button"
               >
                 RESET SQUAD

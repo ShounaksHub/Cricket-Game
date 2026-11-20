@@ -65,26 +65,26 @@ export function DecisionModal({
       aria-labelledby="decision-modal-title"
       tabIndex={-1}
       ref={dialogRef}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#12343B]/80 backdrop-blur-sm animate-fade-in"
+      className="modal modal-open z-50 bg-black/80 backdrop-blur-xs"
     >
-      <div className="bg-[#FBF8F2] border border-[#D8C9B5] rounded-xl max-w-2xl w-full p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="modal-box max-w-2xl w-full p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh] bg-base-100 border border-base-300 rounded-2xl">
         {/* Modal Header */}
-        <div className="flex items-start justify-between gap-4 mb-4 border-b border-[#D8C9B5] pb-3">
+        <div className="flex items-start justify-between gap-4 mb-4 border-b border-base-300 pb-3">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border bg-[#F5EBDD] text-[#2D545E] border-[#2D545E]/30 font-mono">
+              <span className="badge badge-primary badge-outline text-[10px] uppercase font-bold tracking-wider font-mono">
                 {isBatting ? '🏏 TACTICAL BATTING DECISION' : '⚾ BOWLING CHANGE REQUIRED'}
               </span>
-              <span className="text-xs text-[#687477] font-mono">
+              <span className="text-xs opacity-70 font-mono">
                 {isBatting ? 'Wicket Fallen' : 'Over Completed'}
               </span>
             </div>
-            <h3 id="decision-modal-title" className="text-xl font-editorial-title font-bold text-[#12343B] tracking-tight">{title}</h3>
-            <p className="text-xs text-[#687477] mt-0.5">{subtitle}</p>
+            <h3 id="decision-modal-title" className="text-xl font-editorial-title font-bold text-base-content tracking-tight">{title}</h3>
+            <p className="text-xs opacity-75 mt-0.5">{subtitle}</p>
           </div>
           <button
             onClick={onDelegateToAI}
-            className="text-xs text-[#687477] hover:text-[#12343B] flex items-center gap-1 font-mono uppercase bg-[#F5EBDD] px-2.5 py-1.5 rounded-lg border border-[#D8C9B5] hover:border-[#C89666] transition-all shrink-0 cursor-pointer"
+            className="btn btn-neutral btn-xs gap-1 font-mono uppercase"
             title="Delegate this decision to CPU Captain"
           >
             <span>Auto (AI)</span>
@@ -94,7 +94,7 @@ export function DecisionModal({
         {/* Options List */}
         <div className="flex-1 overflow-y-auto space-y-2 pr-1 my-2">
           {options.length === 0 ? (
-            <div className="p-8 text-center text-xs text-[#687477]">
+            <div className="p-8 text-center text-xs opacity-60">
               No eligible players remaining.
             </div>
           ) : (
@@ -111,47 +111,52 @@ export function DecisionModal({
                   key={player.id}
                   disabled={disabled}
                   onClick={() => onSelectPlayer(player.id)}
-                  className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between gap-3 ${disabled
-                    ? 'opacity-40 bg-[#EDE3D2] border-[#D8C9B5] cursor-not-allowed'
-                    : isRecommended
-                      ? 'bg-[#F5EBDD] border-2 border-[#C89666] hover:bg-[#FBF8F2] cursor-pointer shadow-sm'
-                      : 'bg-[#F5EBDD] border-[#D8C9B5] hover:border-[#C89666] hover:bg-[#FBF8F2] cursor-pointer'
-                    }`}
+                  className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between gap-3 ${
+                    disabled
+                      ? 'opacity-40 bg-base-200 border-base-300 cursor-not-allowed'
+                      : isRecommended
+                        ? 'bg-base-200 border-2 border-primary hover:bg-base-300/50 cursor-pointer shadow-sm'
+                        : 'bg-base-200/50 border-base-300 hover:border-primary/50 hover:bg-base-200 cursor-pointer'
+                  }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <img
-                      src={portrait}
-                      alt={player.displayName}
-                      className="w-10 h-10 rounded-lg object-cover bg-[#F5EBDD] border border-[#D8C9B5] shrink-0"
-                      onError={(e) => {
-                        e.currentTarget.src = getRealisticFallback(
-                          player.primaryRole,
-                          player.primaryNationality,
-                          player.id
-                        );
-                      }}
-                    />
+                    <div className="avatar">
+                      <div className="w-10 h-10 rounded-lg border border-base-300">
+                        <img
+                          src={portrait}
+                          alt={player.displayName}
+                          className="object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = getRealisticFallback(
+                              player.primaryRole,
+                              player.primaryNationality,
+                              player.id
+                            );
+                          }}
+                        />
+                      </div>
+                    </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-bold text-[#12343B] truncate">
+                        <span className="text-sm font-bold text-base-content truncate">
                           {player.displayName}
                         </span>
                         {isRecommended && (
-                          <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-[#C89666]/20 text-[#C89666] border border-[#C89666]/40 font-bold">
+                          <span className="badge badge-primary badge-xs font-mono uppercase font-bold">
                             Recommended
                           </span>
                         )}
                         {badge && (
-                          <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded bg-[#2D545E]/10 text-[#2D545E] border border-[#2D545E]/30 font-bold">
+                          <span className="badge badge-secondary badge-outline badge-xs font-mono uppercase font-bold">
                             {badge}
                           </span>
                         )}
                       </div>
-                      <div className="text-xs text-[#687477] mt-0.5 truncate">
+                      <div className="text-xs opacity-75 mt-0.5 truncate">
                         {secondaryInfo}
                       </div>
                       {disabledReason && (
-                        <div className="text-[10px] text-[#B33232] font-mono mt-0.5">
+                        <div className="text-[10px] text-error font-mono mt-0.5">
                           {disabledReason}
                         </div>
                       )}
@@ -159,7 +164,7 @@ export function DecisionModal({
                   </div>
 
                   <div className="shrink-0 flex items-center gap-2">
-                    <span className="text-xs font-mono font-semibold text-[#FBF8F2] bg-[#2D545E] hover:bg-[#12343B] px-2.5 py-1 rounded border border-[#2D545E] transition-colors">
+                    <span className="btn btn-primary btn-xs text-xs font-mono font-semibold">
                       {isBatting ? 'Send In →' : 'Bowl Over →'}
                     </span>
                   </div>
@@ -170,15 +175,15 @@ export function DecisionModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="mt-4 pt-3 border-t border-[#D8C9B5] flex items-center justify-between gap-3">
-          <div className="text-[11px] text-[#687477] flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#C89666] animate-pulse" />
+        <div className="modal-action m-0 mt-4 pt-3 border-t border-base-300 flex items-center justify-between gap-3">
+          <div className="text-[11px] opacity-70 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-warning animate-pulse" />
             <span>Simulation paused until selection</span>
           </div>
 
           <button
             onClick={onDelegateToAI}
-            className="px-4 py-2 bg-[#2D545E] hover:bg-[#12343B] text-[#FBF8F2] text-xs font-semibold uppercase tracking-wider rounded-xl transition-all border border-[#2D545E] cursor-pointer"
+            className="btn btn-primary btn-sm text-xs font-semibold uppercase tracking-wider"
           >
             {aiButtonLabel}
           </button>

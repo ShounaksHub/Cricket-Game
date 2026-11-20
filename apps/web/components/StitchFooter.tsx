@@ -43,7 +43,7 @@ export function StitchFooter() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Shounak Saha on GitHub"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#2D545E] hover:bg-[#2D545E]/80 text-[#FBF8F2] hover:text-[#E1B382] border border-[#C89666]/30 transition-all font-mono text-[11px]"
+              className="btn btn-xs btn-neutral bg-[#2D545E] hover:bg-[#2D545E]/80 text-[#FBF8F2] hover:text-[#E1B382] border border-[#C89666]/30 font-mono"
             >
               <svg
                 className="w-3.5 h-3.5 fill-current"
@@ -79,11 +79,11 @@ export function StitchFooter() {
 
         {/* Right: Engine Telemetry Status & Rules Trigger */}
         <div className="flex flex-wrap items-center justify-center gap-4">
-          <span className="font-mono text-[11px] text-[#D8C9B5]">Plays offline</span>
+          <span className="badge badge-sm badge-ghost font-mono text-[#D8C9B5]">Plays offline</span>
           <button
             onClick={handleOpenRules}
             type="button"
-            className="font-label-caps text-[11px] text-[#E1B382] hover:text-[#FBF8F2] transition-colors cursor-pointer uppercase tracking-wider"
+            className="btn btn-link btn-xs text-[#E1B382] hover:text-[#FBF8F2] no-underline uppercase tracking-wider p-0 h-auto min-h-0"
           >
             Rules &amp; guide
           </button>

@@ -520,35 +520,35 @@ export default function PlayerCataloguePage() {
               </div>
 
               {/* Pagination Bar */}
-              <div className="flex items-center justify-between bg-surface-card px-4 py-3 rounded-xl mt-2 shadow-sm border border-border-hairline">
-                <span className="font-label-caps text-label-caps text-text-subdued uppercase">
+              <div className="flex items-center justify-between bg-base-200/50 px-4 py-3 rounded-xl mt-2 shadow-xs border border-base-300">
+                <span className="font-mono text-xs opacity-70 uppercase">
                   PAGE {String(currentPage).padStart(2, '0')} OF {String(totalPages).padStart(2, '0')}
                 </span>
-                <div className="flex items-center gap-2">
+                <div className="join">
                   <button
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage <= 1}
-                    className="p-2 rounded bg-surface-elevated text-text-slate hover:text-text-chalk disabled:opacity-40 transition-all cursor-pointer"
+                    className="btn btn-sm btn-outline join-item disabled:opacity-40"
                   >
                     <span className="material-symbols-outlined text-[18px]">chevron_left</span>
                   </button>
-                  <span className="px-3 py-1 rounded bg-primary text-on-primary font-label-caps text-label-caps">
+                  <button className="btn btn-sm btn-primary join-item">
                     {currentPage}
-                  </span>
+                  </button>
                   {currentPage < totalPages && (
                     <button
                       onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      className="px-3 py-1 rounded bg-surface-elevated hover:bg-surface-bright text-text-chalk font-label-caps text-label-caps cursor-pointer"
+                      className="btn btn-sm btn-ghost join-item"
                     >
                       {currentPage + 1}
                     </button>
                   )}
                   {currentPage + 1 < totalPages && (
                     <>
-                      <span className="text-text-subdued px-1">...</span>
+                      <button className="btn btn-sm btn-disabled join-item">...</button>
                       <button
                         onClick={() => setCurrentPage(totalPages)}
-                        className="px-3 py-1 rounded bg-surface-elevated hover:bg-surface-bright text-text-chalk font-label-caps text-label-caps cursor-pointer"
+                        className="btn btn-sm btn-ghost join-item"
                       >
                         {totalPages}
                       </button>
@@ -557,7 +557,7 @@ export default function PlayerCataloguePage() {
                   <button
                     onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                     disabled={currentPage >= totalPages}
-                    className="p-2 rounded bg-surface-elevated text-text-slate hover:text-text-chalk disabled:opacity-40 transition-all cursor-pointer"
+                    className="btn btn-sm btn-outline join-item disabled:opacity-40"
                   >
                     <span className="material-symbols-outlined text-[18px]">chevron_right</span>
                   </button>
